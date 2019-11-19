@@ -21,9 +21,8 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.StringUtils;
 
 /**
- * Spring's common transaction attribute implementation.
- * Rolls back on runtime, but not checked, exceptions by default.
- *
+ * 公有的事务属性实现
+ * 运行时会进行回滚，但并不会进行检查
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 16.03.2003
@@ -39,8 +38,8 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 
 
 	/**
-	 * Create a new DefaultTransactionAttribute, with default settings.
-	 * Can be modified through bean property setters.
+	 * 创建默认的DefaultTransactionAttribute，使用默认的配置
+	 * 可以通过bean属性setter方法修改
 	 * @see #setPropagationBehavior
 	 * @see #setIsolationLevel
 	 * @see #setTimeout
@@ -52,7 +51,8 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	}
 
 	/**
-	 * Copy constructor. Definition can be modified through bean property setters.
+	 * 拷贝构造方法
+	 * 可以通过属性的setter的方法修改
 	 * @see #setPropagationBehavior
 	 * @see #setIsolationLevel
 	 * @see #setTimeout
@@ -64,10 +64,9 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	}
 
 	/**
-	 * Create a new DefaultTransactionAttribute with the given
-	 * propagation behavior. Can be modified through bean property setters.
-	 * @param propagationBehavior one of the propagation constants in the
-	 * TransactionDefinition interface
+	 * 使用给定的事务传播方式创建一个新的DefaultTransactionAttribute
+	 * 可以通过属性的setter的方法修改
+	 * @param propagationBehavior 传播方式，TransactionAttribute中的常量值
 	 * @see #setIsolationLevel
 	 * @see #setTimeout
 	 * @see #setReadOnly
@@ -76,19 +75,8 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 		super(propagationBehavior);
 	}
 
-
 	/**
-	 * Associate a qualifier value with this transaction attribute.
-	 * <p>This may be used for choosing a corresponding transaction manager
-	 * to process this specific transaction.
-	 * @since 3.0
-	 */
-	public void setQualifier(@Nullable String qualifier) {
-		this.qualifier = qualifier;
-	}
-
-	/**
-	 * Return a qualifier value associated with this transaction attribute.
+	 * 返回事务属性关联的修饰符
 	 * @since 3.0
 	 */
 	@Override
@@ -98,17 +86,16 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	}
 
 	/**
-	 * Set a descriptor for this transaction attribute,
-	 * e.g. indicating where the attribute is applying.
-	 * @since 4.3.4
+	 * 事务属性关联的修饰符
+	 * 用于选择一个对应的TransactionManager来执行特定的事务
+	 * @since 3.0
 	 */
-	public void setDescriptor(@Nullable String descriptor) {
-		this.descriptor = descriptor;
+	public void setQualifier(@Nullable String qualifier) {
+		this.qualifier = qualifier;
 	}
 
 	/**
-	 * Return a descriptor for this transaction attribute,
-	 * or {@code null} if none.
+	 * 返回属性的描述符，如果没有，返回null
 	 * @since 4.3.4
 	 */
 	@Nullable
@@ -117,17 +104,20 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	}
 
 	/**
-	 * The default behavior is as with EJB: rollback on unchecked exception
-	 * ({@link RuntimeException}), assuming an unexpected outcome outside of any
-	 * business rules. Additionally, we also attempt to rollback on {@link Error} which
-	 * is clearly an unexpected outcome as well. By contrast, a checked exception is
-	 * considered a business exception and therefore a regular expected outcome of the
-	 * transactional business method, i.e. a kind of alternative return value which
-	 * still allows for regular completion of resource operations.
-	 * <p>This is largely consistent with TransactionTemplate's default behavior,
-	 * except that TransactionTemplate also rolls back on undeclared checked exceptions
-	 * (a corner case). For declarative transactions, we expect checked exceptions to be
-	 * intentionally declared as business exceptions, leading to a commit by default.
+	 * 为事务属性设置描述符
+	 * 比如，标识这个属性用于何处
+	 * @since 4.3.4
+	 */
+	public void setDescriptor(@Nullable String descriptor) {
+		this.descriptor = descriptor;
+	}
+
+	/**
+	 * EJB的默认实现，在未检查的异常回滚，假设超出了任何业务规则的意外结果
+	 * 除此之外，也可以尝试回滚错误，这个错误是未期待的
+	 * 相反，一个检查的异常会被认为一个业务异常，会被视为一个常规期待的返回结果，比如，一种替代的返回值，他仍然允许资源操作的正常完成
+	 * 这很大程度上和TransactionManager的默认行为一致，除了TransactionTemplate还会在未声明的检查异常上回滚
+	 * 对于声明式事务，希望检查异常是内部声明的业务异常，默认会引导提交
 	 * @see org.springframework.transaction.support.TransactionTemplate#execute
 	 */
 	@Override
@@ -135,10 +125,9 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 		return (ex instanceof RuntimeException || ex instanceof Error);
 	}
 
-
 	/**
-	 * Return an identifying description for this transaction attribute.
-	 * <p>Available to subclasses, for inclusion in their {@code toString()} result.
+	 * 为事务属性返回一个验证的描述
+	 * 可用于子类，包含在他们的{@code toString()}结果中
 	 */
 	protected final StringBuilder getAttributeDescription() {
 		StringBuilder result = getDefinitionDescription();

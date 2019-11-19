@@ -16,6 +16,9 @@
 
 package org.springframework.transaction.annotation;
 
+import org.springframework.core.annotation.AliasFor;
+import org.springframework.transaction.TransactionDefinition;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -23,31 +26,25 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.core.annotation.AliasFor;
-import org.springframework.transaction.TransactionDefinition;
-
 /**
- * Describes a transaction attribute on an individual method or on a class.
- *
+ * 为个别的方法或者类声明一个事务属性
  * <p>At the class level, this annotation applies as a default to all methods of
  * the declaring class and its subclasses. Note that it does not apply to ancestor
  * classes up the class hierarchy; methods need to be locally redeclared in order
  * to participate in a subclass-level annotation.
+ * 在类级别，注解为类中所有声明的类、子类的方法提供了默认的事务属性。
+ * 需要注意的是，并不会对父类生效，方法需要在本地重新进行注释来参与子类级别的注解。
  *
- * <p>This annotation type is generally directly comparable to Spring's
- * {@link org.springframework.transaction.interceptor.RuleBasedTransactionAttribute}
- * class, and in fact {@link AnnotationTransactionAttributeSource} will directly
- * convert the data to the latter class, so that Spring's transaction support code
- * does not have to know about annotations. If no rules are relevant to the exception,
- * it will be treated like
- * {@link org.springframework.transaction.interceptor.DefaultTransactionAttribute}
- * (rolling back on {@link RuntimeException} and {@link Error} but not on checked
- * exceptions).
+ * 注解类型通常可以直接与Spring的{@link org.springframework.transaction.interceptor.RuleBasedTransactionAttribute}类进行比较
+ * 实际上，{@link AnnotationTransactionAttributeSource}会直接将数据转换为后一类，Spring的事务可以以此来支持。
+ * 如果没有任何规则与异常相关，那么它就会按照{@link org.springframework.transaction.interceptor.DefaultTransactionAttribute}来对待
+ * (以{@link RuntimeException}和{@link Error}来进行回滚，但是不会对异常进行校验)
  *
  * <p>For specific information about the semantics of this annotation's attributes,
  * consult the {@link org.springframework.transaction.TransactionDefinition} and
  * {@link org.springframework.transaction.interceptor.TransactionAttribute} javadocs.
- *
+ * 对于此注释属性的特定语义，请请教{@link org.springframework.transaction.TransactionDefinition}
+ * 和{@link org.springframework.transaction.interceptor.TransactionAttribute}注释
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @author Sam Brannen
