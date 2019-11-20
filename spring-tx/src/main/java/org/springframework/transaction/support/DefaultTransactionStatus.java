@@ -115,8 +115,7 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 	}
 
 	/**
-	 * Return if a new transaction synchronization has been opened
-	 * for this transaction.
+	 * 判断是否是新开启的事务同步
 	 */
 	public boolean isNewSynchronization() {
 		return this.newSynchronization;

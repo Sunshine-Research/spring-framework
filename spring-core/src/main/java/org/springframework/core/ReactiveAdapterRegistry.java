@@ -16,6 +16,18 @@
 
 package org.springframework.core;
 
+import io.reactivex.BackpressureStrategy;
+import io.reactivex.Flowable;
+import kotlinx.coroutines.CompletableDeferredKt;
+import kotlinx.coroutines.Deferred;
+import org.reactivestreams.Publisher;
+import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import rx.RxReactiveStreams;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,28 +36,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
-import io.reactivex.BackpressureStrategy;
-import io.reactivex.Flowable;
-import kotlinx.coroutines.CompletableDeferredKt;
-import kotlinx.coroutines.Deferred;
-import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import rx.RxReactiveStreams;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
-
 /**
- * A registry of adapters to adapt Reactive Streams {@link Publisher} to/from
- * various async/reactive types such as {@code CompletableFuture}, RxJava
- * {@code Observable}, and others.
- *
- * <p>By default, depending on classpath availability, adapters are registered
- * for Reactor, RxJava 1, RxJava 2 types, {@link CompletableFuture}, Java 9+
- * {@code Flow.Publisher} and Kotlin Coroutines {@code Deferred} and {@code Flow}.
- *
+ * 适配的Reactive Streams的注册器，可以使用异步/反应式类型，比如{@code CompletableFuture}，RxJava或者{@code Observable}，以及其他
+ * 默认的，依赖可用的类路径，适配器将会注册为Reactor, RxJava 1, RxJava 2 types，{@link CompletableFuture}，Java 9+ {@code Flow.Publisher}，Kotlin Coroutines等等
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  * @since 5.0

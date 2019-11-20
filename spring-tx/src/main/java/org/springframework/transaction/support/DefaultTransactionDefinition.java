@@ -16,48 +16,61 @@
 
 package org.springframework.transaction.support;
 
-import java.io.Serializable;
-
 import org.springframework.core.Constants;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.TransactionDefinition;
 
+import java.io.Serializable;
+
 /**
- * Default implementation of the {@link TransactionDefinition} interface,
- * offering bean-style configuration and sensible default values
- * (PROPAGATION_REQUIRED, ISOLATION_DEFAULT, TIMEOUT_DEFAULT, readOnly=false).
- *
- * <p>Base class for both {@link TransactionTemplate} and
- * {@link org.springframework.transaction.interceptor.DefaultTransactionAttribute}.
- *
+ * {@link TransactionDefinition}的默认实现
+ * 提供了bean风格的配置以及默认值(PROPAGATION_REQUIRED, ISOLATION_DEFAULT, TIMEOUT_DEFAULT, readOnly=false)
  * @author Juergen Hoeller
  * @since 08.05.2003
  */
 @SuppressWarnings("serial")
 public class DefaultTransactionDefinition implements TransactionDefinition, Serializable {
 
-	/** Prefix for the propagation constants defined in TransactionDefinition. */
+	/**
+	 * PROPAGATION前缀
+	 * 事务传播前缀
+	 */
 	public static final String PREFIX_PROPAGATION = "PROPAGATION_";
-
-	/** Prefix for the isolation constants defined in TransactionDefinition. */
+	/**
+	 * ISOLATION前缀
+	 * 事务隔离级别前缀
+	 */
 	public static final String PREFIX_ISOLATION = "ISOLATION_";
-
-	/** Prefix for transaction timeout values in description strings. */
+	/**
+	 * 在描述符中展示的用于事务超时时间的前缀
+	 */
 	public static final String PREFIX_TIMEOUT = "timeout_";
-
-	/** Marker for read-only transactions in description strings. */
+	/**
+	 * 在描述符中只读事务的标识位
+	 */
 	public static final String READ_ONLY_MARKER = "readOnly";
-
-
-	/** Constants instance for TransactionDefinition. */
+	/**
+	 * TransactionDefinition的常量实例
+	 */
 	static final Constants constants = new Constants(TransactionDefinition.class);
-
+	/**
+	 * 事务传播的表现形式
+	 * 默认是如果当前有事务，使用当前事务，否则开启一个新的事务
+	 */
 	private int propagationBehavior = PROPAGATION_REQUIRED;
-
+	/**
+	 * 事务的隔离级别
+	 * 默认为-1
+	 */
 	private int isolationLevel = ISOLATION_DEFAULT;
-
+	/**
+	 * 事务的超时时间
+	 * 默认为-1
+	 */
 	private int timeout = TIMEOUT_DEFAULT;
-
+	/**
+	 * 是否只读
+	 */
 	private boolean readOnly = false;
 
 	@Nullable
@@ -65,8 +78,8 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 
 
 	/**
-	 * Create a new DefaultTransactionDefinition, with default settings.
-	 * Can be modified through bean property setters.
+	 * 创建一个新的DefaultTransactionDefinition，并且使用默认的配置
+	 * 可以通过bean property的setter修改
 	 * @see #setPropagationBehavior
 	 * @see #setIsolationLevel
 	 * @see #setTimeout
@@ -77,7 +90,8 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	}
 
 	/**
-	 * Copy constructor. Definition can be modified through bean property setters.
+	 * 拷贝构造方法
+	 * 可以通过bean property的setter修改
 	 * @see #setPropagationBehavior
 	 * @see #setIsolationLevel
 	 * @see #setTimeout
@@ -93,10 +107,9 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	}
 
 	/**
-	 * Create a new DefaultTransactionDefinition with the given
-	 * propagation behavior. Can be modified through bean property setters.
-	 * @param propagationBehavior one of the propagation constants in the
-	 * TransactionDefinition interface
+	 * 使用给定的事务传播行为创建新的DefaultTransactionDefinition
+	 * 可以通过bean property的setter修改
+	 * @param propagationBehavior 事务表现行为
 	 * @see #setIsolationLevel
 	 * @see #setTimeout
 	 * @see #setReadOnly
@@ -107,11 +120,10 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 
 
 	/**
-	 * Set the propagation behavior by the name of the corresponding constant in
-	 * TransactionDefinition, e.g. "PROPAGATION_REQUIRED".
-	 * @param constantName name of the constant
-	 * @throws IllegalArgumentException if the supplied value is not resolvable
-	 * to one of the {@code PROPAGATION_} constants or is {@code null}
+	 * 通过给定的事务传播行为名称设置事务传播行为
+	 * 比如PROPAGATION_REQUIRED
+	 * @param constantName 事务传播行为名称
+	 * @throws IllegalArgumentException 给定的事务名称是无法解析的，抛出非法参数异常
 	 * @see #setPropagationBehavior
 	 * @see #PROPAGATION_REQUIRED
 	 */
@@ -134,7 +146,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 * <p>Note that a transaction manager that does not support custom isolation levels
 	 * will throw an exception when given any other level than {@link #ISOLATION_DEFAULT}.
 	 * @throws IllegalArgumentException if the supplied value is not one of the
-	 * {@code PROPAGATION_} constants
+	 *                                  {@code PROPAGATION_} constants
 	 * @see #PROPAGATION_REQUIRED
 	 */
 	public final void setPropagationBehavior(int propagationBehavior) {
@@ -154,7 +166,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 * TransactionDefinition, e.g. "ISOLATION_DEFAULT".
 	 * @param constantName name of the constant
 	 * @throws IllegalArgumentException if the supplied value is not resolvable
-	 * to one of the {@code ISOLATION_} constants or is {@code null}
+	 *                                  to one of the {@code ISOLATION_} constants or is {@code null}
 	 * @see #setIsolationLevel
 	 * @see #ISOLATION_DEFAULT
 	 */
@@ -177,7 +189,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 * <p>Note that a transaction manager that does not support custom isolation levels
 	 * will throw an exception when given any other level than {@link #ISOLATION_DEFAULT}.
 	 * @throws IllegalArgumentException if the supplied value is not one of the
-	 * {@code ISOLATION_} constants
+	 *                                  {@code ISOLATION_} constants
 	 * @see #ISOLATION_DEFAULT
 	 */
 	public final void setIsolationLevel(int isolationLevel) {

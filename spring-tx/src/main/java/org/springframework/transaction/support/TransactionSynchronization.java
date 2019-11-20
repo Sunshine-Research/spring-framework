@@ -19,16 +19,13 @@ package org.springframework.transaction.support;
 import java.io.Flushable;
 
 /**
- * Interface for transaction synchronization callbacks.
- * Supported by AbstractPlatformTransactionManager.
+ * 用于在事务运行过程中进行同步调用
+ * 事务同步的回调接口，AbstractPlatformTransactionManager来提供支持
  *
- * <p>TransactionSynchronization implementations can implement the Ordered interface
- * to influence their execution order. A synchronization that does not implement the
- * Ordered interface is appended to the end of the synchronization chain.
+ * TransactionSynchronization可以实现Ordered接口，来影响执行的顺序
+ * 单独一个同步的话，不会实现Ordered接口，而是直接追加在同步链的尾部
  *
- * <p>System synchronizations performed by Spring itself use specific order values,
- * allowing for fine-grained interaction with their execution order (if necessary).
- *
+ * 系统同步由Spring自己执行，并使用特定的order值，允许与其执行顺序进行细粒度的交互（如有必要）
  * @author Juergen Hoeller
  * @since 02.06.2003
  * @see TransactionSynchronizationManager
@@ -48,15 +45,15 @@ public interface TransactionSynchronization extends Flushable {
 
 
 	/**
-	 * Suspend this synchronization.
-	 * Supposed to unbind resources from TransactionSynchronizationManager if managing any.
+	 * 挂起同步
+	 * 如果管理任何资源，则应从TransactionSynchronizationManager中取消绑定资源
 	 * @see TransactionSynchronizationManager#unbindResource
 	 */
 	default void suspend() {
 	}
 
 	/**
-	 * Resume this synchronization.
+	 * 继续同步
 	 * Supposed to rebind resources to TransactionSynchronizationManager if managing any.
 	 * @see TransactionSynchronizationManager#bindResource
 	 */

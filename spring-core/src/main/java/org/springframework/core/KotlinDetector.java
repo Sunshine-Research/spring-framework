@@ -16,13 +16,12 @@
 
 package org.springframework.core;
 
-import java.lang.annotation.Annotation;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+
+import java.lang.annotation.Annotation;
 
 /**
  * A common delegate for detecting Kotlin's presence and for identifying Kotlin types.
@@ -75,8 +74,7 @@ public abstract class KotlinDetector {
 	}
 
 	/**
-	 * Determine whether the given {@code Class} is a Kotlin type
-	 * (with Kotlin metadata present on it).
+	 * 确定给定的类是否是Kotlin类型的
 	 */
 	public static boolean isKotlinType(Class<?> clazz) {
 		return (kotlinMetadata != null && clazz.getDeclaredAnnotation(kotlinMetadata) != null);

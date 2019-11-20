@@ -18,28 +18,19 @@ package org.springframework.transaction.aspectj;
 
 import org.aspectj.lang.annotation.SuppressAjWarnings;
 import org.aspectj.lang.reflect.MethodSignature;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.transaction.interceptor.TransactionAttributeSource;
 
 /**
- * Abstract superaspect for AspectJ transaction aspects. Concrete
- * subaspects will implement the {@code transactionalMethodExecution()}
- * pointcut using a strategy such as Java 5 annotations.
+ * 事务的超级切面，具体的超级切面会实现{@code transactionalMethodExecution()}方法
  *
- * <p>Suitable for use inside or outside the Spring IoC container.
- * Set the "transactionManager" property appropriately, allowing
- * use of any transaction implementation supported by Spring.
+ * 可以适配Spring IoC容器内外的使用
+ * 适当的设置transactionManager属性，允许使用Spring提供的任意事务实现
  *
- * <p><b>NB:</b> If a method implements an interface that is itself
- * transactionally annotated, the relevant Spring transaction attribute
- * will <i>not</i> be resolved. This behavior will vary from that of Spring AOP
- * if proxying an interface (but not when proxying a class). We recommend that
- * transaction annotations should be added to classes, rather than business
- * interfaces, as they are an implementation detail rather than a contract
- * specification validation.
- *
+ * 需要注意的是，如果一个方法实现了一个接口，这个接口被事务注解了，有关的事务属性不会得到解决
+ * 这种行为会因为Spring的AOP，因为代理的是这个接口，而不是这个类
+ * 建议事务注解需要添加到类中，其次才是业务接口，因为他们是实现细节，而不是规范验证
  * @author Rod Johnson
  * @author Ramnivas Laddad
  * @author Juergen Hoeller

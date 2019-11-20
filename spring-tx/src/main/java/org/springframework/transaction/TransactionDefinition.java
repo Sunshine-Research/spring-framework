@@ -101,7 +101,7 @@ public interface TransactionDefinition {
 	 * exists. Analogous to the EJB transaction attribute of the same name.
 	 * <p>Note that transaction synchronization is <i>not</i> available within a
 	 * {@code PROPAGATION_NEVER} scope.
-	 * 即使当前有事务，也会在非实物环境下执行，如果当前有事务，则抛出异常
+	 * 即使当前有事务，也会在非事务环境下执行，如果当前有事务，则抛出异常
 	 */
 	int PROPAGATION_NEVER = 5;
 
@@ -122,8 +122,8 @@ public interface TransactionDefinition {
 
 
 	/**
-	 * Use the default isolation level of the underlying datastore.
-	 * All other levels correspond to the JDBC isolation levels.
+	 * 基础数据存储使用的默认的事务隔离级别
+	 * 其他的事务隔离级别取决于JDBC的事务隔离级别
 	 * @see java.sql.Connection
 	 */
 	int ISOLATION_DEFAULT = -1;
@@ -174,8 +174,7 @@ public interface TransactionDefinition {
 
 
 	/**
-	 * Use the default timeout of the underlying transaction system,
-	 * or none if timeouts are not supported.
+	 * 基础事务系统使用的默认超时时间，如果不支持超时时间，返回none
 	 */
 	int TIMEOUT_DEFAULT = -1;
 

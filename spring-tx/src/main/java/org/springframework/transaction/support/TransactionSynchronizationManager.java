@@ -16,6 +16,13 @@
 
 package org.springframework.transaction.support;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.core.NamedThreadLocal;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,46 +31,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.core.NamedThreadLocal;
-import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-
 /**
- * Central delegate that manages resources and transaction synchronizations per thread.
- * To be used by resource management code but not by typical application code.
+ * 负责代理每个线程的事务同步器和事务资源
+ * 有资源管理代码而不是应用程序代码使用
  *
- * <p>Supports one resource per key without overwriting, that is, a resource needs
- * to be removed before a new one can be set for the same key.
- * Supports a list of transaction synchronizations if synchronization is active.
+ * 在不会重写的情况下，支持每个key一个资源，一个资源在具有相同key的一个新资源设置之前需要移除
+ * 如果开启了同步功能，支持事务同步列表
  *
- * <p>Resource management code should check for thread-bound resources, e.g. JDBC
- * Connections or Hibernate Sessions, via {@code getResource}. Such code is
- * normally not supposed to bind resources to threads, as this is the responsibility
- * of transaction managers. A further option is to lazily bind on first use if
- * transaction synchronization is active, for performing transactions that span
- * an arbitrary number of resources.
+ * 资源管理代码需要检查线程绑定的资源，比如JDBC连接，或者Hibernate会话，通过{@code getResource}
+ * 此类代码正常情况下不支持绑定资源到线程上，因为这是事务管理器的职责
+ * 另一个使用是在第一次使用时在开启事务同步的情况下，进行延迟绑定，用于执行跨越任意数量资源的事务
  *
- * <p>Transaction synchronization must be activated and deactivated by a transaction
- * manager via {@link #initSynchronization()} and {@link #clearSynchronization()}.
- * This is automatically supported by {@link AbstractPlatformTransactionManager},
- * and thus by all standard Spring transaction managers, such as
- * {@link org.springframework.transaction.jta.JtaTransactionManager} and
- * {@link org.springframework.jdbc.datasource.DataSourceTransactionManager}.
+ * 事务同步必须通过{@link #initSynchronization()} and {@link #clearSynchronization()}来修改活跃状态
+ * 会由{@link AbstractPlatformTransactionManager}，以及其他的所有标准的Spring事务管理器支持
+ * 资源管理代码仅需要在事务管理器存活的情况下进行注册，可以通过{@link #isSynchronizationActive}判断事务管理器的状态
+ * 如果事务同步处于非活跃状态，那么目前可能没有事务，或者事务管理器不支持事务同步
  *
- * <p>Resource management code should only register synchronizations when this
- * manager is active, which can be checked via {@link #isSynchronizationActive};
- * it should perform immediate resource cleanup else. If transaction synchronization
- * isn't active, there is either no current transaction, or the transaction manager
- * doesn't support transaction synchronization.
- *
- * <p>Synchronization is for example used to always return the same resources
- * within a JTA transaction, e.g. a JDBC Connection or a Hibernate Session for
- * any given DataSource or SessionFactory, respectively.
- *
+ * 在JTA事务中，同步用于总是返回所有相同的资源
+ * 比如一个给定Datasource的连接，总是返回相同的JDBC连接
+ * Hibernate SessionFactory可以返回相同的Hibernate Session
  * @author Juergen Hoeller
  * @since 02.06.2003
  * @see #isSynchronizationActive
@@ -81,6 +67,9 @@ public abstract class TransactionSynchronizationManager {
 	private static final ThreadLocal<Map<Object, Object>> resources =
 			new NamedThreadLocal<>("Transactional resources");
 
+	/**
+	 * 当前线程是否开启事务同步策略
+	 */
 	private static final ThreadLocal<Set<TransactionSynchronization>> synchronizations =
 			new NamedThreadLocal<>("Transaction synchronizations");
 
@@ -102,12 +91,9 @@ public abstract class TransactionSynchronizationManager {
 	//-------------------------------------------------------------------------
 
 	/**
-	 * Return all resources that are bound to the current thread.
-	 * <p>Mainly for debugging purposes. Resource managers should always invoke
-	 * {@code hasResource} for a specific resource key that they are interested in.
-	 * @return a Map with resource keys (usually the resource factory) and resource
-	 * values (usually the active resource object), or an empty Map if there are
-	 * currently no resources bound
+	 * 返回当前线程绑定的所有的资源
+	 * 主要用于调试，资源管理需要使用指定的key调用{@code hasResource}获取对应的资源
+	 * @return resource的字典，key: resource factory，value: active resource
 	 * @see #hasResource
 	 */
 	public static Map<Object, Object> getResourceMap() {
@@ -259,6 +245,7 @@ public abstract class TransactionSynchronizationManager {
 	/**
 	 * Return if transaction synchronization is active for the current thread.
 	 * Can be called before register to avoid unnecessary instance creation.
+	 * 事务的同步
 	 * @see #registerSynchronization
 	 */
 	public static boolean isSynchronizationActive() {
@@ -300,25 +287,24 @@ public abstract class TransactionSynchronizationManager {
 	}
 
 	/**
-	 * Return an unmodifiable snapshot list of all registered synchronizations
-	 * for the current thread.
-	 * @return unmodifiable List of TransactionSynchronization instances
-	 * @throws IllegalStateException if synchronization is not active
+	 * 返回一个当前线程未修改的所有已注册同步器的列表快照
+	 * @return 未修改的TransactionSynchronization实例
+	 * @throws IllegalStateException 如果同步功能处于非活跃状态，抛出异常
 	 * @see TransactionSynchronization
 	 */
 	public static List<TransactionSynchronization> getSynchronizations() throws IllegalStateException {
+		// 获取当前线程的所有事务同步器
 		Set<TransactionSynchronization> synchs = synchronizations.get();
 		if (synchs == null) {
 			throw new IllegalStateException("Transaction synchronization is not active");
 		}
-		// Return unmodifiable snapshot, to avoid ConcurrentModificationExceptions
-		// while iterating and invoking synchronization callbacks that in turn
-		// might register further synchronizations.
+		// 直接返回未修改的快照，避免出现ConcurrentModificationExceptions异常
+		// 在迭代和调用同步方法的回调时，很可能会触发进一步的同步
 		if (synchs.isEmpty()) {
 			return Collections.emptyList();
 		}
 		else {
-			// Sort lazily here, not in registerSynchronization.
+			// 进行一次简单的排序
 			List<TransactionSynchronization> sortedSynchs = new ArrayList<>(synchs);
 			AnnotationAwareOrderComparator.sort(sortedSynchs);
 			return Collections.unmodifiableList(sortedSynchs);
@@ -331,10 +317,12 @@ public abstract class TransactionSynchronizationManager {
 	 * @throws IllegalStateException if synchronization is not active
 	 */
 	public static void clearSynchronization() throws IllegalStateException {
+		// 如果同步器已经处于非活跃状态，抛出异常
 		if (!isSynchronizationActive()) {
 			throw new IllegalStateException("Cannot deactivate transaction synchronization - not active");
 		}
 		logger.trace("Clearing transaction synchronization");
+		// 否则清除当前线程的所有的事务同步回调任务
 		synchronizations.remove();
 	}
 
