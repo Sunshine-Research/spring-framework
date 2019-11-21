@@ -19,34 +19,29 @@ package org.springframework.aop;
 import org.aopalliance.aop.Advice;
 
 /**
- * Base interface holding AOP <b>advice</b> (action to take at a joinpoint)
- * and a filter determining the applicability of the advice (such as
- * a pointcut). <i>This interface is not for use by Spring users, but to
- * allow for commonality in support for different types of advice.</i>
+ * 持有AOP增强的基础接口（在拦截点执行的动作）
+ * 和一个确认增强的适用性的过滤器
+ * 这个接口不是为Spring的开发者使用的，但是为了不同的增强提供了通用性
  *
- * <p>Spring AOP is based around <b>around advice</b> delivered via method
- * <b>interception</b>, compliant with the AOP Alliance interception API.
- * The Advisor interface allows support for different types of advice,
- * such as <b>before</b> and <b>after</b> advice, which need not be
- * implemented using interception.
- *
+ * Spring AOP通过方法拦截基于围绕增强，符合AOP联盟的拦截的API
+ * Advisor接口允许支持不同类型的增强，比如前置、后置增强
+ * 这些增强不需要使用拦截来实现
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
 public interface Advisor {
 
 	/**
-	 * Common placeholder for an empty {@code Advice} to be returned from
-	 * {@link #getAdvice()} if no proper advice has been configured (yet).
+	 * 空增强的默认实现
+	 * 在调用{@link #getAdvice()}方法时，如果增强没有配置，访问此空增强
 	 * @since 5.0
 	 */
 	Advice EMPTY_ADVICE = new Advice() {};
 
 
 	/**
-	 * Return the advice part of this aspect. An advice may be an
-	 * interceptor, a before advice, a throws advice, etc.
-	 * @return the advice that should apply if the pointcut matches
+	 * 返回aspect的增强部分，一个增强可能是一个interceptor，一个前置增强，一个异常增强
+	 * @return 如果连接点匹配，应该返回的增强
 	 * @see org.aopalliance.intercept.MethodInterceptor
 	 * @see BeforeAdvice
 	 * @see ThrowsAdvice
@@ -55,14 +50,11 @@ public interface Advisor {
 	Advice getAdvice();
 
 	/**
-	 * Return whether this advice is associated with a particular instance
-	 * (for example, creating a mixin) or shared with all instances of
-	 * the advised class obtained from the same Spring bean factory.
-	 * <p><b>Note that this method is not currently used by the framework.</b>
-	 * Typical Advisor implementations always return {@code true}.
-	 * Use singleton/prototype bean definitions or appropriate programmatic
-	 * proxy creation to ensure that Advisors have the correct lifecycle model.
-	 * @return whether this advice is associated with a particular target instance
+	 * 当前增强是否和一个特定的实例关联，或者与同一Spring Bean工厂获得的增强的所有实例共享
+	 * 需要注意的是，当前方法没有被当前框架所使用
+	 * 典型的Advisor实现应该总是返回true
+	 * 使用单例或者多例的bean definition，或者适当的程序化代理创建，来确认Advisors拥有正确的生命周期模型
+	 * @return 增强是否和一个特定的实例关联
 	 */
 	boolean isPerInstance();
 

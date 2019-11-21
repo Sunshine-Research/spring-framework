@@ -74,6 +74,11 @@ public class LoadTimeWeavingConfiguration implements ImportAware, BeanClassLoade
 	}
 
 
+	/**
+	 * 默认的bean名称是loadTimeWeaver
+	 * 内部工作bean
+	 * @return load-time织入
+	 */
 	@Bean(name = ConfigurableApplicationContext.LOAD_TIME_WEAVER_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public LoadTimeWeaver loadTimeWeaver() {
@@ -81,30 +86,35 @@ public class LoadTimeWeavingConfiguration implements ImportAware, BeanClassLoade
 		LoadTimeWeaver loadTimeWeaver = null;
 
 		if (this.ltwConfigurer != null) {
-			// The user has provided a custom LoadTimeWeaver instance
+			// 用户提供了自定义的load-time织入实例
 			loadTimeWeaver = this.ltwConfigurer.getLoadTimeWeaver();
 		}
 
 		if (loadTimeWeaver == null) {
 			// No custom LoadTimeWeaver provided -> fall back to the default
+			// 如果没有提供默认的load-time织入实例，降级到使用默认的load-time实例
 			loadTimeWeaver = new DefaultContextLoadTimeWeaver(this.beanClassLoader);
 		}
-
+		// 如果开启使用load-time织入
 		if (this.enableLTW != null) {
+			// 获取注解配置的织入方式，并根据不同的类型进行不同的逻辑
 			AspectJWeaving aspectJWeaving = this.enableLTW.getEnum("aspectjWeaving");
 			switch (aspectJWeaving) {
 				case DISABLED:
-					// AJ weaving is disabled -> do nothing
+					// 永不开启的情况下，什么都不做
 					break;
 				case AUTODETECT:
+					// 如果是自动识别开启
+					// 首先尝试获取"META-INF/aop.xml"下的资源
 					if (this.beanClassLoader.getResource(AspectJWeavingEnabler.ASPECTJ_AOP_XML_RESOURCE) == null) {
-						// No aop.xml present on the classpath -> treat as 'disabled'
+						// 没有对应的资源，什么都不做
 						break;
 					}
-					// aop.xml is present on the classpath -> enable
+					// 找到对应的资源，直接开启
 					AspectJWeavingEnabler.enableAspectJWeaving(loadTimeWeaver, this.beanClassLoader);
 					break;
 				case ENABLED:
+					// 永远开启，设置开启
 					AspectJWeavingEnabler.enableAspectJWeaving(loadTimeWeaver, this.beanClassLoader);
 					break;
 			}

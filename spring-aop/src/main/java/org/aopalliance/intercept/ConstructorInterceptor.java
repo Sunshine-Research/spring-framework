@@ -17,14 +17,10 @@
 package org.aopalliance.intercept;
 
 /**
- * Intercepts the construction of a new object.
+ * 拦截一个新对象的构造方法
  *
- * <p>The user should implement the {@link
- * #construct(ConstructorInvocation)} method to modify the original
- * behavior. E.g. the following class implements a singleton
- * interceptor (allows only one unique instance for the intercepted
- * class):
- *
+ * 开发者需要实现{@link #construct(ConstructorInvocation)}方法来修改原有的表现形式
+ * 比如：接下来的例子实现了一个单例interceptor（仅允许唯一一个拦截类的实例）
  * <pre class=code>
  * class DebuggingInterceptor implements ConstructorInterceptor {
  *   Object instance=null;
@@ -38,21 +34,15 @@ package org.aopalliance.intercept;
  *   }
  * }
  * </pre>
- *
  * @author Rod Johnson
  */
 public interface ConstructorInterceptor extends Interceptor  {
 
 	/**
-	 * Implement this method to perform extra treatments before and
-	 * after the construction of a new object. Polite implementations
-	 * would certainly like to invoke {@link Joinpoint#proceed()}.
-	 * @param invocation the construction joinpoint
-	 * @return the newly created object, which is also the result of
-	 * the call to {@link Joinpoint#proceed()}; might be replaced by
-	 * the interceptor
-	 * @throws Throwable if the interceptors or the target object
-	 * throws an exception
+	 * 实现这个方法来执行额外的方法前后的部分
+	 * @param invocation 建造的连接点
+	 * @return 新创建的对象，同时也是{@link Joinpoint#proceed()}调用的结果，可能被interceptor替换
+	 * @throws Throwable 如果interceptors或者目标对象抛出了一个异常
 	 */
 	Object construct(ConstructorInvocation invocation) throws Throwable;
 

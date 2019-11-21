@@ -19,17 +19,13 @@ package org.aopalliance.intercept;
 import org.aopalliance.aop.Advice;
 
 /**
- * This interface represents a generic interceptor.
+ * 拦截器
  *
- * <p>A generic interceptor can intercept runtime events that occur
- * within a base program. Those events are materialized by (reified
- * in) joinpoints. Runtime joinpoints can be invocations, field
- * access, exceptions...
+ * 一般拦截器是可以拦截发生于基础程序的运行时事件
+ * 这些事件通过连接点来实现，运行时连接点可以是调用、请求字段，异常等
  *
- * <p>This interface is not used directly. Use the sub-interfaces
- * to intercept specific events. For instance, the following class
- * implements some specific interceptors in order to implement a
- * debugger:
+ * 这些接口不会直接使用，而是使用子类接口来拦截特定的事件
+ * 举个例子，下面的case实现了一些特定的interceptors来实现一次debug：
  *
  * <pre class=code>
  * class DebuggingInterceptor implements MethodInterceptor,

@@ -16,12 +16,7 @@
 
 package org.springframework.context.weaving;
 
-import java.lang.instrument.ClassFileTransformer;
-import java.lang.instrument.IllegalClassFormatException;
-import java.security.ProtectionDomain;
-
 import org.aspectj.weaver.loadtime.ClassPreProcessorAgentAdapter;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -30,6 +25,10 @@ import org.springframework.core.Ordered;
 import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.lang.Nullable;
+
+import java.lang.instrument.ClassFileTransformer;
+import java.lang.instrument.IllegalClassFormatException;
+import java.security.ProtectionDomain;
 
 /**
  * Post-processor that registers AspectJ's
@@ -45,7 +44,7 @@ public class AspectJWeavingEnabler
 		implements BeanFactoryPostProcessor, BeanClassLoaderAware, LoadTimeWeaverAware, Ordered {
 
 	/**
-	 * The {@code aop.xml} resource location.
+	 * aop文件的资源位置
 	 */
 	public static final String ASPECTJ_AOP_XML_RESOURCE = "META-INF/aop.xml";
 
@@ -79,29 +78,33 @@ public class AspectJWeavingEnabler
 
 
 	/**
-	 * Enable AspectJ weaving with the given {@link LoadTimeWeaver}.
-	 * @param weaverToUse the LoadTimeWeaver to apply to (or {@code null} for a default weaver)
-	 * @param beanClassLoader the class loader to create a default weaver for (if necessary)
+	 * 使用给定的{@link LoadTimeWeaver}的实例，开启AspectJ织入
+	 * @param weaverToUse 给定的需要执行的{@link LoadTimeWeaver}
+	 * @param beanClassLoader 可以创建默认织入的{@link ClassLoader}
 	 */
 	public static void enableAspectJWeaving(
 			@Nullable LoadTimeWeaver weaverToUse, @Nullable ClassLoader beanClassLoader) {
-
+		// 如果没有给定的{@link LoadTimeWeaver}
 		if (weaverToUse == null) {
+			// 如果开启了instrumentation
 			if (InstrumentationLoadTimeWeaver.isInstrumentationAvailable()) {
+				// 使用给定的ClassLoader创建默认的织入实例
 				weaverToUse = new InstrumentationLoadTimeWeaver(beanClassLoader);
 			}
 			else {
+				// 否则抛出非法状态异常
 				throw new IllegalStateException("No LoadTimeWeaver available");
 			}
 		}
+		// 添加transformer
 		weaverToUse.addTransformer(
 				new AspectJClassBypassingClassFileTransformer(new ClassPreProcessorAgentAdapter()));
 	}
 
 
 	/**
-	 * ClassFileTransformer decorator that suppresses processing of AspectJ
-	 * classes in order to avoid potential LinkageErrors.
+	 * 抑制AspectJ处理的ClassFileTransformer装饰器
+	 * 避免出现潜在的联合错误
 	 * @see org.springframework.context.annotation.LoadTimeWeavingConfiguration
 	 */
 	private static class AspectJClassBypassingClassFileTransformer implements ClassFileTransformer {

@@ -19,20 +19,14 @@ package org.aopalliance.intercept;
 import java.lang.reflect.AccessibleObject;
 
 /**
- * This interface represents a generic runtime joinpoint (in the AOP
- * terminology).
+ * AOP中的连接点，代表了一个通用的运行时的连接点（在AOP中）
  *
- * <p>A runtime joinpoint is an <i>event</i> that occurs on a static
- * joinpoint (i.e. a location in a the program). For instance, an
- * invocation is the runtime joinpoint on a method (static joinpoint).
- * The static part of a given joinpoint can be generically retrieved
- * using the {@link #getStaticPart()} method.
+ * 一个运行时的连接点是一个事件，发生在一个静态的连接点上（比如程序中的位置）
+ * 举个例子，一次调用是在一个方法上的运行时连接点（静态连接点）
+ * 可以通过{@link #getStaticPart()}方法对给定的连接点举行遍历
  *
- * <p>In the context of an interception framework, a runtime joinpoint
- * is then the reification of an access to an accessible object (a
- * method, a constructor, a field), i.e. the static part of the
- * joinpoint. It is passed to the interceptors that are installed on
- * the static joinpoint.
+ * 在拦截框架的上下文中，一个运行时的连接点是一个队可访问对象的访问形式化（一个方法，一个构造方法，一个字段）
+ * 它用于传递给静态连接点上的拦截器
  *
  * @author Rod Johnson
  * @see Interceptor
@@ -40,25 +34,23 @@ import java.lang.reflect.AccessibleObject;
 public interface Joinpoint {
 
 	/**
-	 * Proceed to the next interceptor in the chain.
-	 * <p>The implementation and the semantics of this method depends
-	 * on the actual joinpoint type (see the children interfaces).
-	 * @return see the children interfaces' proceed definition
-	 * @throws Throwable if the joinpoint throws an exception
+	 * 进行链上的下一个interceptor
+	 * 此方法的实现和语义取决于实际的连接点类型
+	 * @return 请看子类接口进行定义
+	 * @throws Throwable 连接点抛出了异常
 	 */
 	Object proceed() throws Throwable;
 
 	/**
-	 * Return the object that holds the current joinpoint's static part.
-	 * <p>For instance, the target object for an invocation.
-	 * @return the object (can be null if the accessible object is static)
+	 * 返回持有当前连接点的静态部分的对象
+	 * 举个例子，一次调用的目标对象
+	 * @return 对象
 	 */
 	Object getThis();
 
 	/**
-	 * Return the static part of this joinpoint.
-	 * <p>The static part is an accessible object on which a chain of
-	 * interceptors are installed.
+	 * 返回连接点的静态部分
+	 * 静态部分是指已安装的interceptor链上可访问的部分
 	 */
 	AccessibleObject getStaticPart();
 
