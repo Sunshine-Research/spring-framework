@@ -17,51 +17,42 @@
 package org.springframework.aop.framework.adapter;
 
 import org.aopalliance.intercept.MethodInterceptor;
-
 import org.springframework.aop.Advisor;
 
 /**
- * Interface for registries of Advisor adapters.
- *
- * <p><i>This is an SPI interface, not to be implemented by any Spring user.</i>
- *
+ * Advisor适配器的注册器接口
+ * 虽然是一个SPI接口，但是不会通过Spring的使用者实现
  * @author Rod Johnson
  * @author Rob Harrop
  */
 public interface AdvisorAdapterRegistry {
 
 	/**
-	 * Return an {@link Advisor} wrapping the given advice.
-	 * <p>Should by default at least support
+	 * 包装给定的增强为{@link Advisor}
+	 * 默认至少支持：
 	 * {@link org.aopalliance.intercept.MethodInterceptor},
 	 * {@link org.springframework.aop.MethodBeforeAdvice},
 	 * {@link org.springframework.aop.AfterReturningAdvice},
 	 * {@link org.springframework.aop.ThrowsAdvice}.
-	 * @param advice an object that should be an advice
-	 * @return an Advisor wrapping the given advice (never {@code null};
-	 * if the advice parameter is an Advisor, it is to be returned as-is)
-	 * @throws UnknownAdviceTypeException if no registered advisor adapter
-	 * can wrap the supposed advice
+	 * @param advice 需要包装的增强
+	 * @return 包装了给定增强的Advisor，永不为null，如果给定的增强类型就是Advisor，那么直接返回这个Advisor
+	 * @throws UnknownAdviceTypeException 如果没有已注册的Advisor适配器可以包装给定的增强，抛出异常
 	 */
 	Advisor wrap(Object advice) throws UnknownAdviceTypeException;
 
 	/**
-	 * Return an array of AOP Alliance MethodInterceptors to allow use of the
-	 * given Advisor in an interception-based framework.
-	 * <p>Don't worry about the pointcut associated with the {@link Advisor}, if it is
-	 * a {@link org.springframework.aop.PointcutAdvisor}: just return an interceptor.
-	 * @param advisor the Advisor to find an interceptor for
-	 * @return an array of MethodInterceptors to expose this Advisor's behavior
-	 * @throws UnknownAdviceTypeException if the Advisor type is
-	 * not understood by any registered AdvisorAdapter
+	 * 返回MethodInterceptors的AOP协议数组，来允许基于interceptor框架的切面的使用
+	 * 不用关心和切面关联的切点，如果是{@link org.springframework.aop.PointcutAdvisor}类型的切面，只是会返回一个interceptor
+	 * @param advisor 需要获取interceptor的切面
+	 * @return 暴露切面行为的MethodInterceptors数组
+	 * @throws UnknownAdviceTypeException 无法识别的切面类型
 	 */
 	MethodInterceptor[] getInterceptors(Advisor advisor) throws UnknownAdviceTypeException;
 
 	/**
-	 * Register the given {@link AdvisorAdapter}. Note that it is not necessary to register
-	 * adapters for an AOP Alliance Interceptors or Spring Advices: these must be
-	 * automatically recognized by an {@code AdvisorAdapterRegistry} implementation.
-	 * @param adapter an AdvisorAdapter that understands particular Advisor or Advice types
+	 * 注册给定的{@link AdvisorAdapter}切面适配器
+	 * 需要注意的是，其实不必要去注册AOP协议的interceptor或者Spring增强，它们必须通过{@code AdvisorAdapterRegistry}的实现来识别
+	 * @param adapter 可以理解为是特定的切面，或者增强类型
 	 */
 	void registerAdvisorAdapter(AdvisorAdapter adapter);
 

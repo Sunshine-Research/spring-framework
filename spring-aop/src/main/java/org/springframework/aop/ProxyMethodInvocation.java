@@ -17,7 +17,6 @@
 package org.springframework.aop;
 
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.lang.Nullable;
 
 /**
@@ -51,13 +50,9 @@ public interface ProxyMethodInvocation extends MethodInvocation {
 	MethodInvocation invocableClone();
 
 	/**
-	 * Create a clone of this object. If cloning is done before {@code proceed()}
-	 * is invoked on this object, {@code proceed()} can be invoked once per clone
-	 * to invoke the joinpoint (and the rest of the advice chain) more than once.
-	 * @param arguments the arguments that the cloned invocation is supposed to use,
-	 * overriding the original arguments
-	 * @return an invocable clone of this invocation.
-	 * {@code proceed()} can be called once per clone.
+	 * 创建当前代理的一个克隆对象，如果在{@code proceed()}方法调用之前克隆已经完成，{@code proceed()}可以为每个克隆调用一次，以多次调用连接点（以及增强链的其他部分）
+	 * @param arguments 克隆的调用需要用到的参数，会重写原有的参数
+	 * @return 当前调用的过后销毁的调用，每次克隆可以调用一次{@code proceed()}
 	 */
 	MethodInvocation invocableClone(Object... arguments);
 

@@ -16,22 +16,12 @@
 
 package org.springframework.aop.aspectj;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInvocation;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.weaver.tools.JoinPointMatch;
 import org.aspectj.weaver.tools.PointcutParameter;
-
 import org.springframework.aop.AopInvocationException;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
@@ -49,10 +39,18 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
- * Base class for AOP Alliance {@link org.aopalliance.aop.Advice} classes
- * wrapping an AspectJ aspect or an AspectJ-annotated advice method.
- *
+ * 增强的基类
+ * 包装了基于AspectJ的切面
  * @author Rod Johnson
  * @author Adrian Colyer
  * @author Juergen Hoeller
@@ -63,27 +61,30 @@ import org.springframework.util.StringUtils;
 public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedenceInformation, Serializable {
 
 	/**
-	 * Key used in ReflectiveMethodInvocation userAttributes map for the current joinpoint.
+	 * ReflectiveMethodInvocation userAttributes的键映射到当前的连接点
 	 */
 	protected static final String JOIN_POINT_KEY = JoinPoint.class.getName();
 
 
 	/**
-	 * Lazily instantiate joinpoint for the current invocation.
-	 * Requires MethodInvocation to be bound with ExposeInvocationInterceptor.
-	 * <p>Do not use if access is available to the current ReflectiveMethodInvocation
-	 * (in an around advice).
-	 * @return current AspectJ joinpoint, or through an exception if we're not in a
-	 * Spring AOP invocation.
+	 * 当前调用的连接点的懒实例化
+	 * 需要MethodInvocation和ExposeInvocationInterceptor进行约束
+	 * 如果可以访问ReflectiveMethodInvocation，那么就不要使用此方法
+	 * 比如在一个环绕增强中
+	 * @return 当前的AspectJ连接点，如不在一个Spring AOP调用中，抛出异常
 	 */
 	public static JoinPoint currentJoinPoint() {
+		// 获取当前的方法调用
 		MethodInvocation mi = ExposeInvocationInterceptor.currentInvocation();
 		if (!(mi instanceof ProxyMethodInvocation)) {
+			// 非Spring的方法调用代理，抛出异常
 			throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
 		}
+		// 获取当前方法调用的连接点
 		ProxyMethodInvocation pmi = (ProxyMethodInvocation) mi;
 		JoinPoint jp = (JoinPoint) pmi.getUserAttribute(JOIN_POINT_KEY);
 		if (jp == null) {
+			// 如果没有连接点，创建一个新的连接点
 			jp = new MethodInvocationProceedingJoinPoint(pmi);
 			pmi.setUserAttribute(JOIN_POINT_KEY, jp);
 		}
@@ -661,26 +662,32 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	}
 
 	/**
-	 * Get the current join point match at the join point we are being dispatched on.
+	 * 获取正在分派的连接点的当前连接点
 	 */
 	@Nullable
 	protected JoinPointMatch getJoinPointMatch() {
+		// 获取当前暴露的方法调用
 		MethodInvocation mi = ExposeInvocationInterceptor.currentInvocation();
+		// 如果不是由Spring生成的代理方法调用，抛出异常
 		if (!(mi instanceof ProxyMethodInvocation)) {
 			throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
 		}
+		// 获取匹配的连接点
 		return getJoinPointMatch((ProxyMethodInvocation) mi);
 	}
 
-	// Note: We can't use JoinPointMatch.getClass().getName() as the key, since
-	// Spring AOP does all the matching at a join point, and then all the invocations.
-	// Under this scenario, if we just use JoinPointMatch as the key, then
-	// 'last man wins' which is not what we want at all.
-	// Using the expression is guaranteed to be safe, since 2 identical expressions
-	// are guaranteed to bind in exactly the same way.
+	/**
+	 * 需要注意的是：不能使用JoinPointMatch.getClass().getName()作为key，因为Spring AOP不支持在一个连接点的所有匹配，以及所有的调用
+	 * 在这种情况下，如果使用JoinPointMatch作为key，那么最后一个存活的作为连接掉并不是我们想要的结果
+	 * 使用表达式来保证安全，因为两个已验证的表达式会保证以相同的方式进行绑定
+	 * @param pmi Spring生成的方法代理
+	 * @return 开发者设置的表达式的内容
+	 */
 	@Nullable
 	protected JoinPointMatch getJoinPointMatch(ProxyMethodInvocation pmi) {
+		// 获取切点的表达式
 		String expression = this.pointcut.getExpression();
+		// 获取开发者设置的表达式的内容
 		return (expression != null ? (JoinPointMatch) pmi.getUserAttribute(expression) : null);
 	}
 

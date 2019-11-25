@@ -19,10 +19,12 @@ package org.springframework.aop;
 import org.aopalliance.aop.Advice;
 
 /**
+ * 如果想要使用Advisor切面，那么实现类必须实现Advisor接口，也就是需要适配器
+ * 切面
  * 持有AOP增强的基础接口（在拦截点执行的动作）
  * 和一个确认增强的适用性的过滤器
  * 这个接口不是为Spring的开发者使用的，但是为了不同的增强提供了通用性
- *
+ * <p>
  * Spring AOP通过方法拦截基于围绕增强，符合AOP联盟的拦截的API
  * Advisor接口允许支持不同类型的增强，比如前置、后置增强
  * 这些增强不需要使用拦截来实现

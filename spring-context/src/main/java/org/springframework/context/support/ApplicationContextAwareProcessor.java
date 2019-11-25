@@ -16,10 +16,6 @@
 
 package org.springframework.context.support;
 
-import java.security.AccessControlContext;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.EmbeddedValueResolver;
@@ -33,20 +29,19 @@ import org.springframework.context.ResourceLoaderAware;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
 
+import java.security.AccessControlContext;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+
 /**
- * {@link BeanPostProcessor} implementation that supplies the {@code ApplicationContext},
- * {@link org.springframework.core.env.Environment Environment}, or
- * {@link StringValueResolver} for the {@code ApplicationContext} to beans that
- * implement the {@link EnvironmentAware}, {@link EmbeddedValueResolverAware},
- * {@link ResourceLoaderAware}, {@link ApplicationEventPublisherAware},
- * {@link MessageSourceAware}, and/or {@link ApplicationContextAware} interfaces.
+ * {@link BeanPostProcessor}接口的实现，为beans提供了{@code ApplicationContext}，{@link org.springframework.core.env.Environment}，
+ * 或者{@code ApplicationContext}的{@link StringValueResolver}
+ * 来实现{@link EnvironmentAware}，{@link EmbeddedValueResolverAware}，{@link ResourceLoaderAware}，{@link ApplicationEventPublisherAware}、
+ * {@link MessageSourceAware}和/或{@link ApplicationContextAware}接口
  *
- * <p>Implemented interfaces are satisfied in the order in which they are
- * mentioned above.
+ * 实现的接口将按照提及的顺序进行满足
  *
- * <p>Application contexts will automatically register this with their
- * underlying bean factory. Applications do not use this directly.
- *
+ * ApplicationContext将会自动注入，和它们的底层Bean工厂，应用不会直接使用此类
  * @author Juergen Hoeller
  * @author Costin Leau
  * @author Chris Beams
@@ -67,7 +62,7 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 
 
 	/**
-	 * Create a new ApplicationContextAwareProcessor for the given context.
+	 * 为给定的context提供新的ApplicationContextAwareProcessor
 	 */
 	public ApplicationContextAwareProcessor(ConfigurableApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
@@ -78,32 +73,39 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 	@Override
 	@Nullable
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+		// 如果Bean不是下述类型，则不进行任何处理
 		if (!(bean instanceof EnvironmentAware || bean instanceof EmbeddedValueResolverAware ||
 				bean instanceof ResourceLoaderAware || bean instanceof ApplicationEventPublisherAware ||
-				bean instanceof MessageSourceAware || bean instanceof ApplicationContextAware)){
+				bean instanceof MessageSourceAware || bean instanceof ApplicationContextAware)) {
 			return bean;
 		}
-
+		// 创建可控制的上下文
 		AccessControlContext acc = null;
 
+		// 从当前上下文的bean工厂中获取当前的可控制的上下文信息
 		if (System.getSecurityManager() != null) {
 			acc = this.applicationContext.getBeanFactory().getAccessControlContext();
 		}
 
+		// 调用Aware接口
 		if (acc != null) {
 			AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
 				invokeAwareInterfaces(bean);
 				return null;
 			}, acc);
-		}
-		else {
+		} else {
 			invokeAwareInterfaces(bean);
 		}
 
 		return bean;
 	}
 
+	/**
+	 * 为给定的bean调用Aware接口
+	 * @param bean 给定需要处理的bean，仅会有几种类型
+	 */
 	private void invokeAwareInterfaces(Object bean) {
+		// 设置Spring用到的一些辅助类的Aware对象
 		if (bean instanceof EnvironmentAware) {
 			((EnvironmentAware) bean).setEnvironment(this.applicationContext.getEnvironment());
 		}

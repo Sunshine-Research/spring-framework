@@ -17,6 +17,7 @@
 package org.aopalliance.intercept;
 
 /**
+ * 相当于对增强方法包装成MethodInterceptor
  * 在到达目标方法的途中拦截接口上的调用，
  * 这些interceptor会在目标上进行嵌套
  *

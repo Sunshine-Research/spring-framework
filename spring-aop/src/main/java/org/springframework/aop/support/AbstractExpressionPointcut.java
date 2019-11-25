@@ -16,82 +16,87 @@
 
 package org.springframework.aop.support;
 
-import java.io.Serializable;
-
 import org.springframework.lang.Nullable;
 
+import java.io.Serializable;
+
 /**
- * Abstract superclass for expression pointcuts,
- * offering location and expression properties.
- *
+ * 切点表达式
+ * 也就是我们使用的@PointCut(expression="")
+ * 提供了位置和表达式属性
  * @author Rod Johnson
  * @author Rob Harrop
- * @since 2.0
  * @see #setLocation
  * @see #setExpression
+ * @since 2.0
  */
 @SuppressWarnings("serial")
 public abstract class AbstractExpressionPointcut implements ExpressionPointcut, Serializable {
 
+	/**
+	 * 切点关联的位置
+	 */
 	@Nullable
 	private String location;
 
+	/**
+	 * 切点适配的表达式
+	 */
 	@Nullable
 	private String expression;
 
-
 	/**
-	 * Set the location for debugging.
-	 */
-	public void setLocation(@Nullable String location) {
-		this.location = location;
-	}
-
-	/**
-	 * Return location information about the pointcut expression
-	 * if available. This is useful in debugging.
-	 * @return location information as a human-readable String,
-	 * or {@code null} if none is available
+	 * 提供切点表达式的位置信息
+	 * 这在debug过程中非常好用
+	 * @return 可读的位置信息，不可用的情况下返回null
 	 */
 	@Nullable
 	public String getLocation() {
 		return this.location;
 	}
 
-	public void setExpression(@Nullable String expression) {
-		this.expression = expression;
-		try {
-			onSetExpression(expression);
-		}
-		catch (IllegalArgumentException ex) {
-			// Fill in location information if possible.
-			if (this.location != null) {
-				throw new IllegalArgumentException("Invalid expression at location [" + this.location + "]: " + ex);
-			}
-			else {
-				throw ex;
-			}
-		}
+	/**
+	 * 为debug提供位置信息
+	 */
+	public void setLocation(@Nullable String location) {
+		this.location = location;
 	}
 
 	/**
-	 * Called when a new pointcut expression is set.
-	 * The expression should be parsed at this point if possible.
-	 * <p>This implementation is empty.
-	 * @param expression expression to set
-	 * @throws IllegalArgumentException if the expression is invalid
+	 * 如果一个新的切点表达式设置时，调用此方法
+	 * 默认为空实现
+	 * @param expression 需要设置的表达式
+	 * @throws IllegalArgumentException 如果表达式不可用，抛出异常
 	 * @see #setExpression
 	 */
 	protected void onSetExpression(@Nullable String expression) throws IllegalArgumentException {
 	}
 
 	/**
-	 * Return this pointcut's expression.
+	 * 提供切点的表达式
 	 */
 	@Override
 	@Nullable
 	public String getExpression() {
 		return this.expression;
+	}
+
+	/**
+	 * 设置表达式
+	 * @param expression 切点表达式
+	 */
+	public void setExpression(@Nullable String expression) {
+		this.expression = expression;
+		try {
+			onSetExpression(expression);
+		} catch (IllegalArgumentException ex) {
+			// 如果可以，将位置信息放入到异常中
+			if (this.location != null) {
+				throw new IllegalArgumentException("Invalid expression at location [" + this.location + "]: " + ex);
+			} else {
+				throw ex;
+			}
+		}
 	}
 
 }

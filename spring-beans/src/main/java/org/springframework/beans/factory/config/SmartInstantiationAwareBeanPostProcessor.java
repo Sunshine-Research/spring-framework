@@ -16,35 +16,30 @@
 
 package org.springframework.beans.factory.config;
 
-import java.lang.reflect.Constructor;
-
 import org.springframework.beans.BeansException;
 import org.springframework.lang.Nullable;
 
+import java.lang.reflect.Constructor;
+
 /**
- * Extension of the {@link InstantiationAwareBeanPostProcessor} interface,
- * adding a callback for predicting the eventual type of a processed bean.
- *
- * <p><b>NOTE:</b> This interface is a special purpose interface, mainly for
- * internal use within the framework. In general, application-provided
- * post-processors should simply implement the plain {@link BeanPostProcessor}
- * interface or derive from the {@link InstantiationAwareBeanPostProcessorAdapter}
- * class. New methods might be added to this interface even in point releases.
- *
+ * {@link InstantiationAwareBeanPostProcessor}的扩展接口，添加了用于预测已处理bean的最终类型的回调方法
+ * <p>
+ * 需要注意的是：这个接口是一个特殊用途的接口，主要用于框架的内部使用，一般而言，应用提供的post-processor应该简单实现普通的{@link BeanPostProcessor}接口
+ * 或者从{@link InstantiationAwareBeanPostProcessorAdapter}类派生
+ * 新的方法可能需要添加到这个接口，即使是in point releases
  * @author Juergen Hoeller
- * @since 2.0.3
  * @see InstantiationAwareBeanPostProcessorAdapter
+ * @since 2.0.3
  */
 public interface SmartInstantiationAwareBeanPostProcessor extends InstantiationAwareBeanPostProcessor {
 
 	/**
-	 * Predict the type of the bean to be eventually returned from this
-	 * processor's {@link #postProcessBeforeInstantiation} callback.
-	 * <p>The default implementation returns {@code null}.
-	 * @param beanClass the raw class of the bean
-	 * @param beanName the name of the bean
-	 * @return the type of the bean, or {@code null} if not predictable
-	 * @throws org.springframework.beans.BeansException in case of errors
+	 * 预测最终从此processor的{@link #postProcessBeforeInstantiation}回调返回的bean类型
+	 * 默认的实现返回{@code null}
+	 * @param beanClass bean的原始类
+	 * @param beanName  bean的名称
+	 * @return bean的类型，如果无法预测，返回{@code null}
+	 * @throws org.springframework.beans.BeansException 假如出现错误，抛出异常
 	 */
 	@Nullable
 	default Class<?> predictBeanType(Class<?> beanClass, String beanName) throws BeansException {
@@ -52,12 +47,12 @@ public interface SmartInstantiationAwareBeanPostProcessor extends InstantiationA
 	}
 
 	/**
-	 * Determine the candidate constructors to use for the given bean.
-	 * <p>The default implementation returns {@code null}.
-	 * @param beanClass the raw class of the bean (never {@code null})
-	 * @param beanName the name of the bean
-	 * @return the candidate constructors, or {@code null} if none specified
-	 * @throws org.springframework.beans.BeansException in case of errors
+	 * 确认需要在给定bean上使用的候选构造方法
+	 * 默认的实现是返回null
+	 * @param beanClass bean的原始类
+	 * @param beanName  bean的名称
+	 * @return 候选的构造方法，如果没有指定，返回值{@code null}
+	 * @throws org.springframework.beans.BeansException 假如出现错误，抛出异常
 	 */
 	@Nullable
 	default Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, String beanName)
@@ -67,25 +62,17 @@ public interface SmartInstantiationAwareBeanPostProcessor extends InstantiationA
 	}
 
 	/**
-	 * Obtain a reference for early access to the specified bean,
-	 * typically for the purpose of resolving a circular reference.
-	 * <p>This callback gives post-processors a chance to expose a wrapper
-	 * early - that is, before the target bean instance is fully initialized.
-	 * The exposed object should be equivalent to the what
-	 * {@link #postProcessBeforeInitialization} / {@link #postProcessAfterInitialization}
-	 * would expose otherwise. Note that the object returned by this method will
-	 * be used as bean reference unless the post-processor returns a different
-	 * wrapper from said post-process callbacks. In other words: Those post-process
-	 * callbacks may either eventually expose the same reference or alternatively
-	 * return the raw bean instance from those subsequent callbacks (if the wrapper
-	 * for the affected bean has been built for a call to this method already,
-	 * it will be exposes as final bean reference by default).
-	 * <p>The default implementation returns the given {@code bean} as-is.
-	 * @param bean the raw bean instance
-	 * @param beanName the name of the bean
-	 * @return the object to expose as bean reference
-	 * (typically with the passed-in bean instance as default)
-	 * @throws org.springframework.beans.BeansException in case of errors
+	 * 获取早期访问指定bean的引用，通常用于解决循环依赖
+	 * 此回调方法提供了提早暴露包装类的机会，也就是在目标bean实例完全初始化之前暴露
+	 * 暴露的对象应该相当于{@link #postProcessBeforeInitialization}/{@link #postProcessAfterInitialization}否则会暴露
+	 * 需要注意的是，此方法的返回值将会用于bean引用，除非post-processor返回了从所属的post-processor回调
+	 * 换句话说，这些post-process回调任务可能最终暴露相同的引用，或者从这些后续的回调中返回原始的bean实例
+	 * （如果已经为该方法的调用构建了受影响的包装，则默认情况下它将作为最终bean引用公开）
+	 * 默认实现是返回给定bean
+	 * @param bean     bean的原始类
+	 * @param beanName bean的名称
+	 * @return 暴露bean引用的对象（通常使用形参的bean实例对象作为默认）
+	 * @throws org.springframework.beans.BeansException 假如出现错误，抛出异常
 	 */
 	default Object getEarlyBeanReference(Object bean, String beanName) throws BeansException {
 		return bean;

@@ -20,54 +20,42 @@ import org.springframework.beans.BeansException;
 import org.springframework.lang.Nullable;
 
 /**
- * Factory hook that allows for custom modification of new bean instances &mdash;
- * for example, checking for marker interfaces or wrapping beans with proxies.
- *
- * <p>Typically, post-processors that populate beans via marker interfaces
- * or the like will implement {@link #postProcessBeforeInitialization},
- * while post-processors that wrap beans with proxies will normally
- * implement {@link #postProcessAfterInitialization}.
- *
- * <h3>Registration</h3>
- * <p>An {@code ApplicationContext} can autodetect {@code BeanPostProcessor} beans
- * in its bean definitions and apply those post-processors to any beans subsequently
- * created. A plain {@code BeanFactory} allows for programmatic registration of
- * post-processors, applying them to all beans created through the bean factory.
- *
- * <h3>Ordering</h3>
- * <p>{@code BeanPostProcessor} beans that are autodetected in an
- * {@code ApplicationContext} will be ordered according to
- * {@link org.springframework.core.PriorityOrdered} and
- * {@link org.springframework.core.Ordered} semantics. In contrast,
- * {@code BeanPostProcessor} beans that are registered programmatically with a
- * {@code BeanFactory} will be applied in the order of registration; any ordering
- * semantics expressed through implementing the
- * {@code PriorityOrdered} or {@code Ordered} interface will be ignored for
- * programmatically registered post-processors. Furthermore, the
- * {@link org.springframework.core.annotation.Order @Order} annotation is not
- * taken into account for {@code BeanPostProcessor} beans.
- *
+ * 用于自定义修改新的bean实例的工厂钩子
+ * 比如检查标记的接口，或者使用代理包装bean实例
+ * <p>
+ * 通常，使用{@link #postProcessBeforeInitialization}方法来支持类似于属性注入、标记接口的事情
+ * 使用{@link #postProcessAfterInitialization}方法来进行使用代理包装bean实例的事情
+ * <p>
+ * 注册
+ * {@code ApplicationContext}可以自动检测{@code BeanPostProcessor}bean实例，在它的bean definition，并把这些post-processors用于随后创建的任何bean
+ * 一个简单的{@code BeanFactory}允许使用程序注册post-processors，将它们应用于通过bean工厂创建的所有bean
+ * <p>
+ * 排序
+ * 在{@code ApplicationContext}中自动检测到的{@code BeanPostProcessor}bean会根据
+ * {@link org.springframework.core.PriorityOrdered}和{@link org.springframework.core.Ordered}语义进行排序
+ * 与此相反，使用{@code BeanFactory}通过程序注册的bean，将按照注册的顺序应用
+ * 任何于使用的排序语义，会在程序注入post-processors时忽略掉
+ * 而且{@code BeanPostProcessor}不会考虑{@link org.springframework.core.annotation.Order}注解
  * @author Juergen Hoeller
  * @author Sam Brannen
- * @since 10.10.2003
  * @see InstantiationAwareBeanPostProcessor
  * @see DestructionAwareBeanPostProcessor
  * @see ConfigurableBeanFactory#addBeanPostProcessor
  * @see BeanFactoryPostProcessor
+ * @since 10.10.2003
  */
 public interface BeanPostProcessor {
 
 	/**
-	 * Apply this {@code BeanPostProcessor} to the given new bean instance <i>before</i> any bean
-	 * initialization callbacks (like InitializingBean's {@code afterPropertiesSet}
-	 * or a custom init-method). The bean will already be populated with property values.
-	 * The returned bean instance may be a wrapper around the original.
-	 * <p>The default implementation returns the given {@code bean} as-is.
-	 * @param bean the new bean instance
-	 * @param beanName the name of the bean
-	 * @return the bean instance to use, either the original or a wrapped one;
-	 * if {@code null}, no subsequent BeanPostProcessors will be invoked
-	 * @throws org.springframework.beans.BeansException in case of errors
+	 * 在任何bean实例化回调以前（比如InitializingBean#afterPropertiesSet，或者自定义的初始化方法），将此{@code BeanPostProcessor}应用于给定的新的bean实例
+	 * bean已经填充了属性，返回的bean实例可能是原始bean的包装类
+	 * <p>
+	 * 默认的实现是返回给定的bean原样
+	 * @param bean     新的bean实例
+	 * @param beanName bean的名称
+	 * @return 可以使用的bean实例，可以是原始的或者是包装的
+	 * 如果为null，没有后续的BeanPostProcessors会被调用
+	 * @throws org.springframework.beans.BeansException 假如出现错误，抛出异常
 	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet
 	 */
 	@Nullable
@@ -76,23 +64,19 @@ public interface BeanPostProcessor {
 	}
 
 	/**
-	 * Apply this {@code BeanPostProcessor} to the given new bean instance <i>after</i> any bean
-	 * initialization callbacks (like InitializingBean's {@code afterPropertiesSet}
-	 * or a custom init-method). The bean will already be populated with property values.
-	 * The returned bean instance may be a wrapper around the original.
-	 * <p>In case of a FactoryBean, this callback will be invoked for both the FactoryBean
-	 * instance and the objects created by the FactoryBean (as of Spring 2.0). The
-	 * post-processor can decide whether to apply to either the FactoryBean or created
-	 * objects or both through corresponding {@code bean instanceof FactoryBean} checks.
-	 * <p>This callback will also be invoked after a short-circuiting triggered by a
-	 * {@link InstantiationAwareBeanPostProcessor#postProcessBeforeInstantiation} method,
-	 * in contrast to all other {@code BeanPostProcessor} callbacks.
-	 * <p>The default implementation returns the given {@code bean} as-is.
-	 * @param bean the new bean instance
-	 * @param beanName the name of the bean
-	 * @return the bean instance to use, either the original or a wrapped one;
-	 * if {@code null}, no subsequent BeanPostProcessors will be invoked
-	 * @throws org.springframework.beans.BeansException in case of errors
+	 * 在任何bean实例化回调以后（比如InitializingBean#afterPropertiesSet，或者自定义的初始化方法），将此{@code BeanPostProcessor}应用于给定的新的bean实例
+	 * bean已经填充了属性，返回的bean实例可能是原始bean的包装类
+	 * 假如是FactoryBean，此回调任务既会被FactoryBean调用，也会被FactoryBean创建的对象的调用（Spring 2.0）
+	 * post-processor可以通过{@code bean instanceof FactoryBean}方法，决定是应用到FactoryBean还是FactoryBean创建的对象，或者是两者都应用
+	 *
+	 * 与其他{@code BeanPostProcessor}的回调任务相反，在{@link InstantiationAwareBeanPostProcessor#postProcessBeforeInstantiation}方法触发短路后，也会调用此回调方法
+	 *
+	 * 默认的实现是返回给定的bean原样
+	 * @param bean     新的bean实例
+	 * @param beanName bean的名称
+	 * @return 可以使用的bean实例，可以是原始的或者是包装的
+	 *         如果为null，没有后续的BeanPostProcessors会被调用
+	 * @throws org.springframework.beans.BeansException 假如出现错误，抛出异常
 	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet
 	 * @see org.springframework.beans.factory.FactoryBean
 	 */

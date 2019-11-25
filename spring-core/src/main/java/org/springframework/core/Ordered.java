@@ -17,52 +17,41 @@
 package org.springframework.core;
 
 /**
- * {@code Ordered} is an interface that can be implemented by objects that
- * should be <em>orderable</em>, for example in a {@code Collection}.
- *
- * <p>The actual {@link #getOrder() order} can be interpreted as prioritization,
- * with the first object (with the lowest order value) having the highest
- * priority.
- *
- * <p>Note that there is also a <em>priority</em> marker for this interface:
- * {@link PriorityOrdered}. Consult the Javadoc for {@code PriorityOrdered} for
- * details on how {@code PriorityOrdered} objects are ordered relative to
- * <em>plain</em> {@link Ordered} objects.
- *
- * <p>Consult the Javadoc for {@link OrderComparator} for details on the
- * sort semantics for non-ordered objects.
- *
+ * {@code Ordered}用于对象实现的排序功能的接口
+ * 实际的{@link #getOrder()}方法解释为优先级，优先级最高的第一个对象（顺序值最低）
+ * <p>
+ * 需要注意的是，接口还有一个priority标记位：{@link PriorityOrdered}
+ * 有关{@code PriorityOrdered}对象相对于简单的{@link Ordered}如何排序的详细信息，请查阅{@code PriorityOrdered}的JavaDoc
+ * <p>
+ * 有关{@link OrderComparator}的信息，请查阅JavaDoc，以获取有关非排序对象的排序语义的详细信息
  * @author Juergen Hoeller
  * @author Sam Brannen
- * @since 07.04.2003
  * @see PriorityOrdered
  * @see OrderComparator
  * @see org.springframework.core.annotation.Order
  * @see org.springframework.core.annotation.AnnotationAwareOrderComparator
+ * @since 07.04.2003
  */
 public interface Ordered {
 
 	/**
-	 * Useful constant for the highest precedence value.
+	 * 最高优先级常量
 	 * @see java.lang.Integer#MIN_VALUE
 	 */
 	int HIGHEST_PRECEDENCE = Integer.MIN_VALUE;
 
 	/**
-	 * Useful constant for the lowest precedence value.
+	 * 最低优先级常量
 	 * @see java.lang.Integer#MAX_VALUE
 	 */
 	int LOWEST_PRECEDENCE = Integer.MAX_VALUE;
 
 
 	/**
-	 * Get the order value of this object.
-	 * <p>Higher values are interpreted as lower priority. As a consequence,
-	 * the object with the lowest value has the highest priority (somewhat
-	 * analogous to Servlet {@code load-on-startup} values).
-	 * <p>Same order values will result in arbitrary sort positions for the
-	 * affected objects.
-	 * @return the order value
+	 * 获取当前对象的排序值
+	 * 值越大，优先级越低
+	 * 相同的排序值将导致任意的排序位置
+	 * @return 对象的排序值
 	 * @see #HIGHEST_PRECEDENCE
 	 * @see #LOWEST_PRECEDENCE
 	 */

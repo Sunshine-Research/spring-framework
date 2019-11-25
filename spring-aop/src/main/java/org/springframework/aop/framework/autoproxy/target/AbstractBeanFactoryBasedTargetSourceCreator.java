@@ -16,12 +16,8 @@
 
 package org.springframework.aop.framework.autoproxy.target;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.autoproxy.TargetSourceCreator;
@@ -35,6 +31,9 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.lang.Nullable;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Convenient superclass for
  * {@link org.springframework.aop.framework.autoproxy.TargetSourceCreator}
@@ -47,7 +46,6 @@ import org.springframework.lang.Nullable;
  *
  * <p>Requires running in an
  * {@link org.springframework.beans.factory.support.AbstractBeanFactory}.
- *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see org.springframework.aop.target.AbstractBeanFactoryBasedTargetSource
@@ -60,7 +58,9 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 
 	private ConfigurableBeanFactory beanFactory;
 
-	/** Internally used DefaultListableBeanFactory instances, keyed by bean name. */
+	/**
+	 * Internally used DefaultListableBeanFactory instances, keyed by bean name.
+	 */
 	private final Map<String, DefaultListableBeanFactory> internalBeanFactories =
 			new HashMap<>();
 
@@ -81,11 +81,9 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 		return this.beanFactory;
 	}
 
-
 	//---------------------------------------------------------------------
-	// Implementation of the TargetSourceCreator interface
+	// TargetSourceCreator接口的实现
 	//---------------------------------------------------------------------
-
 	@Override
 	@Nullable
 	public final TargetSource getTargetSource(Class<?> beanClass, String beanName) {
@@ -135,19 +133,19 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 	}
 
 	/**
-	 * Build an internal BeanFactory for resolving target beans.
-	 * @param containingFactory the containing BeanFactory that originally defines the beans
-	 * @return an independent internal BeanFactory to hold copies of some target beans
+	 * 用于解决目标bean来构建的内部BeanFactory
+	 * @param containingFactory 原始声明bean的BeanFactory
+	 * @return 内部独立的BeanFactory，持有了一些目标bean的拷贝
 	 */
 	protected DefaultListableBeanFactory buildInternalBeanFactory(ConfigurableBeanFactory containingFactory) {
-		// Set parent so that references (up container hierarchies) are correctly resolved.
+		// 设置父BeanFactory，以便正确的解析引用（容器的结构）
 		DefaultListableBeanFactory internalBeanFactory = new DefaultListableBeanFactory(containingFactory);
 
-		// Required so that all BeanPostProcessors, Scopes, etc become available.
+		// 所有的BeanPostProcessors、Scopes等变为可用
 		internalBeanFactory.copyConfigurationFrom(containingFactory);
 
-		// Filter out BeanPostProcessors that are part of the AOP infrastructure,
-		// since those are only meant to apply to beans defined in the original factory.
+		// 过滤掉AopInfrastructureBean类型的BeanPostProcessors
+		// 因为这些仅适用于原始工厂中定义的bean
 		internalBeanFactory.getBeanPostProcessors().removeIf(beanPostProcessor ->
 				beanPostProcessor instanceof AopInfrastructureBean);
 
@@ -155,7 +153,7 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 	}
 
 	/**
-	 * Destroys the internal BeanFactory on shutdown of the TargetSourceCreator.
+	 * 在TargetSourceCreator关闭时，销毁内部的beanFactory
 	 * @see #getInternalBeanFactoryForBean
 	 */
 	@Override
@@ -169,13 +167,12 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 
 
 	//---------------------------------------------------------------------
-	// Template methods to be implemented by subclasses
+	// 子类需要实现的模板方法
 	//---------------------------------------------------------------------
 
 	/**
-	 * Return whether this TargetSourceCreator is prototype-based.
-	 * The scope of the target bean definition will be set accordingly.
-	 * <p>Default is "true".
+	 * 判断当前的TargetSourceCreator是否是多例的
+	 * 将相应地设置目标bean定义的范围，默认为true
 	 * @see org.springframework.beans.factory.config.BeanDefinition#isSingleton()
 	 */
 	protected boolean isPrototypeBased() {
@@ -183,15 +180,14 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 	}
 
 	/**
-	 * Subclasses must implement this method to return a new AbstractPrototypeBasedTargetSource
-	 * if they wish to create a custom TargetSource for this bean, or {@code null} if they are
-	 * not interested it in, in which case no special target source will be created.
-	 * Subclasses should not call {@code setTargetBeanName} or {@code setBeanFactory}
-	 * on the AbstractPrototypeBasedTargetSource: This class' implementation of
-	 * {@code getTargetSource()} will do that.
-	 * @param beanClass the class of the bean to create a TargetSource for
-	 * @param beanName the name of the bean
-	 * @return the AbstractPrototypeBasedTargetSource, or {@code null} if we don't match this
+	 * 如果需要创建bean的自定义目标资源，子类必须这个方法来返回新的AbstractPrototypeBasedTargetSource，
+	 * 或者在不感兴趣的情况下，返回{@code null}
+	 * 在这种情况下，没有特殊的目标资源会创建
+	 * 子类不能在AbstractPrototypeBasedTargetSource调用{@code setTargetBeanName}或{@code setBeanFactory}
+	 * 此类的{@code getTargetSource()}实现会调用这些方法
+	 * @param beanClass 创建bean的目标资源的bean类型
+	 * @param beanName  bean名称
+	 * @return AbstractPrototypeBasedTargetSource，没有匹配的情况下返回null
 	 */
 	@Nullable
 	protected abstract AbstractBeanFactoryBasedTargetSource createBeanFactoryBasedTargetSource(

@@ -16,40 +16,30 @@
 
 package org.springframework.aop.framework;
 
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.ProxyMethodInvocation;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.core.BridgeMethodResolver;
+import org.springframework.lang.Nullable;
+
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-
-import org.springframework.aop.ProxyMethodInvocation;
-import org.springframework.aop.support.AopUtils;
-import org.springframework.core.BridgeMethodResolver;
-import org.springframework.lang.Nullable;
-
 /**
- * Spring's implementation of the AOP Alliance
- * {@link org.aopalliance.intercept.MethodInvocation} interface,
- * implementing the extended
- * {@link org.springframework.aop.ProxyMethodInvocation} interface.
- *
- * <p>Invokes the target object using reflection. Subclasses can override the
- * {@link #invokeJoinpoint()} method to change this behavior, so this is also
- * a useful base class for more specialized MethodInvocation implementations.
- *
- * <p>It is possible to clone an invocation, to invoke {@link #proceed()}
- * repeatedly (once per clone), using the {@link #invocableClone()} method.
- * It is also possible to attach custom attributes to the invocation,
- * using the {@link #setUserAttribute} / {@link #getUserAttribute} methods.
- *
- * <p><b>NOTE:</b> This class is considered internal and should not be
- * directly accessed. The sole reason for it being public is compatibility
- * with existing framework integrations (e.g. Pitchfork). For any other
- * purposes, use the {@link ProxyMethodInvocation} interface instead.
- *
+ * Spring的AOP实现
+ * <p>
+ * 使用反射调用了目标对象，子类可以重写{@link #invokeJoinpoint()}方法来改变行为，用于更专业的MethodInvocation实现
+ * <p>
+ * 可以通过{@link #invocableClone()}方法进行克隆调用，来重复调用{@link #proceed()}方法
+ * 也可以将自定义属性附加在调用中
+ * <p>
+ * 主要注意的是，这个类用作内部使用的，不应该被直接请求
+ * 作用域是public的唯一原因是适合和已存在的框架进行结合（比如Pitchfork）
+ * 如果有其他的任何目的，使用{@link ProxyMethodInvocation}来代替
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Adrian Colyer
@@ -74,36 +64,32 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	private final Class<?> targetClass;
 
 	/**
-	 * Lazily initialized map of user-specific attributes for this invocation.
+	 * 需要进行动态检查的MethodInterceptor和InterceptorAndDynamicMethodMatcher列表
+	 */
+	protected final List<?> interceptorsAndDynamicMethodMatchers;
+	/**
+	 * 开发者指定的调用属性的懒加载字典表
 	 */
 	@Nullable
 	private Map<String, Object> userAttributes;
-
 	/**
-	 * List of MethodInterceptor and InterceptorAndDynamicMethodMatcher
-	 * that need dynamic checks.
-	 */
-	protected final List<?> interceptorsAndDynamicMethodMatchers;
-
-	/**
-	 * Index from 0 of the current interceptor we're invoking.
-	 * -1 until we invoke: then the current interceptor.
+	 * 需要调用的当前的Interceptor
+	 * 索引从0开始
 	 */
 	private int currentInterceptorIndex = -1;
 
 
 	/**
-	 * Construct a new ReflectiveMethodInvocation with the given arguments.
-	 * @param proxy the proxy object that the invocation was made on
-	 * @param target the target object to invoke
-	 * @param method the method to invoke
-	 * @param arguments the arguments to invoke the method with
-	 * @param targetClass the target class, for MethodMatcher invocations
-	 * @param interceptorsAndDynamicMethodMatchers interceptors that should be applied,
-	 * along with any InterceptorAndDynamicMethodMatchers that need evaluation at runtime.
-	 * MethodMatchers included in this struct must already have been found to have matched
-	 * as far as was possibly statically. Passing an array might be about 10% faster,
-	 * but would complicate the code. And it would work only for static pointcuts.
+	 * 使用给定的入参构建新的ReflectiveMethodInvocation
+	 * @param proxy 调用作用的代理对象
+	 * @param target 需要调用的目标对象
+	 * @param method 需要调用的目标方法
+	 * @param arguments 需要调用方法的参数
+	 * @param targetClass 目标类，用于MethodMatcher的调用
+	 * @param interceptorsAndDynamicMethodMatchers 需要使用的Interceptors，与任何InterceptorAndDynamicMethodMatchers一起，需要在运行时判断
+	 *                                             在这个结构中包含的MethodMatchers必须已经尽可能静态的完成匹配
+	 *                                             通过数组传递可以快10%，但是会使代码更复杂
+	 *                                             仅会在静态节点执行
 	 */
 	protected ReflectiveMethodInvocation(
 			Object proxy, @Nullable Object target, Method method, @Nullable Object[] arguments,
@@ -118,6 +104,9 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	}
 
 
+	/**
+	 * @return
+	 */
 	@Override
 	public final Object getProxy() {
 		return this.proxy;
@@ -135,9 +124,8 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	}
 
 	/**
-	 * Return the method invoked on the proxied interface.
-	 * May or may not correspond with a method invoked on an underlying
-	 * implementation of that interface.
+	 * 返回在代理接口上调用的方法
+	 * 可能对应或者不可能对应在该接口的基础实现上调用的方法
 	 */
 	@Override
 	public final Method getMethod() {
@@ -158,40 +146,38 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	@Override
 	@Nullable
 	public Object proceed() throws Throwable {
-		// We start with an index of -1 and increment early.
+		// 从索引-1开始，并且是提早增加
 		if (this.currentInterceptorIndex == this.interceptorsAndDynamicMethodMatchers.size() - 1) {
 			return invokeJoinpoint();
 		}
-
+		// 从0开始，获取Interceptor或者拦截型增强
 		Object interceptorOrInterceptionAdvice =
 				this.interceptorsAndDynamicMethodMatchers.get(++this.currentInterceptorIndex);
+		// 如果是InterceptorAndDynamicMethodMatcher类型
 		if (interceptorOrInterceptionAdvice instanceof InterceptorAndDynamicMethodMatcher) {
-			// Evaluate dynamic method matcher here: static part will already have
-			// been evaluated and found to match.
+			// 在这里判断动态方法匹配，静态的部分已经通过计算获取和匹配
 			InterceptorAndDynamicMethodMatcher dm =
 					(InterceptorAndDynamicMethodMatcher) interceptorOrInterceptionAdvice;
 			Class<?> targetClass = (this.targetClass != null ? this.targetClass : this.method.getDeclaringClass());
+			// 如果匹配
 			if (dm.methodMatcher.matches(this.method, targetClass, this.arguments)) {
+				// 执行Interceptor
 				return dm.interceptor.invoke(this);
-			}
-			else {
-				// Dynamic matching failed.
-				// Skip this interceptor and invoke the next in the chain.
+			} else {
+				// 动态匹配失败，跳过这个Interceptor，调用Interceptors链中的下一个Interceptor
 				return proceed();
 			}
-		}
-		else {
-			// It's an interceptor, so we just invoke it: The pointcut will have
-			// been evaluated statically before this object was constructed.
+		} else {
+			// 此时类型是一个Interceptor，直接调用即可，切点将会在对象构造之前通过静态校验的方式完成判断
 			return ((MethodInterceptor) interceptorOrInterceptionAdvice).invoke(this);
 		}
 	}
 
 	/**
-	 * Invoke the joinpoint using reflection.
-	 * Subclasses can override this to use custom invocation.
-	 * @return the return value of the joinpoint
-	 * @throws Throwable if invoking the joinpoint resulted in an exception
+	 * 使用反射调用连接点
+	 * 子类可以重写此方法来实现自定义调用
+	 * @return 连接点的返回值
+	 * @throws Throwable 调用连接点返回的异常
 	 */
 	@Nullable
 	protected Object invokeJoinpoint() throws Throwable {
@@ -200,46 +186,41 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 
 
 	/**
-	 * This implementation returns a shallow copy of this invocation object,
-	 * including an independent copy of the original arguments array.
-	 * <p>We want a shallow copy in this case: We want to use the same interceptor
-	 * chain and other object references, but we want an independent value for the
-	 * current interceptor index.
+	 * 调用对象的影子拷贝
+	 * 包含原始参数数组的独立拷贝
+	 * 在这种情况下需要拷贝，比如想要在不同的对象引用中获取相同的Interceptor链，但是还需要当前Interceptor独立索引
 	 * @see java.lang.Object#clone()
 	 */
 	@Override
 	public MethodInvocation invocableClone() {
 		Object[] cloneArguments = this.arguments;
 		if (this.arguments.length > 0) {
-			// Build an independent copy of the arguments array.
+			// 构建参数数组的独立拷贝
 			cloneArguments = this.arguments.clone();
 		}
+		// 生成调用拷贝
 		return invocableClone(cloneArguments);
 	}
 
 	/**
-	 * This implementation returns a shallow copy of this invocation object,
-	 * using the given arguments array for the clone.
-	 * <p>We want a shallow copy in this case: We want to use the same interceptor
-	 * chain and other object references, but we want an independent value for the
-	 * current interceptor index.
+	 * 调用对象的影子拷贝，使用给定的参数进行拷贝
+	 * 在这种情况下需要拷贝，比如想要在不同的对象引用中获取相同的Interceptor链，但是还需要当前Interceptor独立索引
 	 * @see java.lang.Object#clone()
 	 */
 	@Override
 	public MethodInvocation invocableClone(Object... arguments) {
-		// Force initialization of the user attributes Map,
-		// for having a shared Map reference in the clone.
+		// 强制实现开发者自定义属性字典表
+		// 这样可以在克隆中共享同一个字典表引用
 		if (this.userAttributes == null) {
 			this.userAttributes = new HashMap<>();
 		}
 
-		// Create the MethodInvocation clone.
+		// 创建MethodInvocation克隆对象
 		try {
 			ReflectiveMethodInvocation clone = (ReflectiveMethodInvocation) clone();
 			clone.arguments = arguments;
 			return clone;
-		}
-		catch (CloneNotSupportedException ex) {
+		} catch (CloneNotSupportedException ex) {
 			throw new IllegalStateException(
 					"Should be able to clone object of type [" + getClass() + "]: " + ex);
 		}
@@ -268,11 +249,9 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	}
 
 	/**
-	 * Return user attributes associated with this invocation.
-	 * This method provides an invocation-bound alternative to a ThreadLocal.
-	 * <p>This map is initialized lazily and is not used in the AOP framework itself.
-	 * @return any user attributes associated with this invocation
-	 * (never {@code null})
+	 * 返回和当前调用相关联的开发者属性，此方法提供了和ThreadLocal相关联的调用绑定
+	 * 字典表是懒加载的，并且不会用于AOP框架中
+	 * @return 任何和调用关联的开发者定义的属性
 	 */
 	public Map<String, Object> getUserAttributes() {
 		if (this.userAttributes == null) {
@@ -284,7 +263,6 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 
 	@Override
 	public String toString() {
-		// Don't do toString on target, it may be proxied.
 		StringBuilder sb = new StringBuilder("ReflectiveMethodInvocation: ");
 		sb.append(this.method).append("; ");
 		if (this.target == null) {

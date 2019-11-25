@@ -20,13 +20,10 @@ import org.springframework.aop.TargetSource;
 import org.springframework.lang.Nullable;
 
 /**
- * Implementations can create special target sources, such as pooling target
- * sources, for particular beans. For example, they may base their choice
- * on attributes, such as a pooling attribute, on the target class.
- *
- * <p>AbstractAutoProxyCreator can support a number of TargetSourceCreators,
- * which will be applied in order.
- *
+ * 可以创建特殊目标资源的接口，比如对于特定bean的汇集目标资源
+ * 比如，它们可能基于属性选择，比如目标类的汇集属性
+ * <p>
+ * AbstractAutoProxyCreator可以按照顺序支持一定数量的TargetSourceCreators
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
@@ -34,11 +31,11 @@ import org.springframework.lang.Nullable;
 public interface TargetSourceCreator {
 
 	/**
-	 * Create a special TargetSource for the given bean, if any.
-	 * @param beanClass the class of the bean to create a TargetSource for
-	 * @param beanName the name of the bean
-	 * @return a special TargetSource or {@code null} if this TargetSourceCreator isn't
-	 * interested in the particular bean
+	 * 为给定的bean创建一个特殊的目标资源
+	 * @param beanClass 给定需要创建目标资源的bean
+	 * @param beanName bean名称
+	 * @return 一个特殊的目标资源
+	 * 		   如果TargetSourceCreator对特定的bean不感兴趣，返回{@code null}
 	 */
 	@Nullable
 	TargetSource getTargetSource(Class<?> beanClass, String beanName);

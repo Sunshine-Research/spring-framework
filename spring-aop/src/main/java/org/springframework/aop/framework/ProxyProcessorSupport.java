@@ -16,8 +16,6 @@
 
 package org.springframework.aop.framework;
 
-import java.io.Closeable;
-
 import org.springframework.beans.factory.Aware;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.DisposableBean;
@@ -27,14 +25,15 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
+import java.io.Closeable;
+
 /**
- * Base class with common functionality for proxy processors, in particular
- * ClassLoader management and the {@link #evaluateProxyInterfaces} algorithm.
- *
+ * 对于代理的processor的公共功能的基类
+ * 专注于ClassLoader管理和{@link #evaluateProxyInterfaces}算法
  * @author Juergen Hoeller
- * @since 4.1
  * @see AbstractAdvisingBeanPostProcessor
  * @see org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator
+ * @since 4.1
  */
 @SuppressWarnings("serial")
 public class ProxyProcessorSupport extends ProxyConfig implements Ordered, BeanClassLoaderAware, AopInfrastructureBean {

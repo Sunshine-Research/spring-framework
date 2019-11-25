@@ -17,32 +17,20 @@
 package org.springframework.core;
 
 /**
- * Extension of the {@link Ordered} interface, expressing a <em>priority</em>
- * ordering: {@code PriorityOrdered} objects are always applied before
- * <em>plain</em> {@link Ordered} objects regardless of their order values.
- *
- * <p>When sorting a set of {@code Ordered} objects, {@code PriorityOrdered}
- * objects and <em>plain</em> {@code Ordered} objects are effectively treated as
- * two separate subsets, with the set of {@code PriorityOrdered} objects preceding
- * the set of <em>plain</em> {@code Ordered} objects and with relative
- * ordering applied within those subsets.
- *
- * <p>This is primarily a special-purpose interface, used within the framework
- * itself for objects where it is particularly important to recognize
- * <em>prioritized</em> objects first, potentially without even obtaining the
- * remaining objects. A typical example: prioritized post-processors in a Spring
- * {@link org.springframework.context.ApplicationContext}.
- *
- * <p>Note: {@code PriorityOrdered} post-processor beans are initialized in
- * a special phase, ahead of other post-processor beans. This subtly
- * affects their autowiring behavior: they will only be autowired against
- * beans which do not require eager initialization for type matching.
- *
+ * {@link Ordered}接口的扩展接口，表达了一种优先级排序：{@code PriorityOrdered}对象总是比普通的{@link Ordered}对象之前应用，无论其顺序值如何
+ * <p>
+ * 当排序{@code Ordered}对象集合时，{@code PriorityOrdered}对象和普通的{@code Ordered}对象将会被视为两个分离的子集
+ * {@code PriorityOrdered}子集在{@code Ordered}对象子集之前，并且在这些子集中应用了相对排序
+ * <p>
+ * 这也是一个专用接口，用于框架自己内部使用，用于对象需要特别重要来识别为优先级对象，甚至可能没有获取剩余的对象，比如Spring ApplicationContext中的优先级post-processors
+ * <p>
+ * 需要注意的是：{@code PriorityOrdered}类型的post-processor bean在一个特殊的阶段实例化，在其他post-processors bean之前
+ * 这巧妙的影响了它们的自动装配行为：它们将仅针对不需要为类型匹配而紧急初始化的bean自动装配
  * @author Juergen Hoeller
  * @author Sam Brannen
- * @since 2.5
  * @see org.springframework.beans.factory.config.PropertyOverrideConfigurer
  * @see org.springframework.beans.factory.config.PropertyPlaceholderConfigurer
+ * @since 2.5
  */
 public interface PriorityOrdered extends Ordered {
 }

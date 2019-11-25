@@ -16,24 +16,22 @@
 
 package org.springframework.beans.factory.config;
 
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Constructor;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
 import org.springframework.lang.Nullable;
 
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Constructor;
+
 /**
- * Adapter that implements all methods on {@link SmartInstantiationAwareBeanPostProcessor}
- * as no-ops, which will not change normal processing of each bean instantiated
- * by the container. Subclasses may override merely those methods that they are
- * actually interested in.
- *
- * <p>Note that this base class is only recommendable if you actually require
- * {@link InstantiationAwareBeanPostProcessor} functionality. If all you need
- * is plain {@link BeanPostProcessor} functionality, prefer a straight
- * implementation of that (simpler) interface.
- *
+ * 实现了{@link SmartInstantiationAwareBeanPostProcessor}所有方法的适配器
+ * 作为无操作，不会改变容器对bean实例化的正常处理
+ * 子类只能重写他们感兴趣的方法
+ * <p>
+ * 需要注意的是，仅当确实需要{@link InstantiationAwareBeanPostProcessor}功能时才会推荐使用此基类
+ * 如果只需要普通的{@link BeanPostProcessor}功能，则可以直接简单实现该接口
+ * <p>
+ * 个人理解：都是SmartInstantiationAwareBeanPostProcessor的默认实现
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 2.0

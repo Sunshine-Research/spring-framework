@@ -16,18 +16,15 @@
 
 package org.springframework.aop.framework.adapter;
 
-import java.io.Serializable;
-
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.MethodBeforeAdvice;
 
+import java.io.Serializable;
+
 /**
- * Adapter to enable {@link org.springframework.aop.MethodBeforeAdvice}
- * to be used in the Spring AOP framework.
- *
+ * 前置增强适配器
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
@@ -41,6 +38,7 @@ class MethodBeforeAdviceAdapter implements AdvisorAdapter, Serializable {
 
 	@Override
 	public MethodInterceptor getInterceptor(Advisor advisor) {
+		// 使用MethodInterceptor包装增强
 		MethodBeforeAdvice advice = (MethodBeforeAdvice) advisor.getAdvice();
 		return new MethodBeforeAdviceInterceptor(advice);
 	}

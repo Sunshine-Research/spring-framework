@@ -17,14 +17,12 @@
 package org.springframework.aop.framework;
 
 /**
- * Marker interface that indicates a bean that is part of Spring's
- * AOP infrastructure. In particular, this implies that any such bean
- * is not subject to auto-proxying, even if a pointcut would match.
- *
+ * 标记接口，表明bean是Spring AOP基础结构的一部分
+ * 尤其，这意味着任何这样的bean不受自动代理的约束，即使切点满足条件
  * @author Juergen Hoeller
- * @since 2.0.3
  * @see org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator
  * @see org.springframework.aop.scope.ScopedProxyFactoryBean
+ * @since 2.0.3
  */
 public interface AopInfrastructureBean {
 

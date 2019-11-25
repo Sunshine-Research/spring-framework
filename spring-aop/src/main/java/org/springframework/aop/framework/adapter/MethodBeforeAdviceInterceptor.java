@@ -16,33 +16,32 @@
 
 package org.springframework.aop.framework.adapter;
 
-import java.io.Serializable;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.aop.BeforeAdvice;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.util.Assert;
 
+import java.io.Serializable;
+
 /**
- * Interceptor to wrap am {@link org.springframework.aop.MethodBeforeAdvice}.
- * Used internally by the AOP framework; application developers should not need
- * to use this class directly.
- *
+ * 使用内部的AOP框架，包装成{@link org.springframework.aop.MethodBeforeAdvice}的Interceptor
+ * 应用开发者不应该直接使用这个类
  * @author Rod Johnson
  * @see AfterReturningAdviceInterceptor
  * @see ThrowsAdviceInterceptor
  */
 @SuppressWarnings("serial")
 public class MethodBeforeAdviceInterceptor implements MethodInterceptor, BeforeAdvice, Serializable {
-
+	/**
+	 * 前置增强
+	 */
 	private final MethodBeforeAdvice advice;
 
 
 	/**
-	 * Create a new MethodBeforeAdviceInterceptor for the given advice.
-	 * @param advice the MethodBeforeAdvice to wrap
+	 * 为给定的增强创建一个MethodBeforeAdviceInterceptor
+	 * @param advice 需要包装的前置增强
 	 */
 	public MethodBeforeAdviceInterceptor(MethodBeforeAdvice advice) {
 		Assert.notNull(advice, "Advice must not be null");
@@ -52,6 +51,7 @@ public class MethodBeforeAdviceInterceptor implements MethodInterceptor, BeforeA
 
 	@Override
 	public Object invoke(MethodInvocation mi) throws Throwable {
+		// 前置调用
 		this.advice.before(mi.getMethod(), mi.getArguments(), mi.getThis());
 		return mi.proceed();
 	}

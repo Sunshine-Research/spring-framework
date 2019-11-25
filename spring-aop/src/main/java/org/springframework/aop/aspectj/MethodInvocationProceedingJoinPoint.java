@@ -16,33 +16,30 @@
 
 package org.springframework.aop.aspectj;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.aspectj.lang.reflect.SourceLocation;
 import org.aspectj.runtime.internal.AroundClosure;
-
 import org.springframework.aop.ProxyMethodInvocation;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+
 /**
- * An implementation of the AspectJ {@link ProceedingJoinPoint} interface
- * wrapping an AOP Alliance {@link org.aopalliance.intercept.MethodInvocation}.
- *
- * <p><b>Note</b>: The {@code getThis()} method returns the current Spring AOP proxy.
- * The {@code getTarget()} method returns the current Spring AOP target (which may be
- * {@code null} if there is no target instance) as a plain POJO without any advice.
- * <b>If you want to call the object and have the advice take effect, use {@code getThis()}.</b>
- * A common example is casting the object to an introduced interface in the implementation of
- * an introduction. There is no such distinction between target and proxy in AspectJ itself.
- *
+ * AspectJ的{@link ProceedingJoinPoint}接口的实现
+ * 包装了AOP联盟的{@link org.aopalliance.intercept.MethodInvocation}
+ * <p>
+ * 需要注意的是，{@code getThis()}方法返回了当前的Spring AOP的代理
+ * {@code getTarget()}方法返回了目标对象（如果没有目标实例，可能为null）作为一个没有增强的平常的pojo
+ * 如果你想要调用对象，并且让增强生效，使用{@code getThis()}
+ * 一个普通的例子就是将对象转换为引介接口
+ * 在AspectJ中，目标和代理没有明显的区别
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Adrian Colyer
@@ -58,19 +55,22 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 	@Nullable
 	private Object[] args;
 
-	/** Lazily initialized signature object. */
+	/**
+	 * 懒实例化的对象
+	 */
 	@Nullable
 	private Signature signature;
 
-	/** Lazily initialized source location object. */
+	/**
+	 * 懒实例化的来源位置对象
+	 */
 	@Nullable
 	private SourceLocation sourceLocation;
 
 
 	/**
-	 * Create a new MethodInvocationProceedingJoinPoint, wrapping the given
-	 * Spring ProxyMethodInvocation object.
-	 * @param methodInvocation the Spring ProxyMethodInvocation object
+	 * 通过给定的ProxyMethodInvocation，创建一个新的MethodInvocationProceedingJoinPoint
+	 * @param methodInvocation Spring的方法调用代理对象
 	 */
 	public MethodInvocationProceedingJoinPoint(ProxyMethodInvocation methodInvocation) {
 		Assert.notNull(methodInvocation, "MethodInvocation must not be null");
@@ -91,12 +91,15 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 	@Override
 	public Object proceed(Object[] arguments) throws Throwable {
 		Assert.notNull(arguments, "Argument array passed to proceed cannot be null");
+		// 校验目标方法入参个数
 		if (arguments.length != this.methodInvocation.getArguments().length) {
 			throw new IllegalArgumentException("Expecting " +
 					this.methodInvocation.getArguments().length + " arguments to proceed, " +
 					"but was passed " + arguments.length + " arguments");
 		}
+		// 设置方法代理的参数
 		this.methodInvocation.setArguments(arguments);
+		// 使用
 		return this.methodInvocation.invocableClone(arguments).proceed();
 	}
 
