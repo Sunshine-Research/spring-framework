@@ -16,52 +16,40 @@
 
 package org.springframework.beans.factory;
 
-import java.lang.annotation.Annotation;
-import java.util.Map;
-
 import org.springframework.beans.BeansException;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 
+import java.lang.annotation.Annotation;
+import java.util.Map;
+
 /**
- * Extension of the {@link BeanFactory} interface to be implemented by bean factories
- * that can enumerate all their bean instances, rather than attempting bean lookup
- * by name one by one as requested by clients. BeanFactory implementations that
- * preload all their bean definitions (such as XML-based factories) may implement
- * this interface.
- *
- * <p>If this is a {@link HierarchicalBeanFactory}, the return values will <i>not</i>
- * take any BeanFactory hierarchy into account, but will relate only to the beans
- * defined in the current factory. Use the {@link BeanFactoryUtils} helper class
- * to consider beans in ancestor factories too.
- *
- * <p>The methods in this interface will just respect bean definitions of this factory.
- * They will ignore any singleton beans that have been registered by other means like
- * {@link org.springframework.beans.factory.config.ConfigurableBeanFactory}'s
- * {@code registerSingleton} method, with the exception of
- * {@code getBeanNamesOfType} and {@code getBeansOfType} which will check
- * such manually registered singletons too. Of course, BeanFactory's {@code getBean}
- * does allow transparent access to such special beans as well. However, in typical
- * scenarios, all beans will be defined by external bean definitions anyway, so most
- * applications don't need to worry about this differentiation.
- *
- * <p><b>NOTE:</b> With the exception of {@code getBeanDefinitionCount}
- * and {@code containsBeanDefinition}, the methods in this interface
- * are not designed for frequent invocation. Implementations may be slow.
- *
+ * {@link BeanFactory}接口的扩展，由Bean工厂实现
+ * 可以枚举其所有的bean实例，而不是尝试通过名字一个一个的查询bean
+ * BeanFactory实现了预加载器所有的BeanDefinition（比如基于XML的工厂）可以实现这个接口
+ * <p>
+ * 如果是一个{@link HierarchicalBeanFactory}层级BeanFactory，返回的值可能不会考虑BeanFactory的层次结构，使用{@link BeanFactoryUtils}帮助类来考虑在父类工厂里装配
+ * 这个接口中的方法仅会尊重该工厂的bean定义，会忽略那些通过其他方式注入的单例bean
+ * （比如{@link org.springframework.beans.factory.config.ConfigurableBeanFactory}的{@code registerSingleton}方法）
+ * {@code getBeanNamesOfType}和{@code getBeansOfType}的异常会检查这样的手动注入的bean
+ * 当然，BeanFactory的{@code getBean}方法允许透明访问此类特殊的bean
+ * 然而，在通常场景下，所有bean无论如何都将由外部BeanDefinition来定义，所以大多数应用不需要关心区别
+ * <p>
+ * 需要注意的是，{@code getBeanDefinitionCount}和{@code containsBeanDefinition}的异常，此接口中的方法不会频繁调用
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @since 16 April 2001
  * @see HierarchicalBeanFactory
  * @see BeanFactoryUtils
+ * @since 16 April 2001
  */
 public interface ListableBeanFactory extends BeanFactory {
 
 	/**
-	 * Check if this bean factory contains a bean definition with the given name.
 	 * <p>Does not consider any hierarchy this factory may participate in,
 	 * and ignores any singleton beans that have been registered by
 	 * other means than bean definitions.
+	 * 判断当前BeanFactory是否包含了给定bean名称的BeanDefinition
+	 *
 	 * @param beanName the name of the bean to look for
 	 * @return if this bean factory contains a bean definition with the given name
 	 * @see #containsBean

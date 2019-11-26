@@ -81,11 +81,11 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 
 	/**
 	 * 使用给定的入参构建新的ReflectiveMethodInvocation
-	 * @param proxy 调用作用的代理对象
-	 * @param target 需要调用的目标对象
-	 * @param method 需要调用的目标方法
-	 * @param arguments 需要调用方法的参数
-	 * @param targetClass 目标类，用于MethodMatcher的调用
+	 * @param proxy                                调用作用的代理对象
+	 * @param target                               需要调用的目标对象
+	 * @param method                               需要调用的目标方法
+	 * @param arguments                            需要调用方法的参数
+	 * @param targetClass                          目标类，用于MethodMatcher的调用
 	 * @param interceptorsAndDynamicMethodMatchers 需要使用的Interceptors，与任何InterceptorAndDynamicMethodMatchers一起，需要在运行时判断
 	 *                                             在这个结构中包含的MethodMatchers必须已经尽可能静态的完成匹配
 	 *                                             通过数组传递可以快10%，但是会使代码更复杂
@@ -234,8 +234,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 				this.userAttributes = new HashMap<>();
 			}
 			this.userAttributes.put(key, value);
-		}
-		else {
+		} else {
 			if (this.userAttributes != null) {
 				this.userAttributes.remove(key);
 			}
@@ -267,8 +266,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 		sb.append(this.method).append("; ");
 		if (this.target == null) {
 			sb.append("target is null");
-		}
-		else {
+		} else {
 			sb.append("target is of class [").append(this.target.getClass().getName()).append(']');
 		}
 		return sb.toString();

@@ -16,6 +16,14 @@
 
 package org.springframework.beans.factory.support;
 
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
@@ -25,27 +33,15 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.config.ConstructorArgumentValues;
-import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-
 /**
- * A root bean definition represents the merged bean definition that backs
- * a specific bean in a Spring BeanFactory at runtime. It might have been created
- * from multiple original bean definitions that inherit from each other,
- * typically registered as {@link GenericBeanDefinition GenericBeanDefinitions}.
- * A root bean definition is essentially the 'unified' bean definition view at runtime.
- *
- * <p>Root bean definitions may also be used for registering individual bean definitions
- * in the configuration phase. However, since Spring 2.5, the preferred way to register
- * bean definitions programmatically is the {@link GenericBeanDefinition} class.
- * GenericBeanDefinition has the advantage that it allows to dynamically define
- * parent dependencies, not 'hard-coding' the role as a root bean definition.
- *
+ * RootBeanDefinition表示合并的BeanDefinition，此BeanDefinition在运行时支持Spring BeanFactory中特定的Bean
+ * 它可能已经有多个原始的，相互继承的BeanDefinition创建，通常注册为{@link GenericBeanDefinition}类型
+ * 换句话说，在多继承体系中，RootBeanDefinition代表的是当前初始化类的父类BeanDefinition，但是也可以用于没有继承关系的父类BeanDefinition
+ * RootBeanDefinition本质上是运行时的"统一"BeanDefinition视图
+ * <p>
+ * RootBeanDefinition也可以用于在配置语义中注册单个BeanDefinition
+ * 然而，从Spring 2.5开始，代码注册BeanDefinition的首选方式是通过{@link GenericBeanDefinition}类型
+ * {@link GenericBeanDefinition}优势在于它允许动态声明父依赖，不用像RootBeanDefinition一样需要进行硬编码
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see GenericBeanDefinition
@@ -54,37 +50,51 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class RootBeanDefinition extends AbstractBeanDefinition {
 
-	@Nullable
-	private BeanDefinitionHolder decoratedDefinition;
+	/**
+	 * 确认Definition是否需要在合并
+	 */
+	volatile boolean stale;
 
 	@Nullable
 	private AnnotatedElement qualifiedElement;
-
-	/** Determines if the definition needs to be re-merged. */
-	volatile boolean stale;
-
+	/**
+	 * 是否允许缓存
+	 */
 	boolean allowCaching = true;
-
+	/**
+	 * 工厂的方法是否唯一
+	 */
 	boolean isFactoryMethodUnique = false;
-
+	/**
+	 *
+	 */
 	@Nullable
 	volatile ResolvableType targetType;
-
-	/** Package-visible field for caching the determined Class of a given bean definition. */
+	/**
+	 * 缓存的class，确认RootBeanDefinition存储了哪个类的信息
+	 */
 	@Nullable
 	volatile Class<?> resolvedTargetType;
-
-	/** Package-visible field for caching if the bean is a factory bean. */
+	/**
+	 * 是否是一个FactoryBean
+	 */
 	@Nullable
 	volatile Boolean isFactoryBean;
-
-	/** Package-visible field for caching the return type of a generically typed factory method. */
+	/**
+	 * 工厂方法的返回值类型
+	 */
 	@Nullable
 	volatile ResolvableType factoryMethodReturnType;
-
-	/** Package-visible field for caching a unique factory method candidate for introspection. */
+	/**
+	 *
+	 */
 	@Nullable
 	volatile Method factoryMethodToIntrospect;
+	/**
+	 * BeanDefinitionHolder存储了Bean的名称，别名和BeanDefinition
+	 */
+	@Nullable
+	private BeanDefinitionHolder decoratedDefinition;
 
 	/** Common lock for the four constructor fields below. */
 	final Object constructorArgumentLock = new Object();
@@ -285,24 +295,24 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
-	 * Specify the {@link AnnotatedElement} defining qualifiers,
-	 * to be used instead of the target class or factory method.
-	 * @since 4.3.3
-	 * @see #setTargetType(ResolvableType)
-	 * @see #getResolvedFactoryMethod()
-	 */
-	public void setQualifiedElement(@Nullable AnnotatedElement qualifiedElement) {
-		this.qualifiedElement = qualifiedElement;
-	}
-
-	/**
-	 * Return the {@link AnnotatedElement} defining qualifiers, if any.
-	 * Otherwise, the factory method and target class will be checked.
+	 * 返回{@link AnnotatedElement}定义的qualifiers
+	 * 如果不存在，则会检查工厂方法和目标类
 	 * @since 4.3.3
 	 */
 	@Nullable
 	public AnnotatedElement getQualifiedElement() {
 		return this.qualifiedElement;
+	}
+
+	/**
+	 * 指定{@link AnnotatedElement}定义的qualifiers
+	 * 代替目标类或工厂方法使用
+	 * @see #setTargetType(ResolvableType)
+	 * @see #getResolvedFactoryMethod()
+	 * @since 4.3.3
+	 */
+	public void setQualifiedElement(@Nullable AnnotatedElement qualifiedElement) {
+		this.qualifiedElement = qualifiedElement;
 	}
 
 	/**

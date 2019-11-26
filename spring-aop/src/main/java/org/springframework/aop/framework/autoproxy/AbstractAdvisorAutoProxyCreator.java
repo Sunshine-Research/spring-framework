@@ -16,8 +16,6 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import java.util.List;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.AopUtils;
@@ -26,6 +24,8 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.util.List;
 
 /**
  * Generic auto proxy creator that builds AOP proxies for specific beans
@@ -41,7 +41,6 @@ import org.springframework.util.Assert;
  * Advisors by Ordered order value. Advisors that don't implement the
  * Ordered interface will be considered as unordered; they will appear
  * at the end of the advisor chain in undefined order.
- *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #findCandidateAdvisors
@@ -72,7 +71,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	@Nullable
 	protected Object[] getAdvicesAndAdvisorsForBean(
 			Class<?> beanClass, String beanName, @Nullable TargetSource targetSource) {
-
+		// 筛选有资格的切面
 		List<Advisor> advisors = findEligibleAdvisors(beanClass, beanName);
 		if (advisors.isEmpty()) {
 			return DO_NOT_PROXY;
@@ -81,9 +80,9 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	}
 
 	/**
-	 * Find all eligible Advisors for auto-proxying this class.
-	 * @param beanClass the clazz to find advisors for
-	 * @param beanName the name of the currently proxied bean
+	 * 为自动代理的类筛选所有有资格的切面
+	 * @param beanClass bean类型
+	 * @param beanName  bean名称
 	 * @return the empty List, not {@code null},
 	 * if there are no pointcuts or interceptors
 	 * @see #findCandidateAdvisors
@@ -91,7 +90,9 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * @see #extendAdvisors
 	 */
 	protected List<Advisor> findEligibleAdvisors(Class<?> beanClass, String beanName) {
+		// 获取所有的切面
 		List<Advisor> candidateAdvisors = findCandidateAdvisors();
+		//
 		List<Advisor> eligibleAdvisors = findAdvisorsThatCanApply(candidateAdvisors, beanClass, beanName);
 		extendAdvisors(eligibleAdvisors);
 		if (!eligibleAdvisors.isEmpty()) {
@@ -110,12 +111,11 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	}
 
 	/**
-	 * Search the given candidate Advisors to find all Advisors that
-	 * can apply to the specified bean.
-	 * @param candidateAdvisors the candidate Advisors
-	 * @param beanClass the target's bean class
-	 * @param beanName the target's bean name
-	 * @return the List of applicable Advisors
+	 * 筛选所有可以应用到特定bean的切面
+	 * @param candidateAdvisors 所有候选的切面
+	 * @param beanClass         特定bean的类型
+	 * @param beanName          特定bean的名称
+	 * @return 符合条件的切面列表
 	 * @see ProxyCreationContext#getCurrentProxiedBeanName()
 	 */
 	protected List<Advisor> findAdvisorsThatCanApply(
@@ -124,8 +124,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 		ProxyCreationContext.setCurrentProxiedBeanName(beanName);
 		try {
 			return AopUtils.findAdvisorsThatCanApply(candidateAdvisors, beanClass);
-		}
-		finally {
+		} finally {
 			ProxyCreationContext.setCurrentProxiedBeanName(null);
 		}
 	}
@@ -161,7 +160,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * <p>Typically used to add Advisors that expose contextual information
 	 * required by some of the later advisors.
 	 * @param candidateAdvisors the Advisors that have already been identified as
-	 * applying to a given bean
+	 *                          applying to a given bean
 	 */
 	protected void extendAdvisors(List<Advisor> candidateAdvisors) {
 	}

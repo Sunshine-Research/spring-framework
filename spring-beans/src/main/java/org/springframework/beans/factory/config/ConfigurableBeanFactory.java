@@ -16,9 +16,6 @@
 
 package org.springframework.beans.factory.config;
 
-import java.beans.PropertyEditor;
-import java.security.AccessControlContext;
-
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.TypeConverter;
@@ -30,23 +27,19 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
 
+import java.beans.PropertyEditor;
+import java.security.AccessControlContext;
+
 /**
- * Configuration interface to be implemented by most bean factories. Provides
- * facilities to configure a bean factory, in addition to the bean factory
- * client methods in the {@link org.springframework.beans.factory.BeanFactory}
- * interface.
- *
- * <p>This bean factory interface is not meant to be used in normal application
- * code: Stick to {@link org.springframework.beans.factory.BeanFactory} or
- * {@link org.springframework.beans.factory.ListableBeanFactory} for typical
- * needs. This extended interface is just meant to allow for framework-internal
- * plug'n'play and for special access to bean factory configuration methods.
- *
+ * 大多数bean工厂将实现的配置接口，通过配置bean工厂的设施，除此之外还有bean工厂的客户端方法
+ * <p>
+ * 这个bean工厂接口不打算在应用代码里使用，通常坚持使用{@link org.springframework.beans.factory.BeanFactory}或{@link org.springframework.beans.factory.ListableBeanFactory}
+ * 这个扩展接口仅仅打算使用于允许框架内部插件和对bean工厂配置方法的特殊访问
  * @author Juergen Hoeller
- * @since 03.11.2003
  * @see org.springframework.beans.factory.BeanFactory
  * @see org.springframework.beans.factory.ListableBeanFactory
  * @see ConfigurableListableBeanFactory
+ * @since 03.11.2003
  */
 public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, SingletonBeanRegistry {
 

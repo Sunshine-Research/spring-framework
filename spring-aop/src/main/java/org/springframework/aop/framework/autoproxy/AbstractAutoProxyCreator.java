@@ -124,7 +124,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 */
 	private boolean freezeProxy = false;
 	/**
-	 * 共同的interceptors
+	 * 通用interceptors
 	 * 默认没有共同的interceptors
 	 */
 	private String[] interceptorNames = new String[0];
@@ -170,7 +170,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	/**
 	 * 设置自定义的{@code TargetSourceCreators}，并以该顺序进行应用
 	 * 如果列表为空，或者返回null，则将为每个bean创建一个{@link SingletonTargetSource}
-	 *
+	 * <p>
 	 * 需要注意的是，即使在没有找到增强或增强，TargetSourceCreators也会创建
 	 * 如果{@code TargetSourceCreator}为特定的bean返回了{@link TargetSource}，任何情况都会代理这个bean
 	 * 仅有在当前post-processor在{@link BeanFactory}中，并且{@link BeanFactoryAware}触发的情况下，才可以调用此{@code TargetSourceCreators}
@@ -262,6 +262,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 			if (StringUtils.hasLength(beanName)) {
 				this.targetSourcedBeans.add(beanName);
 			}
+			// 获取给定bean的增强和切面
 			Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(beanClass, beanName, targetSource);
 			Object proxy = createProxy(beanClass, beanName, specificInterceptors, targetSource);
 			this.proxyTypes.put(cacheKey, proxy.getClass());
@@ -305,10 +306,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 	/**
 	 * 为给定的bean类型和bean名称创建缓存
-	 *
+	 * <p>
 	 * 需要注意的是，从4.2.3版本起，不会返回一个把类型和名称联系起来的String，但是会返回一个更高效的可用缓存key：
 	 * 一个简单的bean名称，如果是{@code FactoryBean}，以{@link BeanFactory#FACTORY_BEAN_PREFIX}开头
-	 * 	 * 或者没有指定bean名称，返回给定bean的类型
+	 * * 或者没有指定bean名称，返回给定bean的类型
 	 * @param beanClass 给定bean的类型
 	 * @param beanName  给定bean的名称
 	 * @return 给定bean类型、名称的缓存key
@@ -538,48 +539,48 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	}
 
 	/**
-	 * Resolves the specified interceptor names to Advisor objects.
+	 * 将通用的interceptor名称解析为切面对象
 	 * @see #setInterceptorNames
 	 */
 	private Advisor[] resolveInterceptorNames() {
 		BeanFactory bf = this.beanFactory;
+		//
 		ConfigurableBeanFactory cbf = (bf instanceof ConfigurableBeanFactory ? (ConfigurableBeanFactory) bf : null);
 		List<Advisor> advisors = new ArrayList<>();
+		// 遍历所有的通用interceptors
 		for (String beanName : this.interceptorNames) {
+			//
 			if (cbf == null || !cbf.isCurrentlyInCreation(beanName)) {
 				Assert.state(bf != null, "BeanFactory required for resolving interceptor names");
+				// 从上下文中获取bean对象
 				Object next = bf.getBean(beanName);
+				// 通过切面注册器包装后，放入到切面缓存中
 				advisors.add(this.advisorAdapterRegistry.wrap(next));
 			}
 		}
+		//
 		return advisors.toArray(new Advisor[0]);
 	}
 
 	/**
-	 * Subclasses may choose to implement this: for example,
-	 * to change the interfaces exposed.
-	 * <p>The default implementation is empty.
-	 * @param proxyFactory a ProxyFactory that is already configured with
-	 *                     TargetSource and interfaces and will be used to create the proxy
-	 *                     immediately after this method returns
+	 * 子类可以选择性实现这个方法
+	 * 比如：改变接口的暴露方式
+	 * 默认的实现为空
+	 * @param proxyFactory 代理工厂，已经配置了目标资源和接口，将用于此方法返回后立即创建代理
 	 */
 	protected void customizeProxyFactory(ProxyFactory proxyFactory) {
 	}
 
 
 	/**
-	 * Return whether the given bean is to be proxied, what additional
-	 * advices (e.g. AOP Alliance interceptors) and advisors to apply.
-	 * @param beanClass          the class of the bean to advise
-	 * @param beanName           the name of the bean
-	 * @param customTargetSource the TargetSource returned by the
-	 *                           {@link #getCustomTargetSource} method: may be ignored.
-	 *                           Will be {@code null} if no custom target source is in use.
-	 * @return an array of additional interceptors for the particular bean;
-	 * or an empty array if no additional interceptors but just the common ones;
-	 * or {@code null} if no proxy at all, not even with the common interceptors.
-	 * See constants DO_NOT_PROXY and PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS.
-	 * @throws BeansException in case of errors
+	 * 返回给定的bean是否需要代理，以及应用的额外的增强（比如AOP联盟的interceptors）或者切面
+	 * @param beanClass          需要进行增强的bean类型
+	 * @param beanName           bean名称
+	 * @param customTargetSource 自定义目标资源，可能会被忽略，如果没有自定义的目标资源，返回{@code null}
+	 * @return 特定bean额外interceptors数组，如果没有额外的interceptors，仅有通用的interceptors，则是一个空的数据
+	 * 如果没有代理，返回{@code null}，甚至不会返回通用的interceptors
+	 * 请看常量DO_NOT_PROXY和PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS
+	 * @throws BeansException 假如出现异常，抛出异常
 	 * @see #DO_NOT_PROXY
 	 * @see #PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS
 	 */

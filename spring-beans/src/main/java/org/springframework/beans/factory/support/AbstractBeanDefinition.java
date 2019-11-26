@@ -16,14 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import java.lang.reflect.Constructor;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Supplier;
-
 import org.springframework.beans.BeanMetadataAttributeAccessor;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -38,15 +30,19 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import java.lang.reflect.Constructor;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Supplier;
+
 /**
- * Base class for concrete, full-fledged {@link BeanDefinition} classes,
- * factoring out common properties of {@link GenericBeanDefinition},
- * {@link RootBeanDefinition}, and {@link ChildBeanDefinition}.
- *
- * <p>The autowire constants match the ones defined in the
- * {@link org.springframework.beans.factory.config.AutowireCapableBeanFactory}
- * interface.
- *
+ * 具体实现，成熟的{@link BeanDefinition}的实现基类
+ * 但是{@link GenericBeanDefinition}、{@link RootBeanDefinition}、{@link ChildBeanDefinition}不在上述范围之内
+ * <p>
+ * 自动注入常量将会和{@link org.springframework.beans.factory.config.AutowireCapableBeanFactory}中相匹配
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop

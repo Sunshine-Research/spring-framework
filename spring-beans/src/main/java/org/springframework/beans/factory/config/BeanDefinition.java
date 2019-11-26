@@ -23,45 +23,42 @@ import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 
 /**
- * A BeanDefinition describes a bean instance, which has property values,
- * constructor argument values, and further information supplied by
- * concrete implementations.
- *
- * <p>This is just a minimal interface: The main intention is to allow a
- * {@link BeanFactoryPostProcessor} to introspect and modify property values
- * and other bean metadata.
- *
+ * BeanDefinition描述了一个Bean实例，Bean实例拥有属性，构造参数，以及具体实现提供的更多信息
+ * <p>
+ * 这仅仅是一个最小的接口，主要的意图是允许{@link BeanFactoryPostProcessor}内省和修改属性值，以及bean的元数据
  * @author Juergen Hoeller
  * @author Rob Harrop
- * @since 19.03.2004
  * @see ConfigurableListableBeanFactory#getBeanDefinition
  * @see org.springframework.beans.factory.support.RootBeanDefinition
  * @see org.springframework.beans.factory.support.ChildBeanDefinition
+ * @since 19.03.2004
  */
 public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
 	/**
-	 * Scope identifier for the standard singleton scope: "singleton".
-	 * <p>Note that extended bean factories might support further scopes.
+	 * Scope标识符——标准单例——"singleton"
+	 * 需要注意的是，扩展BeanFactory可以支持更多的scope类型
 	 * @see #setScope
 	 */
 	String SCOPE_SINGLETON = ConfigurableBeanFactory.SCOPE_SINGLETON;
 
 	/**
-	 * Scope identifier for the standard prototype scope: "prototype".
-	 * <p>Note that extended bean factories might support further scopes.
+	 * Scope标识符——标准多例——"prototype"
+	 * 需要注意的是，扩展BeanFactory可以支持更多的scope类型
 	 * @see #setScope
 	 */
 	String SCOPE_PROTOTYPE = ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
 
 	/**
+	 * BeanDefinition的角色信息
 	 * {@code BeanDefinition}是应用程序的主要部分
 	 * 通常和用户自定义的bean关联
 	 */
 	int ROLE_APPLICATION = 0;
 
 	/**
+	 * BeanDefinition的角色信息
 	 * {@code BeanDefinition}是一些大型配置的支撑部分
 	 * 通常是外层的{@link org.springframework.beans.factory.parsing.ComponentDefinition}
 	 * {@code SUPPORT}类型的bean会被认为足够重要，以便更仔细的查看特定{@link org.springframework.beans.factory.parsing.ComponentDefinition}对象时意识到
@@ -76,37 +73,24 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	int ROLE_INFRASTRUCTURE = 2;
 
 
-	// Modifiable attributes
+	// 可修改的属性
 
 	/**
-	 * Set the name of the parent definition of this bean definition, if any.
-	 */
-	void setParentName(@Nullable String parentName);
-
-	/**
-	 * Return the name of the parent definition of this bean definition, if any.
+	 * 返回当前BeanDefinition的父Definition的名称
 	 */
 	@Nullable
 	String getParentName();
 
 	/**
-	 * Specify the bean class name of this bean definition.
-	 * <p>The class name can be modified during bean factory post-processing,
-	 * typically replacing the original class name with a parsed variant of it.
-	 * @see #setParentName
-	 * @see #setFactoryBeanName
-	 * @see #setFactoryMethodName
+	 * 设置当前BeanDefinition的父Definition
 	 */
-	void setBeanClassName(@Nullable String beanClassName);
+	void setParentName(@Nullable String parentName);
 
 	/**
-	 * Return the current bean class name of this bean definition.
-	 * <p>Note that this does not have to be the actual class name used at runtime, in
-	 * case of a child definition overriding/inheriting the class name from its parent.
-	 * Also, this may just be the class that a factory method is called on, or it may
-	 * even be empty in case of a factory bean reference that a method is called on.
-	 * Hence, do <i>not</i> consider this to be the definitive bean type at runtime but
-	 * rather only use it for parsing purposes at the individual bean definition level.
+	 * BeanDefinition的类名称
+	 * 需要注意的是，如果是子级定义从起父类重写/继承类名，可以不是在运行时真是的类名称
+	 * 当然，可以仅仅是调用工厂方法的类，或者可以是空的，由于工厂Bean引用是由调用方法得到的
+	 * 因此，不用考虑在运行时将其视为确定的bean类型，但也不是仅仅在单个bean定义级别时将其用于解析目的
 	 * @see #getParentName()
 	 * @see #getFactoryBeanName()
 	 * @see #getFactoryMethodName()
@@ -115,43 +99,51 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	String getBeanClassName();
 
 	/**
-	 * Override the target scope of this bean, specifying a new scope name.
+	 * 设置BeanDefinition的Bean类名称
+	 * 在BeanFactory的post-process过程中，类名称可以随时修改
+	 * 通常用于将原始类名称为其解析的变体
+	 * @see #setParentName
+	 * @see #setFactoryBeanName
+	 * @see #setFactoryMethodName
+	 */
+	void setBeanClassName(@Nullable String beanClassName);
+
+	/**
+	 * 返回Bean当前scope
+	 */
+	@Nullable
+	String getScope();
+
+	/**
+	 * 重写Bean的scope，指定新的scope名称
 	 * @see #SCOPE_SINGLETON
 	 * @see #SCOPE_PROTOTYPE
 	 */
 	void setScope(@Nullable String scope);
 
 	/**
-	 * Return the name of the current target scope for this bean,
-	 * or {@code null} if not known yet.
-	 */
-	@Nullable
-	String getScope();
-
-	/**
-	 * Set whether this bean should be lazily initialized.
-	 * <p>If {@code false}, the bean will get instantiated on startup by bean
-	 * factories that perform eager initialization of singletons.
-	 */
-	void setLazyInit(boolean lazyInit);
-
-	/**
-	 * Return whether this bean should be lazily initialized, i.e. not
-	 * eagerly instantiated on startup. Only applicable to a singleton bean.
+	 * Bean是否是懒加载的
+	 * 仅适用于单例Bean
 	 */
 	boolean isLazyInit();
 
 	/**
-	 * Set the names of the beans that this bean depends on being initialized.
-	 * The bean factory will guarantee that these beans get initialized first.
+	 * 设置Bean是否需要懒加载
+	 * 如果返回{@code false}，bean会在Spring容器启动时由BeanFactory进行初始化，
 	 */
-	void setDependsOn(@Nullable String... dependsOn);
+	void setLazyInit(boolean lazyInit);
 
 	/**
-	 * Return the bean names that this bean depends on.
+	 * 获取当前Bean依赖的Bean数组
 	 */
 	@Nullable
 	String[] getDependsOn();
+
+	/**
+	 * Bean需要依赖的哪个Bean的实例化
+	 * BeanFactory会保证给定的Bean先进行实例化
+	 */
+	void setDependsOn(@Nullable String... dependsOn);
 
 	/**
 	 * Set whether this bean is a candidate for getting autowired into some other bean.
@@ -159,6 +151,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * It does not affect explicit references by name, which will get resolved even
 	 * if the specified bean is not marked as an autowire candidate. As a consequence,
 	 * autowiring by name will nevertheless inject a bean if the name matches.
+	 *
 	 */
 	void setAutowireCandidate(boolean autowireCandidate);
 
