@@ -17,7 +17,6 @@
 package org.springframework.aop.aspectj;
 
 import org.aopalliance.aop.Advice;
-
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.core.Ordered;
@@ -25,26 +24,33 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * AspectJPointcutAdvisor that adapts an {@link AbstractAspectJAdvice}
- * to the {@link org.springframework.aop.PointcutAdvisor} interface.
- *
+ * 是{@link AbstractAspectJAdvice}增强基类的适配类
+ * 同时也是{@link org.springframework.aop.PointcutAdvisor}连接点切面的实现
  * @author Adrian Colyer
  * @author Juergen Hoeller
  * @since 2.0
  */
 public class AspectJPointcutAdvisor implements PointcutAdvisor, Ordered {
 
+	/**
+	 * 增强对象
+	 */
 	private final AbstractAspectJAdvice advice;
-
+	/**
+	 * 连接点
+	 */
 	private final Pointcut pointcut;
 
+	/**
+	 * Bean顺序
+	 */
 	@Nullable
 	private Integer order;
 
 
 	/**
-	 * Create a new AspectJPointcutAdvisor for the given advice.
-	 * @param advice the AbstractAspectJAdvice to wrap
+	 * 使用给定的增强创建AspectJPointcutAdvisor
+	 * @param advice 需要进行包装的增强
 	 */
 	public AspectJPointcutAdvisor(AbstractAspectJAdvice advice) {
 		Assert.notNull(advice, "Advice must not be null");
@@ -57,12 +63,16 @@ public class AspectJPointcutAdvisor implements PointcutAdvisor, Ordered {
 		this.order = order;
 	}
 
+	/**
+	 * 获取当前bean顺序
+	 * 如果当前bean没有给定顺序，则默认使用增强的顺序
+	 * @return 连接点切面的顺序
+	 */
 	@Override
 	public int getOrder() {
 		if (this.order != null) {
 			return this.order;
-		}
-		else {
+		} else {
 			return this.advice.getOrder();
 		}
 	}
@@ -83,7 +93,7 @@ public class AspectJPointcutAdvisor implements PointcutAdvisor, Ordered {
 	}
 
 	/**
-	 * Return the name of the aspect (bean) in which the advice was declared.
+	 * 获取切面名称，其实也就是获取增强的名称
 	 * @since 4.3.15
 	 * @see AbstractAspectJAdvice#getAspectName()
 	 */

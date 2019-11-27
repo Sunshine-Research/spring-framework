@@ -26,10 +26,9 @@ import org.springframework.util.StringUtils;
 /**
  * Utilities for auto-proxy aware components.
  * Mainly for internal use within the framework.
- *
  * @author Juergen Hoeller
- * @since 2.0.3
  * @see AbstractAutoProxyCreator
+ * @since 2.0.3
  */
 public abstract class AutoProxyUtils {
 
@@ -49,8 +48,8 @@ public abstract class AutoProxyUtils {
 	 * Bean definition attribute that indicates the original target class of an
 	 * auto-proxied bean, e.g. to be used for the introspection of annotations
 	 * on the target class behind an interface-based proxy.
-	 * @since 4.2.3
 	 * @see #determineTargetClass
+	 * @since 4.2.3
 	 */
 	public static final String ORIGINAL_TARGET_CLASS_ATTRIBUTE =
 			Conventions.getQualifiedAttributeName(AutoProxyUtils.class, "originalTargetClass");
@@ -62,7 +61,7 @@ public abstract class AutoProxyUtils {
 	 * {@link #PRESERVE_TARGET_CLASS_ATTRIBUTE "preserveTargetClass" attribute}
 	 * of the corresponding bean definition.
 	 * @param beanFactory the containing ConfigurableListableBeanFactory
-	 * @param beanName the name of the bean
+	 * @param beanName    the name of the bean
 	 * @return whether the given bean should be proxied with its target class
 	 */
 	public static boolean shouldProxyTargetClass(
@@ -79,10 +78,10 @@ public abstract class AutoProxyUtils {
 	 * Determine the original target class for the specified bean, if possible,
 	 * otherwise falling back to a regular {@code getType} lookup.
 	 * @param beanFactory the containing ConfigurableListableBeanFactory
-	 * @param beanName the name of the bean
+	 * @param beanName    the name of the bean
 	 * @return the original target class as stored in the bean definition, if any
-	 * @since 4.2.3
 	 * @see org.springframework.beans.factory.BeanFactory#getType(String)
+	 * @since 4.2.3
 	 */
 	@Nullable
 	public static Class<?> determineTargetClass(
@@ -104,7 +103,7 @@ public abstract class AutoProxyUtils {
 	/**
 	 * Expose the given target class for the specified bean, if possible.
 	 * @param beanFactory the containing ConfigurableListableBeanFactory
-	 * @param beanName the name of the bean
+	 * @param beanName    the name of the bean
 	 * @param targetClass the corresponding target class
 	 * @since 4.2.3
 	 */
@@ -117,19 +116,21 @@ public abstract class AutoProxyUtils {
 	}
 
 	/**
-	 * Determine whether the given bean name indicates an "original instance"
-	 * according to {@link AutowireCapableBeanFactory#ORIGINAL_INSTANCE_SUFFIX},
-	 * skipping any proxy attempts for it.
-	 * @param beanName the name of the bean
-	 * @param beanClass the corresponding bean class
-	 * @since 5.1
+	 * 确认给定的bean是否标识为"原始bean"，原始bean的定义为{@link AutowireCapableBeanFactory#ORIGINAL_INSTANCE_SUFFIX}
+	 * 也就是以".ORIGINAL"结尾的
+	 * 对于这种类型的bean，会跳过任何代理尝试
+	 * @param beanName  bean名称
+	 * @param beanClass 相关的bean类型
 	 * @see AutowireCapableBeanFactory#ORIGINAL_INSTANCE_SUFFIX
+	 * @since 5.1
 	 */
 	static boolean isOriginalInstance(String beanName, Class<?> beanClass) {
+		// 首先做一些不需要截取字符串的校验
 		if (!StringUtils.hasLength(beanName) || beanName.length() !=
 				beanClass.getName().length() + AutowireCapableBeanFactory.ORIGINAL_INSTANCE_SUFFIX.length()) {
 			return false;
 		}
+		// 当前Bean如果是以".ORIGINAL"结尾的，则视为是一个原始类型的Bean
 		return (beanName.startsWith(beanClass.getName()) &&
 				beanName.endsWith(AutowireCapableBeanFactory.ORIGINAL_INSTANCE_SUFFIX));
 	}

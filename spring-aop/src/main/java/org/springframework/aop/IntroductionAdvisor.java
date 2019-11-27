@@ -17,34 +17,28 @@
 package org.springframework.aop;
 
 /**
- * Superinterface for advisors that perform one or more AOP <b>introductions</b>.
- *
- * <p>This interface cannot be implemented directly; subinterfaces must
- * provide the advice type implementing the introduction.
- *
- * <p>Introduction is the implementation of additional interfaces
- * (not implemented by a target) via AOP advice.
- *
+ * 引介切面，是引介增强的适配器，通过引介切面可以很容易为现有对象添加任何接口实现
+ * 它可以为目标类创建新的方法和属性
+ * 和{@link PointcutAdvisor}不同，{@link IntroductionAdvisor}仅有{@code ClassFilter}，它是类级别的切面
+ * <p>
+ * 这个接口没有直接实现，子接口必须提供增强类型来实现引介
  * @author Rod Johnson
- * @since 04.04.2003
  * @see IntroductionInterceptor
+ * @since 04.04.2003
  */
 public interface IntroductionAdvisor extends Advisor, IntroductionInfo {
 
 	/**
-	 * Return the filter determining which target classes this introduction
-	 * should apply to.
-	 * <p>This represents the class part of a pointcut. Note that method
-	 * matching doesn't make sense to introductions.
-	 * @return the class filter
+	 * 确认引介需要应用的目标类型
+	 * 这代表切点的类部分，需要注意的是，引介没有方法匹配（MethodMatcher）
+	 * @return 类型过滤
 	 */
 	ClassFilter getClassFilter();
 
 	/**
-	 * Can the advised interfaces be implemented by the introduction advice?
-	 * Invoked before adding an IntroductionAdvisor.
-	 * @throws IllegalArgumentException if the advised interfaces can't be
-	 * implemented by the introduction advice
+	 * 判断引介增强是否可以实现切面接口
+	 * 在添加一个引介切面前调用
+	 * @throws IllegalArgumentException 如果切面接口不能由引介增强实现
 	 */
 	void validateInterfaces() throws IllegalArgumentException;
 

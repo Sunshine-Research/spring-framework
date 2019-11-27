@@ -71,7 +71,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	@Nullable
 	protected Object[] getAdvicesAndAdvisorsForBean(
 			Class<?> beanClass, String beanName, @Nullable TargetSource targetSource) {
-		// 筛选有资格的切面
+		// 筛选符合Bean实例条件的切面
 		List<Advisor> advisors = findEligibleAdvisors(beanClass, beanName);
 		if (advisors.isEmpty()) {
 			return DO_NOT_PROXY;
@@ -80,11 +80,10 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	}
 
 	/**
-	 * 为自动代理的类筛选所有有资格的切面
+	 * 为代理的Bean实例筛选所有符合条件的切面
 	 * @param beanClass bean类型
 	 * @param beanName  bean名称
-	 * @return the empty List, not {@code null},
-	 * if there are no pointcuts or interceptors
+	 * @return 符合Bean实例类型的切面集合
 	 * @see #findCandidateAdvisors
 	 * @see #sortAdvisors
 	 * @see #extendAdvisors
@@ -92,18 +91,21 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	protected List<Advisor> findEligibleAdvisors(Class<?> beanClass, String beanName) {
 		// 获取所有的切面
 		List<Advisor> candidateAdvisors = findCandidateAdvisors();
-		//
+		// 筛选可应用于Bean实例类型上的切面
+		// 将分别进行ClassFilter和MethodMatcher的筛选
 		List<Advisor> eligibleAdvisors = findAdvisorsThatCanApply(candidateAdvisors, beanClass, beanName);
+		//
 		extendAdvisors(eligibleAdvisors);
 		if (!eligibleAdvisors.isEmpty()) {
+			// 过滤给定的切面
 			eligibleAdvisors = sortAdvisors(eligibleAdvisors);
 		}
 		return eligibleAdvisors;
 	}
 
 	/**
-	 * Find all candidate Advisors to use in auto-proxying.
-	 * @return the List of candidate Advisors
+	 * 获取所有在自动代理中可使用的候选切面
+	 * @return 候选切面列表
 	 */
 	protected List<Advisor> findCandidateAdvisors() {
 		Assert.state(this.advisorRetrievalHelper != null, "No BeanFactoryAdvisorRetrievalHelper available");
@@ -123,6 +125,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 
 		ProxyCreationContext.setCurrentProxiedBeanName(beanName);
 		try {
+			// 获取所有可以应用在此类型上的切面，包含引介切面
 			return AopUtils.findAdvisorsThatCanApply(candidateAdvisors, beanClass);
 		} finally {
 			ProxyCreationContext.setCurrentProxiedBeanName(null);

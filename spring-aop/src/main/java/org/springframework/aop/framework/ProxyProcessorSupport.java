@@ -77,7 +77,7 @@ public class ProxyProcessorSupport extends ProxyConfig implements Ordered, BeanC
 	}
 
 	/**
-	 * Return the configured proxy ClassLoader for this processor.
+	 * 获取当前处理器已配置的代理ClassLoader
 	 */
 	@Nullable
 	protected ClassLoader getProxyClassLoader() {

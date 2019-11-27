@@ -16,12 +16,8 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.aop.Advisor;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
@@ -30,13 +26,15 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Helper for retrieving standard Spring Advisors from a BeanFactory,
  * for use with auto-proxying.
- *
  * @author Juergen Hoeller
- * @since 2.0.2
  * @see AbstractAdvisorAutoProxyCreator
+ * @since 2.0.2
  */
 public class BeanFactoryAdvisorRetrievalHelper {
 
@@ -59,49 +57,52 @@ public class BeanFactoryAdvisorRetrievalHelper {
 
 
 	/**
-	 * Find all eligible Advisor beans in the current bean factory,
-	 * ignoring FactoryBeans and excluding beans that are currently in creation.
-	 * @return the list of {@link org.springframework.aop.Advisor} beans
+	 * 获取当前BeanFactory中的所有符合条件的切面
+	 * 忽略FactoryBean和正在创建的Bean
+	 * @return 符合条件的切面列表
 	 * @see #isEligibleBean
 	 */
 	public List<Advisor> findAdvisorBeans() {
-		// Determine list of advisor bean names, if not cached already.
+		// 获取所有的缓存的切面名称
 		String[] advisorNames = this.cachedAdvisorBeanNames;
 		if (advisorNames == null) {
-			// Do not initialize FactoryBeans here: We need to leave all regular beans
-			// uninitialized to let the auto-proxy creator apply to them!
+			// 如果没有缓存可用的切面名称，进而去Container中进行查找
 			advisorNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 					this.beanFactory, Advisor.class, true, false);
 			this.cachedAdvisorBeanNames = advisorNames;
 		}
+		// 如果没有的话，直接返回空的可用切面列表
 		if (advisorNames.length == 0) {
 			return new ArrayList<>();
 		}
 
 		List<Advisor> advisors = new ArrayList<>();
+		// 遍历所有的切面名称
 		for (String name : advisorNames) {
+			// 切面名称符合条件
 			if (isEligibleBean(name)) {
+				// 不添加正在创建的切面
 				if (this.beanFactory.isCurrentlyInCreation(name)) {
 					if (logger.isTraceEnabled()) {
 						logger.trace("Skipping currently created advisor '" + name + "'");
 					}
-				}
-				else {
+				} else {
 					try {
+						// 添加到符合条件的切面名称列表中
 						advisors.add(this.beanFactory.getBean(name, Advisor.class));
-					}
-					catch (BeanCreationException ex) {
+					} catch (BeanCreationException ex) {
 						Throwable rootCause = ex.getMostSpecificCause();
+						// 如果异常类型是Bean正在创建异常
 						if (rootCause instanceof BeanCurrentlyInCreationException) {
 							BeanCreationException bce = (BeanCreationException) rootCause;
 							String bceBeanName = bce.getBeanName();
+							// 需要判断Bean是否真的正在创建
+							// 如果真的正在创建，可以忽略议程，进行下一个切面的遍历
 							if (bceBeanName != null && this.beanFactory.isCurrentlyInCreation(bceBeanName)) {
 								if (logger.isTraceEnabled()) {
 									logger.trace("Skipping advisor '" + name +
 											"' with dependency on currently created bean: " + ex.getMessage());
 								}
-								// Ignore: indicates a reference back to the bean we're trying to advise.
-								// We want to find advisors other than the currently created bean itself.
 								continue;
 							}
 						}
@@ -110,14 +111,15 @@ public class BeanFactoryAdvisorRetrievalHelper {
 				}
 			}
 		}
+		// 返回符合条件的切面名称列表符合条件的切面名称列表
 		return advisors;
 	}
 
 	/**
-	 * Determine whether the aspect bean with the given name is eligible.
-	 * <p>The default implementation always returns {@code true}.
-	 * @param beanName the name of the aspect bean
-	 * @return whether the bean is eligible
+	 * 确认切面Bean名称是否符合条件
+	 * 默认实现判定符合条件，返回{@code true}
+	 * @param beanName 切面Bean名称
+	 * @return Bean是否符合条件
 	 */
 	protected boolean isEligibleBean(String beanName) {
 		return true;

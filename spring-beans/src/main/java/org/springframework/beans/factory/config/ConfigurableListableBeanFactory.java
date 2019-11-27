@@ -16,28 +16,22 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.Iterator;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.lang.Nullable;
 
+import java.util.Iterator;
+
 /**
- * Configuration interface to be implemented by most listable bean factories.
- * In addition to {@link ConfigurableBeanFactory}, it provides facilities to
- * analyze and modify bean definitions, and to pre-instantiate singletons.
- *
- * <p>This subinterface of {@link org.springframework.beans.factory.BeanFactory}
- * is not meant to be used in normal application code: Stick to
- * {@link org.springframework.beans.factory.BeanFactory} or
- * {@link org.springframework.beans.factory.ListableBeanFactory} for typical
- * use cases. This interface is just meant to allow for framework-internal
- * plug'n'play even when needing access to bean factory configuration methods.
- *
+ * 除了{@link ConfigurableBeanFactory}它为分析和修改Bean Definition提供了遍历，还可以预先实例化单例
+ * <p>
+ * 这个{@link org.springframework.beans.factory.BeanFactory}子接口并不打算用于普通的应用程序代码
+ * 通常情况下请使用{@link org.springframework.beans.factory.BeanFactory}或{@link org.springframework.beans.factory.ListableBeanFactory}
+ * 此接口一般用于框架内部使用，比如在需要访问BeanFactory的配置方法时
  * @author Juergen Hoeller
- * @since 03.11.2003
  * @see org.springframework.context.support.AbstractApplicationContext#getBeanFactory()
+ * @since 03.11.2003
  */
 public interface ConfigurableListableBeanFactory
 		extends ListableBeanFactory, AutowireCapableBeanFactory, ConfigurableBeanFactory {
