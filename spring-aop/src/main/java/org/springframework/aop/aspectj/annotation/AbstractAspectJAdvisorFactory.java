@@ -16,15 +16,6 @@
 
 package org.springframework.aop.aspectj.annotation;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.annotation.After;
@@ -37,19 +28,26 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.AjType;
 import org.aspectj.lang.reflect.AjTypeSystem;
 import org.aspectj.lang.reflect.PerClauseKind;
-
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.StringTokenizer;
+
 /**
- * Abstract base class for factories that can create Spring AOP Advisors
- * given AspectJ classes from classes honoring the AspectJ 5 annotation syntax.
- *
- * <p>This class handles annotation parsing and validation functionality.
- * It does not actually generate Spring AOP Advisors, which is deferred to subclasses.
- *
+ * 可以创建Spring AOP Advisor类型的Bean Factory的抽象类
+ * 遵循AspectJ 5注释语法的类中给定的AspectJ类
+ * <p>
+ * 这个类处理了注解解析和校验函数
+ * 不需要真实生成Spring AOP Advisor，由子类实现
  * @author Rod Johnson
  * @author Adrian Colyer
  * @author Juergen Hoeller
@@ -62,21 +60,18 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	private static final Class<?>[] ASPECTJ_ANNOTATION_CLASSES = new Class<?>[] {
 			Pointcut.class, Around.class, Before.class, After.class, AfterReturning.class, AfterThrowing.class};
 
-
-	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	protected final ParameterNameDiscoverer parameterNameDiscoverer = new AspectJAnnotationParameterNameDiscoverer();
 
 
 	/**
-	 * We consider something to be an AspectJ aspect suitable for use by the Spring AOP system
-	 * if it has the @Aspect annotation, and was not compiled by ajc. The reason for this latter test
-	 * is that aspects written in the code-style (AspectJ language) also have the annotation present
-	 * when compiled by ajc with the -1.5 flag, yet they cannot be consumed by Spring AOP.
+	 * 如果使用了@Aspect注解，认为的某些东西是适用于Spring AOP系统的AspectJ切面，也不会通过ajc进行编译
+	 * 这样做的原因是，用ajc使用-1.5进行编译时，以编码方式（AspectJ语言）编写的切面也具有注释，但是Spring AOP无法使用它
 	 */
 	@Override
 	public boolean isAspect(Class<?> clazz) {
+		// 使用了@Aspect注解，但是没有使用ajc进行编译
 		return (hasAspectAnnotation(clazz) && !compiledByAjc(clazz));
 	}
 
@@ -85,13 +80,13 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	}
 
 	/**
-	 * We need to detect this as "code-style" AspectJ aspects should not be
-	 * interpreted by Spring AOP.
+	 * 编码方式的AspectJ切面不应该被Spring AOP解释
+	 * 依靠AspectJ编译器的实现细节
 	 */
 	private boolean compiledByAjc(Class<?> clazz) {
-		// The AJTypeSystem goes to great lengths to provide a uniform appearance between code-style and
-		// annotation-style aspects. Therefore there is no 'clean' way to tell them apart. Here we rely on
-		// an implementation detail of the AspectJ compiler.
+		// 如果字段开头是以"ajc$"开头的，判定为是使用ajc进行编译的
+		// AJTTypeSystem竭尽全力在代码样式和注释样式方面提供统一的外观，因此，没有"干净的"方式将它们区分开
+		// 在这里，需要依靠AspectJ编译器的实现细节
 		for (Field field : clazz.getDeclaredFields()) {
 			if (field.getName().startsWith(AJC_MAGIC)) {
 				return true;

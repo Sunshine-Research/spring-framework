@@ -16,25 +16,23 @@
 
 package org.springframework.aop.aspectj.annotation;
 
-import java.lang.reflect.Method;
-import java.util.List;
-
 import org.aopalliance.aop.Advice;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.lang.Nullable;
 
+import java.lang.reflect.Method;
+import java.util.List;
+
 /**
  * Interface for factories that can create Spring AOP Advisors from classes
  * annotated with AspectJ annotation syntax.
- *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @since 2.0
  * @see AspectMetadata
  * @see org.aspectj.lang.reflect.AjTypeSystem
+ * @since 2.0
  */
 public interface AspectJAdvisorFactory {
 
@@ -54,19 +52,17 @@ public interface AspectJAdvisorFactory {
 	/**
 	 * Is the given class a valid AspectJ aspect class?
 	 * @param aspectClass the supposed AspectJ annotation-style class to validate
-	 * @throws AopConfigException if the class is an invalid aspect
-	 * (which can never be legal)
+	 * @throws AopConfigException     if the class is an invalid aspect
+	 *                                (which can never be legal)
 	 * @throws NotAnAtAspectException if the class is not an aspect at all
-	 * (which may or may not be legal, depending on the context)
+	 *                                (which may or may not be legal, depending on the context)
 	 */
 	void validate(Class<?> aspectClass) throws AopConfigException;
 
 	/**
-	 * Build Spring AOP Advisors for all annotated At-AspectJ methods
-	 * on the specified aspect instance.
-	 * @param aspectInstanceFactory the aspect instance factory
-	 * (not the aspect instance itself in order to avoid eager instantiation)
-	 * @return a list of advisors for this class
+	 * 为所有使用@AspectJ注解的方法的特定Aspect实例构建Spring AOP Advisor
+	 * @param aspectInstanceFactory Aspect实例factory，不是Aspect实例本身，避免过早实例化
+	 * @return 给定类型的Advisor列表
 	 */
 	List<Advisor> getAdvisors(MetadataAwareAspectInstanceFactory aspectInstanceFactory);
 
@@ -74,26 +70,24 @@ public interface AspectJAdvisorFactory {
 	 * Build a Spring AOP Advisor for the given AspectJ advice method.
 	 * @param candidateAdviceMethod the candidate advice method
 	 * @param aspectInstanceFactory the aspect instance factory
-	 * @param declarationOrder the declaration order within the aspect
-	 * @param aspectName the name of the aspect
+	 * @param declarationOrder      the declaration order within the aspect
+	 * @param aspectName            the name of the aspect
 	 * @return {@code null} if the method is not an AspectJ advice method
 	 * or if it is a pointcut that will be used by other advice but will not
 	 * create a Spring advice in its own right
 	 */
 	@Nullable
 	Advisor getAdvisor(Method candidateAdviceMethod, MetadataAwareAspectInstanceFactory aspectInstanceFactory,
-			int declarationOrder, String aspectName);
+					   int declarationOrder, String aspectName);
 
 	/**
-	 * Build a Spring AOP Advice for the given AspectJ advice method.
-	 * @param candidateAdviceMethod the candidate advice method
-	 * @param expressionPointcut the AspectJ expression pointcut
-	 * @param aspectInstanceFactory the aspect instance factory
-	 * @param declarationOrder the declaration order within the aspect
-	 * @param aspectName the name of the aspect
-	 * @return {@code null} if the method is not an AspectJ advice method
-	 * or if it is a pointcut that will be used by other advice but will not
-	 * create a Spring advice in its own right
+	 * 用于将AspectJ增强方法构建为一个Spring AOP Advice
+	 * @param candidateAdviceMethod 候选的增强方法
+	 * @param expressionPointcut    切点表达式
+	 * @param aspectInstanceFactory 切面实例BeanFactory
+	 * @param declarationOrder      Aspect声明的顺序
+	 * @param aspectName            Aspect名称
+	 * @return Spring AOP类型的Advisor
 	 * @see org.springframework.aop.aspectj.AspectJAroundAdvice
 	 * @see org.springframework.aop.aspectj.AspectJMethodBeforeAdvice
 	 * @see org.springframework.aop.aspectj.AspectJAfterAdvice
@@ -102,6 +96,6 @@ public interface AspectJAdvisorFactory {
 	 */
 	@Nullable
 	Advice getAdvice(Method candidateAdviceMethod, AspectJExpressionPointcut expressionPointcut,
-			MetadataAwareAspectInstanceFactory aspectInstanceFactory, int declarationOrder, String aspectName);
+					 MetadataAwareAspectInstanceFactory aspectInstanceFactory, int declarationOrder, String aspectName);
 
 }

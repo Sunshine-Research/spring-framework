@@ -59,6 +59,7 @@ public class BeanFactoryAdvisorRetrievalHelper {
 	/**
 	 * 获取当前BeanFactory中的所有符合条件的切面
 	 * 忽略FactoryBean和正在创建的Bean
+	 * 换句话说，是从Container中获取Advisor类型的Bean
 	 * @return 符合条件的切面列表
 	 * @see #isEligibleBean
 	 */
@@ -97,7 +98,7 @@ public class BeanFactoryAdvisorRetrievalHelper {
 							BeanCreationException bce = (BeanCreationException) rootCause;
 							String bceBeanName = bce.getBeanName();
 							// 需要判断Bean是否真的正在创建
-							// 如果真的正在创建，可以忽略议程，进行下一个切面的遍历
+							// 如果真的正在创建，可以忽略异常，进行下一个切面的遍历
 							if (bceBeanName != null && this.beanFactory.isCurrentlyInCreation(bceBeanName)) {
 								if (logger.isTraceEnabled()) {
 									logger.trace("Skipping advisor '" + name +
