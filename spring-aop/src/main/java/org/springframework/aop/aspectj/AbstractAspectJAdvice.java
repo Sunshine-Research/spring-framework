@@ -149,7 +149,9 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 
 	@Nullable
 	private Map<String, Integer> argumentBindings;
-
+	/**
+	 * 参数绑定成功，已开启参数内省
+	 */
 	private boolean argumentsIntrospected = false;
 
 	@Nullable
@@ -366,36 +368,32 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 
 
 	/**
-	 * Do as much work as we can as part of the set-up so that argument binding
-	 * on subsequent advice invocations can be as fast as possible.
-	 * <p>If the first argument is of type JoinPoint or ProceedingJoinPoint then we
-	 * pass a JoinPoint in that position (ProceedingJoinPoint for around advice).
-	 * <p>If the first argument is of type {@code JoinPoint.StaticPart}
-	 * then we pass a {@code JoinPoint.StaticPart} in that position.
-	 * <p>Remaining arguments have to be bound by pointcut evaluation at
-	 * a given join point. We will get back a map from argument name to
-	 * value. We need to calculate which advice parameter needs to be bound
-	 * to which argument name. There are multiple strategies for determining
-	 * this binding, which are arranged in a ChainOfResponsibility.
+	 * Spring做的额外的工作，提高后续参数绑定的效率
+	 * 如果第一个参数的类型是JoinPoint或ProceedingJoinPoint，会在那个位置传递一个JoinPoint（ProceedingJoinPoint用于环绕增强）
+	 * 如果第一个参数类型是JointPoint静态连接点，会在那个位置传递一个静态JoinPoint
+	 * 剩余的参数需要在给定的JoinPoint处通过Pointcut来进行评估
+	 * 我们会返回一个从参数名称到值的映射
+	 * 我们需要计算增强参数需要绑定在哪个参数名称上，会有很多策略来进行绑定确认，比如责任链
 	 */
 	public final synchronized void calculateArgumentBindings() {
-		// The simple case... nothing to bind.
+		// 没有需要绑定的参数，直接返回
 		if (this.argumentsIntrospected || this.parameterTypes.length == 0) {
 			return;
 		}
-
+		// 需要进行绑定参数个数
 		int numUnboundArgs = this.parameterTypes.length;
 		Class<?>[] parameterTypes = this.aspectJAdviceMethod.getParameterTypes();
+		// 如果第一个参数类型是JoinPoint，或者ProceedingJoinPoint，或者JoinPointStaticPart
 		if (maybeBindJoinPoint(parameterTypes[0]) || maybeBindProceedingJoinPoint(parameterTypes[0]) ||
 				maybeBindJoinPointStaticPart(parameterTypes[0])) {
+			// 需要绑定的参数-1，因为第一个参数会是连接点信息
 			numUnboundArgs--;
 		}
-
+		// 处理剩余需要绑定参数
 		if (numUnboundArgs > 0) {
-			// need to bind arguments by name as returned from the pointcut match
 			bindArgumentsByName(numUnboundArgs);
 		}
-
+		// 设置参数绑定开关
 		this.argumentsIntrospected = true;
 	}
 

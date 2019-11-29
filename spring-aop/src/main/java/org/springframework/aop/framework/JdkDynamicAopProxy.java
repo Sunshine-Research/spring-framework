@@ -16,16 +16,9 @@
 
 package org.springframework.aop.framework;
 
-import java.io.Serializable;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.List;
-
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.aop.AopInvocationException;
 import org.springframework.aop.RawTargetAccess;
 import org.springframework.aop.TargetSource;
@@ -35,24 +28,23 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
+import java.io.Serializable;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.List;
+
 /**
- * JDK-based {@link AopProxy} implementation for the Spring AOP framework,
- * based on JDK {@link java.lang.reflect.Proxy dynamic proxies}.
- *
- * <p>Creates a dynamic proxy, implementing the interfaces exposed by
- * the AopProxy. Dynamic proxies <i>cannot</i> be used to proxy methods
- * defined in classes, rather than interfaces.
- *
- * <p>Objects of this type should be obtained through proxy factories,
- * configured by an {@link AdvisedSupport} class. This class is internal
- * to Spring's AOP framework and need not be used directly by client code.
- *
- * <p>Proxies created using this class will be thread-safe if the
- * underlying (target) class is thread-safe.
- *
- * <p>Proxies are serializable so long as all Advisors (including Advices
- * and Pointcuts) and the TargetSource are serializable.
- *
+ * Spring AOP基于JDK的{@link AopProxy}实现
+ * <p>
+ * 创建一个动态代理，实现了AOP暴露的接口，动态代理不能用于代理类（而不是接口）中定义的方法
+ * <p>
+ * 这种类型的对象需要通过代理工厂获得，由{@link AdvisedSupport}类提供配置
+ * 这个类是Spring AOP的内部类，不需要直接由客户端直接进行编码
+ * <p>
+ * 如果目标类是线程安全的，使用此类创建的代理也是线程安全的
+ * <p>
+ * 如果所有的切面以及目标资源都是可序列化的，那么创建的代理类也是线程安全的
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -68,48 +60,49 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 
 
 	/*
-	 * NOTE: We could avoid the code duplication between this class and the CGLIB
-	 * proxies by refactoring "invoke" into a template method. However, this approach
-	 * adds at least 10% performance overhead versus a copy-paste solution, so we sacrifice
-	 * elegance for performance. (We have a good test suite to ensure that the different
-	 * proxies behave the same :-)
-	 * This way, we can also more easily take advantage of minor optimizations in each class.
+	 * 需要注意的是：我们可以通过将"调用"重构为模板方法来避免此类与CGLIB动态代理之间的代码重复
+	 * 但是这种方法可以提高性能
+	 * 我们有很好的测试套件，可以确保不同的代理的表现是相同的
+	 * 这样，我们可以利用每个类中的次要优化
 	 */
 
-	/** We use a static Log to avoid serialization issues. */
 	private static final Log logger = LogFactory.getLog(JdkDynamicAopProxy.class);
 
-	/** Config used to configure this proxy. */
+	/**
+	 * 代理的配置信息
+	 */
 	private final AdvisedSupport advised;
 
 	/**
-	 * Is the {@link #equals} method defined on the proxied interfaces?
+	 * 代理接口是否声明了{@link #equals}方法
 	 */
 	private boolean equalsDefined;
 
 	/**
-	 * Is the {@link #hashCode} method defined on the proxied interfaces?
+	 * 代理接口是否声明了{@link #hashCode}方法
 	 */
 	private boolean hashCodeDefined;
 
 
 	/**
-	 * Construct a new JdkDynamicAopProxy for the given AOP configuration.
-	 * @param config the AOP configuration as AdvisedSupport object
-	 * @throws AopConfigException if the config is invalid. We try to throw an informative
-	 * exception in this case, rather than let a mysterious failure happen later.
+	 * 使用给定的AOP配置构建一个JDK动态代理
+	 * @param config {@link AdvisedSupport}AOP配置
+	 * @throws AopConfigException 如果非法配置，会抛出异常
 	 */
 	public JdkDynamicAopProxy(AdvisedSupport config) throws AopConfigException {
 		Assert.notNull(config, "AdvisedSupport must not be null");
+		// 没有切面，并且没有目标代理类
 		if (config.getAdvisors().length == 0 && config.getTargetSource() == AdvisedSupport.EMPTY_TARGET_SOURCE) {
 			throw new AopConfigException("No advisors and no TargetSource specified");
 		}
+		// 设置增强代理配置
 		this.advised = config;
 	}
 
 
 	@Override
 	public Object getProxy() {
+		// 使用默认的ClassLoader获取代理
 		return getProxy(ClassUtils.getDefaultClassLoader());
 	}
 
@@ -119,6 +112,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 			logger.trace("Creating JDK dynamic proxy: " + this.advised.getTargetSource());
 		}
 		Class<?>[] proxiedInterfaces = AopProxyUtils.completeProxiedInterfaces(this.advised, true);
+		// 为给定的接口查询equals()、hashcode()方法
 		findDefinedEqualsAndHashCodeMethods(proxiedInterfaces);
 		return Proxy.newProxyInstance(classLoader, proxiedInterfaces, this);
 	}

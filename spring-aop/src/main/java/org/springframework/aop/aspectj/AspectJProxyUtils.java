@@ -16,15 +16,14 @@
 
 package org.springframework.aop.aspectj;
 
-import java.util.List;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 
+import java.util.List;
+
 /**
  * Utility methods for working with AspectJ proxies.
- *
  * @author Rod Johnson
  * @author Ramnivas Laddad
  * @author Juergen Hoeller
@@ -33,27 +32,27 @@ import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 public abstract class AspectJProxyUtils {
 
 	/**
-	 * Add special advisors if necessary to work with a proxy chain that contains AspectJ advisors:
-	 * concretely, {@link ExposeInvocationInterceptor} at the beginning of the list.
-	 * <p>This will expose the current Spring AOP invocation (necessary for some AspectJ pointcut
-	 * matching) and make available the current AspectJ JoinPoint. The call will have no effect
-	 * if there are no AspectJ advisors in the advisor chain.
-	 * @param advisors the advisors available
-	 * @return {@code true} if an {@link ExposeInvocationInterceptor} was added to the list,
-	 * otherwise {@code false}
+	 * 必要时添加特殊的切面，以与包含AspectJ切面的代理链一起使用：
+	 * 具体来说，{@link ExposeInvocationInterceptor}需要在列表的头部
+	 * 这会暴露当前Spring AOP的调用（一些AspectJ切入点匹配所必须的），并提供当前AspectJ JoinPoint
+	 * 如果切面链中没有切面，那么本次调用不会造成任何影响
+	 * @param advisors 可用的切面
+	 * @return 添加{@link ExposeInvocationInterceptor}到增强列表成功或失败
 	 */
 	public static boolean makeAdvisorChainAspectJCapableIfNecessary(List<Advisor> advisors) {
-		// Don't add advisors to an empty list; may indicate that proxying is just not required
+		// 在没有切面的情况下不进行添加
+		// 可以表明此时不需要代理
 		if (!advisors.isEmpty()) {
 			boolean foundAspectJAdvice = false;
+			// 遍历所有的切面
 			for (Advisor advisor : advisors) {
-				// Be careful not to get the Advice without a guard, as this might eagerly
-				// instantiate a non-singleton AspectJ aspect...
+				// 再次判断当前的切面类型
 				if (isAspectJAdvice(advisor)) {
 					foundAspectJAdvice = true;
 					break;
 				}
 			}
+			// 在当前切面中没有ExposeInvocationInterceptor类型切面的情况下，添加ExposeInvocationInterceptor切面到首位
 			if (foundAspectJAdvice && !advisors.contains(ExposeInvocationInterceptor.ADVISOR)) {
 				advisors.add(0, ExposeInvocationInterceptor.ADVISOR);
 				return true;
@@ -63,10 +62,13 @@ public abstract class AspectJProxyUtils {
 	}
 
 	/**
-	 * Determine whether the given Advisor contains an AspectJ advice.
-	 * @param advisor the Advisor to check
+	 * 确认给定的切面包含了AspectJ类型的增强
+	 * @param advisor 需要进行检查的切面
 	 */
 	private static boolean isAspectJAdvice(Advisor advisor) {
+		// 切面是InstantiationModelAwarePointcutAdvisor类型
+		// 增强方法是AbstractAspectJAdvice
+		// 或者PointcutAdvisor类型的切面，切点是AspectJExpressionPointcut，AspectJ类型的切点
 		return (advisor instanceof InstantiationModelAwarePointcutAdvisor ||
 				advisor.getAdvice() instanceof AbstractAspectJAdvice ||
 				(advisor instanceof PointcutAdvisor &&

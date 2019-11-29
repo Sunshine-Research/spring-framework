@@ -16,49 +16,49 @@
 
 package org.springframework.aop.framework;
 
+import org.springframework.aop.SpringProxy;
+
 import java.io.Serializable;
 import java.lang.reflect.Proxy;
 
-import org.springframework.aop.SpringProxy;
-
 /**
- * Default {@link AopProxyFactory} implementation, creating either a CGLIB proxy
- * or a JDK dynamic proxy.
- *
- * <p>Creates a CGLIB proxy if one the following is true for a given
- * {@link AdvisedSupport} instance:
- * <ul>
- * <li>the {@code optimize} flag is set
- * <li>the {@code proxyTargetClass} flag is set
- * <li>no proxy interfaces have been specified
- * </ul>
- *
- * <p>In general, specify {@code proxyTargetClass} to enforce a CGLIB proxy,
- * or specify one or more interfaces to use a JDK dynamic proxy.
- *
+ * 默认{@link AopProxyFactory}实现，可以创建CGLIB代理或者JDK代理
+ * 如果给定了如下条件中的一个，将会创建CGLIB代理：
+ * 1. 设置了{@code optimize}标志
+ * 2. 设置了{@code proxyTargetClass}属性
+ * 3. 没有指定代理接口
+ * <p>
+ * 通常，可以使用{@code proxyTargetClass}来强制使用CGLIB代理，或者指定一个或多个接口来使用JDK动态代理
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @since 12.03.2004
  * @see AdvisedSupport#setOptimize
  * @see AdvisedSupport#setProxyTargetClass
  * @see AdvisedSupport#setInterfaces
+ * @since 12.03.2004
  */
 @SuppressWarnings("serial")
 public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 
 	@Override
 	public AopProxy createAopProxy(AdvisedSupport config) throws AopConfigException {
+		// 1. 设置optimize属性为true
+		// 2. proxy-target-class属性设置为true
+		// 3. 没有用户定义的接口
+		// 以上情况下，正常情况下使用CGLIB代理
 		if (config.isOptimize() || config.isProxyTargetClass() || hasNoUserSuppliedProxyInterfaces(config)) {
 			Class<?> targetClass = config.getTargetClass();
 			if (targetClass == null) {
 				throw new AopConfigException("TargetSource cannot determine target class: " +
 						"Either an interface or a target is required for proxy creation.");
 			}
+			// 如果目标类是接口或者本身就是一个代理类，默认使用JDK动态代理
 			if (targetClass.isInterface() || Proxy.isProxyClass(targetClass)) {
 				return new JdkDynamicAopProxy(config);
 			}
+			// 否则使用CGLIB代理
 			return new ObjenesisCglibAopProxy(config);
 		}
+		// 其他情况下使用JDK动态代理
 		else {
 			return new JdkDynamicAopProxy(config);
 		}
