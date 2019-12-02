@@ -16,18 +16,7 @@
 
 package org.springframework.aop.framework;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.aopalliance.aop.Advice;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.DynamicIntroductionAdvice;
 import org.springframework.aop.IntroductionAdvisor;
@@ -42,6 +31,16 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * Base class for AOP proxy configuration managers.
  * These are not themselves AOP proxies, but subclasses of this class are
@@ -53,7 +52,7 @@ import org.springframework.util.CollectionUtils;
  *
  * <p>This class is serializable; subclasses need not be.
  * This class is used to hold snapshots of proxies.
- *
+ * AOP代理配置管理器
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see org.springframework.aop.framework.AopProxy
@@ -470,14 +469,16 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 
 	/**
-	 * Determine a list of {@link org.aopalliance.intercept.MethodInterceptor} objects
-	 * for the given method, based on this configuration.
-	 * @param method the proxied method
-	 * @param targetClass the target class
-	 * @return a List of MethodInterceptors (may also include InterceptorAndDynamicMethodMatchers)
+	 * 确认基于配置的给定方法的{@link org.aopalliance.intercept.MethodInterceptor}对象列表
+	 * @param method 代理的方法
+	 * @param targetClass 目标类
+	 * @return {@link org.aopalliance.intercept.MethodInterceptor}对象列表，可能包括InterceptorAndDynamicMethodMatchers
 	 */
 	public List<Object> getInterceptorsAndDynamicInterceptionAdvice(Method method, @Nullable Class<?> targetClass) {
+		// 构建目标方法的缓存Key
 		MethodCacheKey cacheKey = new MethodCacheKey(method);
+		// 首先从缓存中获取目标方法的方法拦截对象列表
+		// 如果缓存中没有，则从Advisor链工厂中获取给定方法的MethodInterceptor，并放入到缓存中
 		List<Object> cached = this.methodCache.get(cacheKey);
 		if (cached == null) {
 			cached = this.advisorChainFactory.getInterceptorsAndDynamicInterceptionAdvice(

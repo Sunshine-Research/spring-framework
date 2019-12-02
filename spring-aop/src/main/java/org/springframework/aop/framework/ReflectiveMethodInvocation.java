@@ -147,10 +147,12 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	@Nullable
 	public Object proceed() throws Throwable {
 		// 从索引-1开始，并且是提早增加
+		// 如果当前的索引是所有拦截器的最后一个，那么直接调用连接点
 		if (this.currentInterceptorIndex == this.interceptorsAndDynamicMethodMatchers.size() - 1) {
 			return invokeJoinpoint();
 		}
 		// 从0开始，获取Interceptor或者拦截型增强
+		// 同时移动索引位置
 		Object interceptorOrInterceptionAdvice =
 				this.interceptorsAndDynamicMethodMatchers.get(++this.currentInterceptorIndex);
 		// 如果是InterceptorAndDynamicMethodMatcher类型
@@ -165,6 +167,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 				return dm.interceptor.invoke(this);
 			} else {
 				// 动态匹配失败，跳过这个Interceptor，调用Interceptors链中的下一个Interceptor
+				// 递归执行，由于索引是全局唯一的，所以如果interceptors遍历完，会直接调用连接点
 				return proceed();
 			}
 		} else {

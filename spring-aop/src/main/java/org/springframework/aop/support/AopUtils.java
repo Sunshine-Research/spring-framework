@@ -339,25 +339,24 @@ public abstract class AopUtils {
 	}
 
 	/**
-	 * Invoke the given target via reflection, as part of an AOP method invocation.
-	 * @param target the target object
-	 * @param method the method to invoke
-	 * @param args   the arguments for the method
-	 * @return the invocation result, if any
-	 * @throws Throwable                                      if thrown by the target method
-	 * @throws org.springframework.aop.AopInvocationException in case of a reflection error
+	 * 通过反射调用目标，是AOP方法调用的一部分
+	 * @param target 进行调用的目标对象
+	 * @param method 进行调用的目标方法
+	 * @param args   调用方法的参数列表
+	 * @return 调用结果
+	 * @throws Throwable                                      目标方法抛出的异常
+	 * @throws org.springframework.aop.AopInvocationException 抛出反射异常
 	 */
 	@Nullable
 	public static Object invokeJoinpointUsingReflection(@Nullable Object target, Method method, Object[] args)
 			throws Throwable {
 
-		// Use reflection to invoke the method.
+		// 使用反射来调用方法
 		try {
 			ReflectionUtils.makeAccessible(method);
 			return method.invoke(target, args);
 		} catch (InvocationTargetException ex) {
-			// Invoked method threw a checked exception.
-			// We must rethrow it. The client won't see the interceptor.
+			// 调用方法抛出了检查异常，需要再次抛出，客户端将看不到interceptor
 			throw ex.getTargetException();
 		} catch (IllegalArgumentException ex) {
 			throw new AopInvocationException("AOP configuration seems to be invalid: tried calling method [" +

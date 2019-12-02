@@ -16,21 +16,6 @@
 
 package org.springframework.cglib.proxy;
 
-import java.lang.ref.WeakReference;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.security.ProtectionDomain;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.Label;
 import org.springframework.asm.Type;
@@ -57,37 +42,40 @@ import org.springframework.cglib.core.TypeUtils;
 import org.springframework.cglib.core.VisibilityPredicate;
 import org.springframework.cglib.core.WeakCacheKey;
 
+import java.lang.ref.WeakReference;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.security.ProtectionDomain;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 /**
- * Generates dynamic subclasses to enable method interception. This
- * class started as a substitute for the standard Dynamic Proxy support
- * included with JDK 1.3, but one that allowed the proxies to extend a
- * concrete base class, in addition to implementing interfaces. The dynamically
- * generated subclasses override the non-final methods of the superclass and
- * have hooks which callback to user-defined interceptor
- * implementations.
+ * 生成动态的子类来允许方法拦截
+ * 这个类用于代理JDK1.3开始使用的标准动态代理，但是除了实现接口，仅允许代理继承一个具体基类
+ * 生成的动态子类可以重写所有的非final类型的方法，并且可以有hook方法回调到用户定义的拦截器实现
  * <p>
- * The original and most general callback type is the {@link MethodInterceptor}, which
- * in AOP terms enables "around advice"--that is, you can invoke custom code both before
- * and after the invocation of the "super" method. In addition you can modify the
- * arguments before calling the super method, or not call it at all.
+ * 原始和最通常的回调类型是{@link MethodInterceptor}，在AOP术语代表允许"环绕增强"，也就是，你可以在方法的之前和之后分别调用自定义代码
+ * 你还可以修改调用方法的参数，或者根本不调用目标方法
  * <p>
- * Although <code>MethodInterceptor</code> is generic enough to meet any
- * interception need, it is often overkill. For simplicity and performance, additional
- * specialized callback types, such as {@link LazyLoader} are also available.
- * Often a single callback will be used per enhanced class, but you can control
- * which callback is used on a per-method basis with a {@link CallbackFilter}.
+ * 虽然{@link MethodInterceptor}已经具有足够的通用性，可以满足任何的拦截需求，但是覆盖范围太广
+ * 为了简单和性能，需要额外的、特殊的回调类型，比如{@link LazyLoader}
+ * 一个简单的回调可以为每个enhanced类所使用，但是你可以通过{@link CallbackFilter}来控制那个回调需要作用于方法之上
  * <p>
- * The most common uses of this class are embodied in the static helper methods. For
- * advanced needs, such as customizing the <code>ClassLoader</code> to use, you should create
- * a new instance of <code>Enhancer</code>. Other classes within CGLIB follow a similar pattern.
+ * 此类最常见的用法体现于静态帮助方法之中
+ * 对于高级需求，比如自定义使用的ClassLoader，你应该创建一个新的Enhancer实例，其他使用CGLIB的类将遵循一个相近的格式
  * <p>
- * All enhanced objects implement the {@link Factory} interface, unless {@link #setUseFactory} is
- * used to explicitly disable this feature. The <code>Factory</code> interface provides an API
- * to change the callbacks of an existing object, as well as a faster and easier way to create
- * new instances of the same type.
+ * 除非使用{@link #setUseFactory}来屏蔽使用，所有enhanced对象实现了{@link Factory}接口
+ * 工厂接口提供了API来改变已存在对象的回调任务，以及更快更简单的方法来创建相同类型的新实例
  * <p>
- * For an almost drop-in replacement for
- * <code>java.lang.reflect.Proxy</code>, see the {@link Proxy} class.
+ * 几乎可以替代{@link Proxy}
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class Enhancer extends AbstractClassGenerator {
@@ -373,10 +361,9 @@ public class Enhancer extends AbstractClassGenerator {
 	}
 
 	/**
-	 * Generate a new class if necessary and uses the specified
-	 * callbacks (if any) to create a new object instance.
-	 * Uses the no-arg constructor of the superclass.
-	 * @return a new instance
+	 * 在必要的情况下，生成一个新类，并且使用指定的回调任务，来创建一个新的对象实例
+	 * 使用超类的无参构造方法
+	 * @return 新实例
 	 */
 	public Object create() {
 		classOnly = false;
@@ -417,18 +404,25 @@ public class Enhancer extends AbstractClassGenerator {
 	}
 
 	/**
-	 * Insert a static serialVersionUID field into the generated class.
-	 * @param sUID the field value, or null to avoid generating field.
+	 * 为生成的类添加静态的serialVersionUID参数
+	 * @param sUID serialVersionUID的值，如果为null，则不进行添加
 	 */
 	public void setSerialVersionUID(Long sUID) {
 		serialVersionUID = sUID;
 	}
 
+	/**
+	 * 创建代理的前置校验
+	 */
 	private void preValidate() {
+		// 如果代理的类没有任何回调任务
 		if (callbackTypes == null) {
+			// 不需要进一步检查回调任务
 			callbackTypes = CallbackInfo.determineTypes(callbacks, false);
 			validateCallbackTypes = true;
 		}
+		// 如果没有过滤器，则需要进一步校验代理的类是否需要过滤器
+		// 如果需要，则抛出异常
 		if (filter == null) {
 			if (callbackTypes.length > 1) {
 				throw new IllegalStateException("Multiple callback types possible but no filter specified");
@@ -546,18 +540,22 @@ public class Enhancer extends AbstractClassGenerator {
 		private void setThreadCallbacks(Callback[] callbacks) {
 			try {
 				setThreadCallbacks.invoke(generatedClass, (Object) callbacks);
-			}
-			catch (IllegalAccessException e) {
+			} catch (IllegalAccessException e) {
 				throw new CodeGenerationException(e);
-			}
-			catch (InvocationTargetException e) {
+			} catch (InvocationTargetException e) {
 				throw new CodeGenerationException(e.getTargetException());
 			}
 		}
 	}
 
+	/**
+	 * 实例创建帮助器
+	 * @return
+	 */
 	private Object createHelper() {
+		// 前置校验
 		preValidate();
+		// 通过CGLIB代理工厂创建新实例
 		Object key = KEY_FACTORY.newInstance((superclass != null) ? superclass.getName() : null,
 				ReflectUtils.getNames(interfaces),
 				filter == ALL_ZERO ? null : new WeakCacheKey<CallbackFilter>(filter),
@@ -566,7 +564,9 @@ public class Enhancer extends AbstractClassGenerator {
 				interceptDuringConstruction,
 				serialVersionUID);
 		this.currentKey = key;
+		//  生成新的类
 		Object result = super.create(key);
+		// 返回生成新的类实例
 		return result;
 	}
 

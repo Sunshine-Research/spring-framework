@@ -37,7 +37,6 @@ import java.util.Arrays;
  *
  * <p>See {@link org.springframework.aop.support.AopUtils} for a collection of
  * generic AOP utility methods which do not depend on AOP framework internals.
- *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see org.springframework.aop.support.AopUtils
@@ -49,9 +48,9 @@ public abstract class AopProxyUtils {
 	 * @param candidate the (potential) proxy to check
 	 * @return the singleton target object managed in a {@link SingletonTargetSource},
 	 * or {@code null} in any other case (not a proxy, not an existing singleton target)
-	 * @since 4.3.8
 	 * @see Advised#getTargetSource()
 	 * @see SingletonTargetSource#getTarget()
+	 * @since 4.3.8
 	 */
 	@Nullable
 	public static Object getSingletonTarget(Object candidate) {
@@ -89,13 +88,10 @@ public abstract class AopProxyUtils {
 	}
 
 	/**
-	 * <p>This will always add the {@link Advised} interface unless the AdvisedSupport's
-	 * {@link AdvisedSupport#setOpaque "opaque"} flag is on. Always adds the
-	 * {@link org.springframework.aop.SpringProxy} marker interface.
 	 * 确认用于代理给定AOP配置的完整接口集
 	 * 除非AdvisedSupport
 	 * @param advised 代理配置
-	 * @return the complete set of interfaces to proxy
+	 * @return 需要代理的完整接口集
 	 * @see SpringProxy
 	 * @see Advised
 	 */
@@ -104,37 +100,42 @@ public abstract class AopProxyUtils {
 	}
 
 	/**
-	 * Determine the complete set of interfaces to proxy for the given AOP configuration.
-	 * <p>This will always add the {@link Advised} interface unless the AdvisedSupport's
-	 * 使用给定的
-	 * {@link AdvisedSupport#setOpaque "opaque"} flag is on. Always adds the
-	 * {@link org.springframework.aop.SpringProxy} marker interface.
-	 * @param advised the proxy config
-	 * @param decoratingProxy whether to expose the {@link DecoratingProxy} interface
-	 * @return the complete set of interfaces to proxy
-	 * @since 4.3
+	 * 确认用于代理给给定AOP配置的完整接口集
+	 * 这个方法会在{@link AdvisedSupport#setOpaque}为true的情况下添加{@link Advised}接口
+	 * 也会添加{@link org.springframework.aop.SpringProxy}标记接口
+	 * @param advised         Factory的所有代理配置
+	 * @param decoratingProxy 是否需要暴露{@link DecoratingProxy}接口
 	 * @see SpringProxy
 	 * @see Advised
 	 * @see DecoratingProxy
+	 * @since 4.3
 	 */
 	static Class<?>[] completeProxiedInterfaces(AdvisedSupport advised, boolean decoratingProxy) {
+		// 从代理配置中获取所有的代理接口
 		Class<?>[] specifiedInterfaces = advised.getProxiedInterfaces();
+		// 如果没有代理接口
 		if (specifiedInterfaces.length == 0) {
-			// No user-specified interfaces: check whether target class is an interface.
+			// 首先校验目标类本身是否就是一个接跨
 			Class<?> targetClass = advised.getTargetClass();
 			if (targetClass != null) {
+				// 如果目标类是接口类型，则设置目标类为接口
 				if (targetClass.isInterface()) {
 					advised.setInterfaces(targetClass);
-				}
-				else if (Proxy.isProxyClass(targetClass)) {
+				} else if (Proxy.isProxyClass(targetClass)) {
+					// 否则设置为目标类的接口
 					advised.setInterfaces(targetClass.getInterfaces());
 				}
+				// 重新获取指定的接口类型
 				specifiedInterfaces = advised.getProxiedInterfaces();
 			}
 		}
+		// 如果没有代理SpringProxy接口，则需要添加SpringProxy代理类
 		boolean addSpringProxy = !advised.isInterfaceProxied(SpringProxy.class);
+		// 如果没有代理Advised接口，则需要添加Advised代理类
 		boolean addAdvised = !advised.isOpaque() && !advised.isInterfaceProxied(Advised.class);
+		// 如果没有代理DecoratingProxy接口，则需要添加DecoratingProxy代理类
 		boolean addDecoratingProxy = (decoratingProxy && !advised.isInterfaceProxied(DecoratingProxy.class));
+		// 计算需要补充的代理类数量
 		int nonUserIfcCount = 0;
 		if (addSpringProxy) {
 			nonUserIfcCount++;
@@ -145,6 +146,7 @@ public abstract class AopProxyUtils {
 		if (addDecoratingProxy) {
 			nonUserIfcCount++;
 		}
+		// 创建新的代理类接口数组，包括Advised配置中获取的，以及没有的部分
 		Class<?>[] proxiedInterfaces = new Class<?>[specifiedInterfaces.length + nonUserIfcCount];
 		System.arraycopy(specifiedInterfaces, 0, proxiedInterfaces, 0, specifiedInterfaces.length);
 		int index = specifiedInterfaces.length;
@@ -213,12 +215,11 @@ public abstract class AopProxyUtils {
 
 
 	/**
-	 * Adapt the given arguments to the target signature in the given method,
-	 * if necessary: in particular, if a given vararg argument array does not
-	 * match the array type of the declared vararg parameter in the method.
-	 * @param method the target method
-	 * @param arguments the given arguments
-	 * @return a cloned argument array, or the original if no adaptation is needed
+	 * 将给定的参数适配是给定方法的目标结构参数
+	 * 如果需要，特别的，如果给定的参数数组和方法声明的参数类型不匹配
+	 * @param method    目标方法
+	 * @param arguments 给定的参数数组
+	 * @return 克隆的参数数组，如果直接就是原始的，不需做任何的适配
 	 * @since 4.2.3
 	 */
 	static Object[] adaptArgumentsIfNecessary(Method method, @Nullable Object[] arguments) {
