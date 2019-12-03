@@ -177,7 +177,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	}
 
 	/**
-	 * 使用反射调用连接点
+	 * 使用反射调用连接点，也就是调用目标方法
 	 * 子类可以重写此方法来实现自定义调用
 	 * @return 连接点的返回值
 	 * @throws Throwable 调用连接点返回的异常

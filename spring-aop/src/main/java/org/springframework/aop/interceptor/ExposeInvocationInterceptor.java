@@ -16,27 +16,25 @@
 
 package org.springframework.aop.interceptor;
 
-import java.io.Serializable;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.PriorityOrdered;
 
+import java.io.Serializable;
+
 /**
- * Interceptor that exposes the current {@link org.aopalliance.intercept.MethodInvocation}
- * as a thread-local object. We occasionally need to do this; for example, when a pointcut
- * (e.g. an AspectJ expression pointcut) needs to know the full invocation context.
- *
- * <p>Don't use this interceptor unless this is really necessary. Target objects should
- * not normally know about Spring AOP, as this creates a dependency on Spring API.
- * Target objects should be plain POJOs as far as possible.
- *
- * <p>If used, this interceptor will normally be the first in the interceptor chain.
- *
+ * 将当前{@link org.aopalliance.intercept.MethodInvocation}暴露为一个ThreadLocal对象的interceptor
+ * 我们偶尔需要这样做，比如，当一个Pointcut（AspectJ表达式Pointcut），需要了解全局的调用上下文
+ * <p>
+ * 如非必要，请不要使用这个interceptor，目标对象并不应该知道Spring AOP，这会造成对Spring API的依赖
+ * 目标对象应该尽可能是POJO对象
+ * <p>
+ * 如果需要使用，那么{@link ExposeInvocationInterceptor}需要是interceptor链中的第一个interceptor
+ * <p>
+ * 这样做的好处是，如果其他地方需要调用当前的MethodInvocation，可以直接通过{@link #currentInvocation()}取出
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
@@ -88,11 +86,12 @@ public final class ExposeInvocationInterceptor implements MethodInterceptor, Pri
 	@Override
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		MethodInvocation oldInvocation = invocation.get();
+		// 将当前的MethodInvocation放入到ThreadLocal中
 		invocation.set(mi);
 		try {
+			// 调用下一个interceptor
 			return mi.proceed();
-		}
-		finally {
+		} finally {
 			invocation.set(oldInvocation);
 		}
 	}
