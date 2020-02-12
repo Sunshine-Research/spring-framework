@@ -28,15 +28,15 @@
 				pointcut="execution(* exceptional(..))"
 			/>
 			<aop:after-throwing
-				method="noArgsOnRuntimeExceptionMatch"
-				throwing="java.lang.RuntimeException"
-				pointcut="execution(* exceptional(..))"
-			/>		
-	</aop:aspect>	
+					method="noArgsOnRuntimeExceptionMatch"
+					throwing="java.lang.RuntimeException"
+					pointcut="execution(* exceptional(..))"
+			/>
+		</aop:aspect>
 	</aop:config>
 
 	<bean id="testAspect" class="org.springframework.aop.aspectj.AfterThrowingAdviceBindingTestAspect"/>
 
-	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean"/>
+	<bean id="testBean" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
 </beans>

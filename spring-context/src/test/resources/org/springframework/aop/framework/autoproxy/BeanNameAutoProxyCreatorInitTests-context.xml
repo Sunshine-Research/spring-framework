@@ -18,12 +18,12 @@
 				<property name="sourceList">
 					<list>
 						<value>.*\.set[a-zA-Z]*(.*)</value>
-				 </list>
+					</list>
 				</property>
 			</bean>
 		</property>
 	</bean>
 
-	<bean id="bean" class="org.springframework.tests.sample.beans.TestBean"/>
+	<bean id="bean" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
 </beans>	

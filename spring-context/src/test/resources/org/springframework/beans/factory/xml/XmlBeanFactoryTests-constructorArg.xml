@@ -4,16 +4,20 @@
 		xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
 	<bean id="rod1" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean">
-		<constructor-arg><ref bean="kerry2"/></constructor-arg>
+		<constructor-arg>
+			<ref bean="kerry2"/>
+		</constructor-arg>
 	</bean>
 
 	<bean id="rod2" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean">
 		<constructor-arg index="1" ref="kerry1"/>
 		<constructor-arg index="0" ref="kerry2"/>
-		<constructor-arg><ref bean="other"/></constructor-arg>
+		<constructor-arg>
+			<ref bean="other"/>
+		</constructor-arg>
 	</bean>
 
-	<bean id="rod2Accessor" class="org.springframework.tests.sample.beans.TestBean" lazy-init="true">
+	<bean id="rod2Accessor" class="org.springframework.beans.testfixture.beans.TestBean" lazy-init="true">
 		<property name="friends">
 			<list>
 				<ref bean="rod2"/>
@@ -23,7 +27,7 @@
 	</bean>
 
 	<bean id="rod3" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean"
-			autowire="constructor">
+		  autowire="constructor">
 		<constructor-arg index="0"><ref bean="kerry2"/></constructor-arg>
 		<constructor-arg index="1"><ref bean="kerry2"/></constructor-arg>
 	</bean>
@@ -110,14 +114,18 @@
 	</bean>
 
 	<bean id="rod17" parent="rod16">
-		<constructor-arg name="otherSpouse"><ref bean="kerry2"/></constructor-arg>
-		<constructor-arg name="spouse"><ref bean="kerry1"/></constructor-arg>
+		<constructor-arg name="otherSpouse">
+			<ref bean="kerry2"/>
+		</constructor-arg>
+		<constructor-arg name="spouse">
+			<ref bean="kerry1"/>
+		</constructor-arg>
 	</bean>
 
 	<bean id="rod18" class="org.springframework.beans.factory.xml.SimpleConstructorArgBean" scope="prototype">
 	</bean>
 
-	<bean id="kerry1" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="kerry1" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name">
 			<value>Kerry1</value>
 		</property>
@@ -126,7 +134,7 @@
 		</property>
 	</bean>
 
-	<bean id="kerry2" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="kerry2" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name">
 			<value>Kerry2</value>
 		</property>
@@ -135,10 +143,12 @@
 		</property>
 	</bean>
 
-	<bean id="other" class="org.springframework.tests.sample.beans.IndexedTestBean"/>
+	<bean id="other" class="org.springframework.beans.testfixture.beans.IndexedTestBean"/>
 
 	<bean id="file" class="java.io.File">
-		<constructor-arg><value>/test</value></constructor-arg>
+		<constructor-arg>
+			<value>/test</value>
+		</constructor-arg>
 	</bean>
 
 	<bean id="beanWithBoolean" class="org.springframework.beans.factory.xml.SingleSimpleTypeConstructorBean" scope="prototype">
@@ -187,13 +197,13 @@
 
 	<bean id="lenientDependencyTestBean" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$LenientDependencyTestBean" scope="prototype">
 		<constructor-arg>
-			<bean class="org.springframework.tests.sample.beans.DerivedTestBean"/>
+			<bean class="org.springframework.beans.testfixture.beans.DerivedTestBean"/>
 		</constructor-arg>
 	</bean>
 
 	<bean id="lenientDependencyTestBeanFactoryMethod" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$LenientDependencyTestBean" scope="prototype" factory-method="create">
 		<constructor-arg>
-			<bean class="org.springframework.tests.sample.beans.DerivedTestBean"/>
+			<bean class="org.springframework.beans.testfixture.beans.DerivedTestBean"/>
 		</constructor-arg>
 	</bean>
 

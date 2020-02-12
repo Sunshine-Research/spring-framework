@@ -49,69 +49,85 @@
 		<description>
 			Illustrates a JDK introduction
 		</description>
-	  <property name="beanNames"><value>*introductionUsingJdk</value></property>
-	  <property name="interceptorNames">
+		<property name="beanNames">
+			<value>*introductionUsingJdk</value>
+		</property>
+		<property name="interceptorNames">
 			<list>
 				<value>introductionNopInterceptor</value>
 				<value>timestampIntroduction</value>
 				<value>lockableAdvisor</value>
 			</list>
-	  </property>
+		</property>
 	</bean>
 
-	<bean id="timestampIntroduction" class="org.springframework.tests.aop.advice.TimestampIntroductionAdvisor"/>
+	<bean id="timestampIntroduction" class="org.springframework.aop.testfixture.advice.TimestampIntroductionAdvisor"/>
 
 	<!--
 		Stateful mixin. Note that singleton property is false.
 	-->
 	<bean id="lockableAdvisor" class="test.mixin.LockMixinAdvisor"
-			scope="prototype"/>
+		  scope="prototype"/>
 
-	<bean id="countingBeforeAdvice" class="org.springframework.tests.aop.advice.CountingBeforeAdvice"/>
+	<bean id="countingBeforeAdvice" class="org.springframework.aop.testfixture.advice.CountingBeforeAdvice"/>
 
-	<bean id="nopInterceptor" class="org.springframework.tests.aop.interceptor.NopInterceptor"/>
+	<bean id="nopInterceptor" class="org.springframework.aop.testfixture.interceptor.NopInterceptor"/>
 
-	<bean id="introductionNopInterceptor" class="org.springframework.tests.aop.interceptor.NopInterceptor"/>
+	<bean id="introductionNopInterceptor" class="org.springframework.aop.testfixture.interceptor.NopInterceptor"/>
 
-	<bean id="introductionUsingJdk" class="org.springframework.tests.sample.beans.TestBean">
-		<property name="name"><value>introductionUsingJdk</value></property>
+	<bean id="introductionUsingJdk" class="org.springframework.beans.testfixture.beans.TestBean">
+		<property name="name">
+			<value>introductionUsingJdk</value>
+		</property>
 	</bean>
 
-	<bean id="second-introductionUsingJdk" class="org.springframework.tests.sample.beans.TestBean">
-		<property name="name"><value>second-introductionUsingJdk</value></property>
+	<bean id="second-introductionUsingJdk" class="org.springframework.beans.testfixture.beans.TestBean">
+		<property name="name">
+			<value>second-introductionUsingJdk</value>
+		</property>
 	</bean>
 
 	<!--
 		Lazy only because it breaks other tests until this test is fixed
 	-->
 	<bean id="factory-introductionUsingJdk" class="org.springframework.aop.framework.autoproxy.CreatesTestBean"
-			lazy-init="true">
+		  lazy-init="true">
 	</bean>
 
-	<bean id="jdk1" class="org.springframework.tests.sample.beans.TestBean">
-		<property name="name"><value>jdk1</value></property>
+	<bean id="jdk1" class="org.springframework.beans.testfixture.beans.TestBean">
+		<property name="name">
+			<value>jdk1</value>
+		</property>
 	</bean>
 
-	<bean id="frozen" class="org.springframework.tests.sample.beans.TestBean">
+	<bean id="frozen" class="org.springframework.beans.testfixture.beans.TestBean">
 		<property name="name" value="frozenBean"/>
 	</bean>
 
 	<alias name="frozen" alias="frozenBean"/>
 
-	<bean id="cglib1" class="org.springframework.tests.sample.beans.TestBean">
-		<property name="name"><value>cglib1</value></property>
+	<bean id="cglib1" class="org.springframework.beans.testfixture.beans.TestBean">
+		<property name="name">
+			<value>cglib1</value>
+		</property>
 	</bean>
 
-	<bean id="onlyJdk" class="org.springframework.tests.sample.beans.TestBean">
-		<property name="name"><value>onlyJdk</value></property>
+	<bean id="onlyJdk" class="org.springframework.beans.testfixture.beans.TestBean">
+		<property name="name">
+			<value>onlyJdk</value>
+		</property>
 	</bean>
 
-	<bean id="doubleJdk" class="org.springframework.tests.sample.beans.TestBean">
-		<property name="name"><value>doubleJdk</value></property>
+	<bean id="doubleJdk" class="org.springframework.beans.testfixture.beans.TestBean">
+		<property name="name">
+			<value>doubleJdk</value>
+		</property>
 	</bean>
 
-	<bean id="noproxy" class="org.springframework.tests.sample.beans.TestBean">
-		<property name="name"><value>noproxy</value></property>
+	<bean id="noproxy" class="org.springframework.beans.testfixture.beans.TestBean">
+		<property name="name">
+			<value>noproxy</value>
+		</property>
 	</bean>
 
 </beans>

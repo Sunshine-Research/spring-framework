@@ -11,11 +11,11 @@
 			<aop:pointcut id="setter" expression="execution(* setName(..)) and args(name)"/>
 			<aop:before pointcut-ref="setter" method="myBeforeAdvice(java.lang.String)"/>
 			<aop:before pointcut-ref="setter" method="myBeforeAdvice(int)"/>
-		</aop:aspect>	
+		</aop:aspect>
 	</aop:config>
 
 	<bean id="testAspect" class="org.springframework.aop.aspectj.OverloadedAdviceTestAspect"/>
 
-	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean"/>
+	<bean id="testBean" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
 </beans>

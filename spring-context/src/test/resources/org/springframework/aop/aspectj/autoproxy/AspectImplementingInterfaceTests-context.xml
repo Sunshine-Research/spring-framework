@@ -8,13 +8,13 @@
 	<aop:config>
 		<aop:aspect ref="interfaceExtendingAspect">
 			<aop:pointcut id="anyOperation"
-				expression="execution(* *(..))"/>
+						  expression="execution(* *(..))"/>
 			<aop:around pointcut-ref="anyOperation" method="increment"/>
 		</aop:aspect>
 	</aop:config>
 
-	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean" />
+	<bean id="testBean" class="org.springframework.beans.testfixture.beans.TestBean"/>
 
 	<bean id="interfaceExtendingAspect"
-		class="org.springframework.aop.aspectj.autoproxy.InterfaceExtendingAspect"/>
+		  class="org.springframework.aop.aspectj.autoproxy.InterfaceExtendingAspect"/>
 </beans>
