@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,7 @@
 
 package org.springframework.http.client.reactive;
 
-import java.util.Collection;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import io.netty.buffer.ByteBufAllocator;
-import reactor.core.publisher.Flux;
-import reactor.netty.NettyInbound;
-import reactor.netty.http.client.HttpClientResponse;
-
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
@@ -32,6 +25,12 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import reactor.core.publisher.Flux;
+import reactor.netty.NettyInbound;
+import reactor.netty.http.client.HttpClientResponse;
+
+import java.util.Collection;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * {@link ClientHttpResponse} implementation for the Reactor-Netty HTTP client.
@@ -100,14 +99,14 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	public MultiValueMap<String, ResponseCookie> getCookies() {
 		MultiValueMap<String, ResponseCookie> result = new LinkedMultiValueMap<>();
 		this.response.cookies().values().stream().flatMap(Collection::stream)
-				.forEach(cookie ->
-					result.add(cookie.name(), ResponseCookie.from(cookie.name(), cookie.value())
-							.domain(cookie.domain())
-							.path(cookie.path())
-							.maxAge(cookie.maxAge())
-							.secure(cookie.isSecure())
-							.httpOnly(cookie.isHttpOnly())
-							.build()));
+				.forEach(c ->
+						result.add(c.name(), ResponseCookie.fromClientResponse(c.name(), c.value())
+								.domain(c.domain())
+								.path(c.path())
+								.maxAge(c.maxAge())
+								.secure(c.isSecure())
+								.httpOnly(c.isHttpOnly())
+								.build()));
 		return CollectionUtils.unmodifiableMultiValueMap(result);
 	}
 

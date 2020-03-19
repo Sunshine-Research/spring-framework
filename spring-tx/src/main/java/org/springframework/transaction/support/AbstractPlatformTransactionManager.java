@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -385,7 +385,6 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				prepareSynchronization(status, def);
 				return status;
 			} catch (RuntimeException | Error ex) {
-				// 出现异常的情况下，继续进行当前的事务，并抛出捕获的异常
 				resume(null, suspendedResources);
 				throw ex;
 			}
@@ -404,6 +403,20 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 	/**
 	 * 为已存在事务创建一个事务状态
+	 */
+	private TransactionStatus startTransaction(TransactionDefinition definition, Object transaction,
+											   boolean debugEnabled, @Nullable SuspendedResourcesHolder suspendedResources) {
+
+		boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
+		DefaultTransactionStatus status = newTransactionStatus(
+				definition, transaction, true, newSynchronization, debugEnabled, suspendedResources);
+		doBegin(transaction, definition);
+		prepareSynchronization(status, definition);
+		return status;
+	}
+
+	/**
+	 * Create a TransactionStatus for an existing transaction.
 	 */
 	private TransactionStatus handleExistingTransaction(
 			TransactionDefinition definition, Object transaction, boolean debugEnabled)
@@ -472,16 +485,9 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				status.createAndHoldSavepoint();
 				return status;
 			} else {
-				// 如果不需要保存点
-				// 通常用于JTA
-				// 判断新事务的同步状态
-				boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
-				DefaultTransactionStatus status = newTransactionStatus(
-						definition, transaction, true, newSynchronization, debugEnabled, null);
-				// 直接开启事务，并设置新事务的同步状态，返回TransactionStatus
-				doBegin(transaction, definition);
-				prepareSynchronization(status, definition);
-				return status;
+				// 通过嵌套的begin和commit/rollback调用进行嵌套事务
+				// 只在JTA情况下使用：Spring同步可能在此处激活，由于已经存在的JTA事务
+				return startTransaction(definition, transaction, debugEnabled, null);
 			}
 		}
 

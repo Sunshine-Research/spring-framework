@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,8 @@
 
 package org.springframework.test.web.servlet.request;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
-import javax.servlet.ServletContext;
-import javax.servlet.http.Cookie;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -48,7 +31,23 @@ import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.Cookie;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Unit tests for building a {@link MockHttpServletRequest} with
@@ -88,7 +87,8 @@ public class MockHttpServletRequestBuilderTests {
 		assertThat(request.getServerName()).isEqualTo("java.sun.com");
 		assertThat(request.getServerPort()).isEqualTo(8080);
 		assertThat(request.getRequestURI()).isEqualTo("/javase/6/docs/api/java/util/BitSet.html");
-		assertThat(request.getRequestURL().toString()).isEqualTo("https://java.sun.com:8080/javase/6/docs/api/java/util/BitSet.html");
+		assertThat(request.getRequestURL().toString())
+				.isEqualTo("https://java.sun.com:8080/javase/6/docs/api/java/util/BitSet.html");
 	}
 
 	@Test
@@ -105,6 +105,12 @@ public class MockHttpServletRequestBuilderTests {
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
 		assertThat(request.getRequestURI()).isEqualTo("/test//currentlyValid/0");
+	}
+
+	@Test // gh-24556
+	public void requestUriWithoutScheme() {
+		assertThatIllegalArgumentException().isThrownBy(() -> MockMvcRequestBuilders.get("localhost:8080/path"))
+				.withMessage("'url' should start with a path or be a complete HTTP URL: localhost:8080/path");
 	}
 
 	@Test

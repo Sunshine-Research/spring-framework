@@ -14,16 +14,8 @@
  * limitations under the License.
  */
 
-package example.gh24375;
+package example.type;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-@Target(ElementType.ANNOTATION_TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface B {
-
-	String name() default "";
+@EnclosingAnnotation(nested2 = @NestedAnnotation)
+public class AnnotatedComponent {
 }

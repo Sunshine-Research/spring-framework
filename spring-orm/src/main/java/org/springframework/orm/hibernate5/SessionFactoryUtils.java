@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,6 @@
  */
 
 package org.springframework.orm.hibernate5;
-
-import java.lang.reflect.Method;
-import java.util.Map;
-
-import javax.persistence.PersistenceException;
-import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -53,7 +47,6 @@ import org.hibernate.exception.JDBCConnectionException;
 import org.hibernate.exception.LockAcquisitionException;
 import org.hibernate.exception.SQLGrammarException;
 import org.hibernate.service.UnknownServiceException;
-
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -68,6 +61,11 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+
+import javax.persistence.PersistenceException;
+import javax.sql.DataSource;
+import java.lang.reflect.Method;
+import java.util.Map;
 
 /**
  * Helper class featuring methods for Hibernate Session handling.
@@ -170,11 +168,8 @@ public abstract class SessionFactoryUtils {
 			try {
 				session.close();
 			}
-			catch (HibernateException ex) {
-				logger.debug("Could not close Hibernate Session", ex);
-			}
 			catch (Throwable ex) {
-				logger.debug("Unexpected exception on closing Hibernate Session", ex);
+				logger.error("Failed to release Hibernate Session", ex);
 			}
 		}
 	}

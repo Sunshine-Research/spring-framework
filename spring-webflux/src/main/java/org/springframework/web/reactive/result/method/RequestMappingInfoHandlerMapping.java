@@ -16,17 +16,6 @@
 
 package org.springframework.web.reactive.result.method;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.EnumSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.InvalidMediaTypeException;
@@ -38,12 +27,25 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.result.condition.NameValueExpression;
+import org.springframework.web.reactive.result.condition.ProducesRequestCondition;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.util.pattern.PathPattern;
+import reactor.core.publisher.Mono;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Abstract base class for classes for which {@link RequestMappingInfo} defines
@@ -87,6 +89,13 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		return (info1, info2) -> info1.compareTo(info2, exchange);
 	}
 
+	@Override
+	public Mono<HandlerMethod> getHandlerInternal(ServerWebExchange exchange) {
+		exchange.getAttributes().remove(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
+		return super.getHandlerInternal(exchange)
+				.doOnTerminate(() -> ProducesRequestCondition.clearMediaTypesAttribute(exchange));
+	}
+
 	/**
 	 * Expose URI template variables, matrix variables, and producible media types in the request.
 	 * @see HandlerMapping#URI_TEMPLATE_VARIABLES_ATTRIBUTE
@@ -95,7 +104,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 */
 	@Override
 	protected void handleMatch(RequestMappingInfo info, HandlerMethod handlerMethod,
-			ServerWebExchange exchange) {
+							   ServerWebExchange exchange) {
 
 		super.handleMatch(info, handlerMethod, exchange);
 

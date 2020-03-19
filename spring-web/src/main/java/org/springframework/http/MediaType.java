@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,14 @@
 
 package org.springframework.http;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.InvalidMimeTypeException;
+import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
+import org.springframework.util.StringUtils;
+
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -26,14 +34,6 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.InvalidMimeTypeException;
-import org.springframework.util.MimeType;
-import org.springframework.util.MimeTypeUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * A subclass of {@link MimeType} that adds support for quality parameters
@@ -302,9 +302,21 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String MULTIPART_MIXED_VALUE = "multipart/mixed";
 
 	/**
+	 * Public constant media type for {@code multipart/related}.
+	 * @since 5.2.5
+	 */
+	public static final MediaType MULTIPART_RELATED;
+
+	/**
+	 * A String equivalent of {@link MediaType#MULTIPART_RELATED}.
+	 * @since 5.2.5
+	 */
+	public static final String MULTIPART_RELATED_VALUE = "multipart/related";
+
+	/**
 	 * Public constant media type for {@code text/event-stream}.
-	 * @since 4.3.6
 	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
+	 * @since 4.3.6
 	 */
 	public static final MediaType TEXT_EVENT_STREAM;
 
@@ -381,6 +393,7 @@ public class MediaType extends MimeType implements Serializable {
 		IMAGE_PNG = new MediaType("image", "png");
 		MULTIPART_FORM_DATA = new MediaType("multipart", "form-data");
 		MULTIPART_MIXED = new MediaType("multipart", "mixed");
+		MULTIPART_RELATED = new MediaType("multipart", "related");
 		TEXT_EVENT_STREAM = new MediaType("text", "event-stream");
 		TEXT_HTML = new MediaType("text", "html");
 		TEXT_MARKDOWN = new MediaType("text", "markdown");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,7 @@
 
 package org.springframework.web.reactive.function.server;
 
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -35,6 +29,13 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
+import org.springframework.web.testfixture.server.MockServerWebExchange;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+
+import java.util.Collections;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -50,7 +51,8 @@ public class RouterFunctionsTests {
 	public void routeMatch() {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 
-		MockServerRequest request = MockServerRequest.builder().build();
+		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com").build();
+		ServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		given(requestPredicate.test(request)).willReturn(true);
 
@@ -70,7 +72,8 @@ public class RouterFunctionsTests {
 	public void routeNoMatch() {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 
-		MockServerRequest request = MockServerRequest.builder().build();
+		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com").build();
+		ServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		given(requestPredicate.test(request)).willReturn(false);
 
@@ -88,7 +91,8 @@ public class RouterFunctionsTests {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 		RouterFunction<ServerResponse> routerFunction = request -> Mono.just(handlerFunction);
 
-		MockServerRequest request = MockServerRequest.builder().build();
+		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com").build();
+		ServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		given(requestPredicate.nest(request)).willReturn(Optional.of(request));
 
@@ -107,7 +111,8 @@ public class RouterFunctionsTests {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 		RouterFunction<ServerResponse> routerFunction = request -> Mono.just(handlerFunction);
 
-		MockServerRequest request = MockServerRequest.builder().build();
+		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com").build();
+		ServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		given(requestPredicate.nest(request)).willReturn(Optional.empty());
 
@@ -129,7 +134,7 @@ public class RouterFunctionsTests {
 		HttpHandler result = RouterFunctions.toHttpHandler(routerFunction);
 		assertThat(result).isNotNull();
 
-		MockServerHttpRequest httpRequest = MockServerHttpRequest.get("http://localhost").build();
+		MockServerHttpRequest httpRequest = MockServerHttpRequest.get("https://localhost").build();
 		MockServerHttpResponse httpResponse = new MockServerHttpResponse();
 		result.handle(httpRequest, httpResponse).block();
 		assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
@@ -147,7 +152,7 @@ public class RouterFunctionsTests {
 		HttpHandler result = RouterFunctions.toHttpHandler(routerFunction);
 		assertThat(result).isNotNull();
 
-		MockServerHttpRequest httpRequest = MockServerHttpRequest.get("http://localhost").build();
+		MockServerHttpRequest httpRequest = MockServerHttpRequest.get("https://localhost").build();
 		MockServerHttpResponse httpResponse = new MockServerHttpResponse();
 		result.handle(httpRequest, httpResponse).block();
 		assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -163,7 +168,7 @@ public class RouterFunctionsTests {
 		HttpHandler result = RouterFunctions.toHttpHandler(routerFunction);
 		assertThat(result).isNotNull();
 
-		MockServerHttpRequest httpRequest = MockServerHttpRequest.get("http://localhost").build();
+		MockServerHttpRequest httpRequest = MockServerHttpRequest.get("https://localhost").build();
 		MockServerHttpResponse httpResponse = new MockServerHttpResponse();
 		result.handle(httpRequest, httpResponse).block();
 		assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -179,7 +184,7 @@ public class RouterFunctionsTests {
 		HttpHandler result = RouterFunctions.toHttpHandler(routerFunction);
 		assertThat(result).isNotNull();
 
-		MockServerHttpRequest httpRequest = MockServerHttpRequest.get("http://localhost").build();
+		MockServerHttpRequest httpRequest = MockServerHttpRequest.get("https://localhost").build();
 		MockServerHttpResponse httpResponse = new MockServerHttpResponse();
 		result.handle(httpRequest, httpResponse).block();
 		assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -217,7 +222,7 @@ public class RouterFunctionsTests {
 		HttpHandler result = RouterFunctions.toHttpHandler(routerFunction);
 		assertThat(result).isNotNull();
 
-		MockServerHttpRequest httpRequest = MockServerHttpRequest.get("http://localhost").build();
+		MockServerHttpRequest httpRequest = MockServerHttpRequest.get("https://localhost").build();
 		MockServerHttpResponse httpResponse = new MockServerHttpResponse();
 		result.handle(httpRequest, httpResponse).block();
 		assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -255,7 +260,7 @@ public class RouterFunctionsTests {
 		HttpHandler result = RouterFunctions.toHttpHandler(routerFunction);
 		assertThat(result).isNotNull();
 
-		MockServerHttpRequest httpRequest = MockServerHttpRequest.get("http://localhost").build();
+		MockServerHttpRequest httpRequest = MockServerHttpRequest.get("https://localhost").build();
 		MockServerHttpResponse httpResponse = new MockServerHttpResponse();
 		result.handle(httpRequest, httpResponse).block();
 		assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -283,7 +288,7 @@ public class RouterFunctionsTests {
 		HttpHandler result = RouterFunctions.toHttpHandler(routerFunction, handlerStrategies);
 		assertThat(result).isNotNull();
 
-		MockServerHttpRequest httpRequest = MockServerHttpRequest.get("http://localhost").build();
+		MockServerHttpRequest httpRequest = MockServerHttpRequest.get("https://localhost").build();
 		MockServerHttpResponse httpResponse = new MockServerHttpResponse();
 		result.handle(httpRequest, httpResponse).block();
 		assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);

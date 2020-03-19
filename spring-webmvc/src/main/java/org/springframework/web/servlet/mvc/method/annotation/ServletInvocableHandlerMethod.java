@@ -16,15 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.concurrent.Callable;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
@@ -36,7 +27,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
@@ -44,6 +34,14 @@ import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.View;
 import org.springframework.web.util.NestedServletException;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.concurrent.Callable;
 
 /**
  * Extends {@link InvocableHandlerMethod} with the ability to handle return
@@ -172,7 +170,6 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 			if (StringUtils.hasText(response.getHeader(HttpHeaders.ETAG))) {
 				HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
 				Assert.notNull(request, "Expected HttpServletRequest");
-				ShallowEtagHeaderFilter.disableContentCaching(request);
 			}
 		}
 	}

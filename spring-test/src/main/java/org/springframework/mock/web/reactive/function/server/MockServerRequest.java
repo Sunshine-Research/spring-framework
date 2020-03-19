@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,33 @@
 
 package org.springframework.mock.web.reactive.function.server;
 
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpCookie;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRange;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.multipart.Part;
+import org.springframework.http.server.PathContainer;
+import org.springframework.http.server.RequestPath;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.lang.Nullable;
+import org.springframework.mock.web.server.MockServerWebExchange;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyExtractor;
+import org.springframework.web.reactive.function.server.HandlerStrategies;
+import org.springframework.web.reactive.function.server.ServerRequest;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebSession;
+import org.springframework.web.util.UriBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -30,39 +57,15 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.ConcurrentHashMap;
 
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpCookie;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpRange;
-import org.springframework.http.MediaType;
-import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.http.codec.multipart.Part;
-import org.springframework.http.server.PathContainer;
-import org.springframework.http.server.RequestPath;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.reactive.function.BodyExtractor;
-import org.springframework.web.reactive.function.server.HandlerStrategies;
-import org.springframework.web.reactive.function.server.ServerRequest;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.WebSession;
-import org.springframework.web.util.UriBuilder;
-import org.springframework.web.util.UriComponentsBuilder;
-
 /**
  * Mock implementation of {@link ServerRequest}.
- *
  * @author Arjen Poutsma
  * @since 5.0
+ * @deprecated as of 5.2.5 in favor of
+ * {@link ServerRequest#create(ServerWebExchange, List)} combined with
+ * {@link MockServerWebExchange}.
  */
+@Deprecated
 public final class MockServerRequest implements ServerRequest {
 
 	private final HttpMethod method;

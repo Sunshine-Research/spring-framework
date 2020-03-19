@@ -16,6 +16,13 @@
 
 package org.springframework.scheduling.concurrent;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -23,14 +30,6 @@ import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.beans.factory.BeanNameAware;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.Nullable;
 
 /**
  * Base class for setting up a {@link java.util.concurrent.ExecutorService}
@@ -141,6 +140,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 * since all remaining tasks in the queue will still get executed - in contrast
 	 * to the default shutdown behavior where it's just about waiting for currently
 	 * executing tasks that aren't reacting to thread interruption.
+	 * @see #setAwaitTerminationMillis
 	 * @see java.util.concurrent.ExecutorService#shutdown()
 	 * @see java.util.concurrent.ExecutorService#awaitTermination
 	 */
@@ -150,14 +150,12 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 
 	/**
 	 * Variant of {@link #setAwaitTerminationSeconds} with millisecond precision.
+	 * @see #setAwaitTerminationSeconds
 	 * @since 5.2.4
-	 * @see java.util.concurrent.ExecutorService#shutdown()
-	 * @see java.util.concurrent.ExecutorService#awaitTermination
 	 */
 	public void setAwaitTerminationMillis(long awaitTerminationMillis) {
 		this.awaitTerminationMillis = awaitTerminationMillis;
 	}
-
 
 	@Override
 	public void setBeanName(String name) {

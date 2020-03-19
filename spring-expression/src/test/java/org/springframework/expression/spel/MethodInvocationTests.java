@@ -16,15 +16,7 @@
 
 package org.springframework.expression.spel;
 
-import java.lang.annotation.Annotation;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
-
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
@@ -37,6 +29,13 @@ import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.PlaceOfBirth;
+
+import java.lang.annotation.Annotation;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -221,8 +220,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		ctx.addMethodResolver(dummy);
 		assertThat(ctx.getMethodResolvers().size()).isEqualTo(2);
 
-		List<MethodResolver> copy = new ArrayList<>();
-		copy.addAll(ctx.getMethodResolvers());
+		List<MethodResolver> copy = new ArrayList<>(ctx.getMethodResolvers());
 		assertThat(ctx.removeMethodResolver(dummy)).isTrue();
 		assertThat(ctx.removeMethodResolver(dummy)).isFalse();
 		assertThat(ctx.getMethodResolvers().size()).isEqualTo(1);

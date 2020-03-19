@@ -16,10 +16,10 @@
 
 package org.springframework.transaction.interceptor;
 
-import java.io.Serializable;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.io.Serializable;
 
 /**
  * Rule determining whether or not a given exception (and any subclasses)
@@ -54,11 +54,11 @@ public class RollbackRuleAttribute implements Serializable{
 	/**
 	 * Create a new instance of the {@code RollbackRuleAttribute} class.
 	 * <p>This is the preferred way to construct a rollback rule that matches
-	 * the supplied {@link Exception} class (and subclasses).
+	 * the supplied {@link Exception} class, its subclasses, and its nested classes.
 	 * @param clazz throwable class; must be {@link Throwable} or a subclass
-	 * of {@code Throwable}
+	 *              of {@code Throwable}
 	 * @throws IllegalArgumentException if the supplied {@code clazz} is
-	 * not a {@code Throwable} type or is {@code null}
+	 *                                  not a {@code Throwable} type or is {@code null}
 	 */
 	public RollbackRuleAttribute(Class<?> clazz) {
 		Assert.notNull(clazz, "'clazz' cannot be null");

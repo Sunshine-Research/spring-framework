@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,6 @@
  */
 
 package org.springframework.expression.spel.support;
-
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.asm.MethodVisitor;
 import org.springframework.core.MethodParameter;
@@ -45,20 +33,32 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * A powerful {@link PropertyAccessor} that uses reflection to access properties
  * for reading and possibly also for writing.
  *
  * <p>A property can be referenced through a public getter method (when being read)
  * or a public setter method (when being written), and also as a public field.
- *
  * @author Andy Clement
  * @author Juergen Hoeller
  * @author Phillip Webb
- * @since 3.0
+ * @author Sam Brannen
  * @see StandardEvaluationContext
  * @see SimpleEvaluationContext
  * @see DataBindingPropertyAccessor
+ * @since 3.0
  */
 public class ReflectivePropertyAccessor implements PropertyAccessor {
 
@@ -765,10 +765,12 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			}
 
 			if (this.member instanceof Method) {
-				mv.visitMethodInsn((isStatic ? INVOKESTATIC : INVOKEVIRTUAL), classDesc, this.member.getName(),
-						CodeFlow.createSignatureDescriptor((Method) this.member), false);
-			}
-			else {
+				Method method = (Method) this.member;
+				boolean isInterface = method.getDeclaringClass().isInterface();
+				int opcode = (isStatic ? INVOKESTATIC : isInterface ? INVOKEINTERFACE : INVOKEVIRTUAL);
+				mv.visitMethodInsn(opcode, classDesc, method.getName(),
+						CodeFlow.createSignatureDescriptor(method), isInterface);
+			} else {
 				mv.visitFieldInsn((isStatic ? GETSTATIC : GETFIELD), classDesc, this.member.getName(),
 						CodeFlow.toJvmDescriptor(((Field) this.member).getType()));
 			}

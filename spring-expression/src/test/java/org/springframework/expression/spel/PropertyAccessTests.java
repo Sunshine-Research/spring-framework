@@ -16,13 +16,7 @@
 
 package org.springframework.expression.spel;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 import org.junit.jupiter.api.Test;
-
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
@@ -36,6 +30,11 @@ import org.springframework.expression.spel.support.SimpleEvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.Inventor;
 import org.springframework.expression.spel.testresources.Person;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -135,8 +134,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		ctx.addPropertyAccessor(spa);
 		assertThat(ctx.getPropertyAccessors().size()).isEqualTo(2);
 
-		List<PropertyAccessor> copy = new ArrayList<>();
-		copy.addAll(ctx.getPropertyAccessors());
+		List<PropertyAccessor> copy = new ArrayList<>(ctx.getPropertyAccessors());
 		assertThat(ctx.removePropertyAccessor(spa)).isTrue();
 		assertThat(ctx.removePropertyAccessor(spa)).isFalse();
 		assertThat(ctx.getPropertyAccessors().size()).isEqualTo(1);

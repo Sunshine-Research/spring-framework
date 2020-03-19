@@ -16,12 +16,6 @@
 
 package org.springframework.cache.config;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import org.w3c.dom.Element;
-
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.parsing.ReaderContext;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -39,6 +33,11 @@ import org.springframework.cache.interceptor.NameMatchCacheOperationSource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
+import org.w3c.dom.Element;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser
@@ -113,11 +112,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			builder.setUnless(getAttributeValue(opElement, "unless", ""));
 			builder.setSync(Boolean.parseBoolean(getAttributeValue(opElement, "sync", "false")));
 
-			Collection<CacheOperation> col = cacheOpMap.get(nameHolder);
-			if (col == null) {
-				col = new ArrayList<>(2);
-				cacheOpMap.put(nameHolder, col);
-			}
+			Collection<CacheOperation> col = cacheOpMap.computeIfAbsent(nameHolder, k -> new ArrayList<>(2));
 			col.add(builder.build());
 		}
 
@@ -140,11 +135,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 				builder.setBeforeInvocation(Boolean.parseBoolean(after.trim()));
 			}
 
-			Collection<CacheOperation> col = cacheOpMap.get(nameHolder);
-			if (col == null) {
-				col = new ArrayList<>(2);
-				cacheOpMap.put(nameHolder, col);
-			}
+			Collection<CacheOperation> col = cacheOpMap.computeIfAbsent(nameHolder, k -> new ArrayList<>(2));
 			col.add(builder.build());
 		}
 
@@ -158,11 +149,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 					parserContext.getReaderContext(), new CachePutOperation.Builder());
 			builder.setUnless(getAttributeValue(opElement, "unless", ""));
 
-			Collection<CacheOperation> col = cacheOpMap.get(nameHolder);
-			if (col == null) {
-				col = new ArrayList<>(2);
-				cacheOpMap.put(nameHolder, col);
-			}
+			Collection<CacheOperation> col = cacheOpMap.computeIfAbsent(nameHolder, k -> new ArrayList<>(2));
 			col.add(builder.build());
 		}
 

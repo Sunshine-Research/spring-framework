@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,6 @@
 
 package org.springframework.web.servlet.mvc.condition;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
@@ -35,6 +27,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition.HeaderExpression;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * A logical disjunction (' || ') request condition to match a request's 'Accept' header
@@ -97,7 +96,9 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 			@Nullable ContentNegotiationManager manager) {
 
 		this.expressions = new ArrayList<>(parseExpressions(produces, headers));
-		Collections.sort(this.expressions);
+		if (this.expressions.size() > 1) {
+			Collections.sort(this.expressions);
+		}
 		this.contentNegotiationManager = manager != null ? manager : DEFAULT_CONTENT_NEGOTIATION_MANAGER;
 	}
 

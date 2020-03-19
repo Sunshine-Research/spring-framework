@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,7 @@
 
 package org.springframework.web.reactive.function.client;
 
-import java.net.URI;
-import java.nio.charset.Charset;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.IntPredicate;
-import java.util.function.Predicate;
-
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpHeaders;
@@ -43,8 +30,21 @@ import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.net.URI;
+import java.nio.charset.Charset;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.IntPredicate;
+import java.util.function.Predicate;
 
 /**
  * Non-blocking, reactive client to perform HTTP requests, exposing a fluent,
@@ -163,44 +163,20 @@ public interface WebClient {
 	interface Builder {
 
 		/**
-		 * Configure a base URL for requests performed through the client.
-		 *
-		 * <p>For example given base URL "https://abc.go.com/v1":
-		 * <p><pre class="code">
-		 * Mono&#060;Account&#062; result = client.get().uri("/accounts/{id}", 43)
-		 *         .retrieve()
-		 *         .bodyToMono(Account.class);
-		 *
-		 * // Result: https://abc.go.com/v1/accounts/43
-		 *
-		 * Flux&#060;Account&#062; result = client.get()
-		 *         .uri(builder -> builder.path("/accounts").queryParam("q", "12").build())
-		 *         .retrieve()
-		 *         .bodyToFlux(Account.class);
-		 *
-		 * // Result: https://abc.go.com/v1/accounts?q=12
-		 * </pre>
-		 *
-		 * <p>The base URL can be overridden with an absolute URI:
+		 * Configure a base URL for requests. Effectively a shortcut for:
+		 * <p>
 		 * <pre class="code">
-		 * Mono&#060;Account&#062; result = client.get().uri("https://xyz.com/path")
-		 *         .retrieve()
-		 *         .bodyToMono(Account.class);
-		 *
-		 * // Result: https://xyz.com/path
+		 * String baseUrl = "https://abc.go.com/v1";
+		 * DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(baseUrl);
+		 * WebClient client = WebClient.builder().uriBuilderFactory(factory).build();
 		 * </pre>
-		 *
-		 * <p>Or partially overridden with a {@code UriBuilder}:
-		 * <pre class="code">
-		 * Flux&#060;Account&#062; result = client.get()
-		 *         .uri(builder -> builder.replacePath("/v2/accounts").queryParam("q", "12").build())
-		 *         .retrieve()
-		 *         .bodyToFlux(Account.class);
-		 *
-		 * // Result: https://abc.com/v2/accounts?q=12
-		 * </pre>
-		 *
-		 * @see #defaultUriVariables(Map)
+		 * <p>The {@code DefaultUriBuilderFactory} is used to prepare the URL
+		 * for every request with the given base URL, unless the URL request
+		 * for a given URL is absolute in which case the base URL is ignored.
+		 * <p><strong>Note:</strong> this method is mutually exclusive with
+		 * {@link #uriBuilderFactory(UriBuilderFactory)}. If both are used, the
+		 * baseUrl value provided here will be ignored.
+		 * @see DefaultUriBuilderFactory#DefaultUriBuilderFactory(String)
 		 * @see #uriBuilderFactory(UriBuilderFactory)
 		 */
 		Builder baseUrl(String baseUrl);
@@ -212,11 +188,28 @@ public interface WebClient {
 		 * @see #baseUrl(String)
 		 * @see #uriBuilderFactory(UriBuilderFactory)
 		 */
+		/**
+		 * Configure default URL variable values to use when expanding URI
+		 * templates with a {@link Map}. Effectively a shortcut for:
+		 * <p>
+		 * <pre class="code">
+		 * Map&lt;String, ?&gt; defaultVars = ...;
+		 * DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
+		 * factory.setDefaultVariables(defaultVars);
+		 * WebClient client = WebClient.builder().uriBuilderFactory(factory).build();
+		 * </pre>
+		 * <p><strong>Note:</strong> this method is mutually exclusive with
+		 * {@link #uriBuilderFactory(UriBuilderFactory)}. If both are used, the
+		 * defaultUriVariables value provided here will be ignored.
+		 * @see DefaultUriBuilderFactory#setDefaultUriVariables(Map)
+		 * @see #uriBuilderFactory(UriBuilderFactory)
+		 */
 		Builder defaultUriVariables(Map<String, ?> defaultUriVariables);
 
 		/**
 		 * Provide a pre-configured {@link UriBuilderFactory} instance. This is
-		 * an alternative to and effectively overrides the following:
+		 * an alternative to, and effectively overrides the following shortcut
+		 * properties:
 		 * <ul>
 		 * <li>{@link #baseUrl(String)}
 		 * <li>{@link #defaultUriVariables(Map)}.

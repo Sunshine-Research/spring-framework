@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,12 @@
 
 package org.springframework.test.context.junit.jupiter;
 
-import javax.sql.DataSource;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.platform.testkit.engine.EngineTestKit;
 import org.junit.platform.testkit.engine.Events;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -37,6 +34,8 @@ import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.sql.DataSource;
 
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
@@ -80,9 +79,9 @@ class FailingBeforeAndAfterMethodsSpringExtensionTests {
 	})
 	void failingBeforeAndAfterCallbacks(Class<?> testClass) {
 		Events events = EngineTestKit.engine("junit-jupiter")
-			.selectors(selectClass(testClass))
-			.execute()
-			.tests()
+				.selectors(selectClass(testClass))
+				.execute()
+				.testEvents()
 			.assertStatistics(stats -> stats
 				.skipped(0)
 				.aborted(0)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,32 @@
  */
 
 package org.springframework.web.reactive.function.server;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpCookie;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.multipart.Part;
+import org.springframework.http.server.PathContainer;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.cors.reactive.CorsUtils;
+import org.springframework.web.reactive.function.BodyExtractor;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebSession;
+import org.springframework.web.util.UriBuilder;
+import org.springframework.web.util.UriUtils;
+import org.springframework.web.util.pattern.PathPattern;
+import org.springframework.web.util.pattern.PathPatternParser;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -33,32 +59,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpCookie;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.http.codec.multipart.Part;
-import org.springframework.http.server.PathContainer;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.reactive.function.BodyExtractor;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.WebSession;
-import org.springframework.web.util.UriBuilder;
-import org.springframework.web.util.UriUtils;
-import org.springframework.web.util.pattern.PathPattern;
-import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * Implementations of {@link RequestPredicate} that implement various useful
@@ -449,10 +449,23 @@ public abstract class RequestPredicates {
 
 		@Override
 		public boolean test(ServerRequest request) {
-			boolean match = this.httpMethods.contains(request.method());
-			traceMatch("Method", this.httpMethods, request.method(), match);
+			HttpMethod method = method(request);
+			boolean match = this.httpMethods.contains(method);
+			traceMatch("Method", this.httpMethods, method, match);
 			return match;
 		}
+
+		@Nullable
+		private static HttpMethod method(ServerRequest request) {
+			if (CorsUtils.isPreFlightRequest(request.exchange().getRequest())) {
+				String accessControlRequestMethod =
+						request.headers().firstHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD);
+				return HttpMethod.resolve(accessControlRequestMethod);
+			} else {
+				return request.method();
+			}
+		}
+
 
 		@Override
 		public void accept(Visitor visitor) {
@@ -535,7 +548,11 @@ public abstract class RequestPredicates {
 
 		@Override
 		public boolean test(ServerRequest request) {
-			return this.headersPredicate.test(request.headers());
+			if (CorsUtils.isPreFlightRequest(request.exchange().getRequest())) {
+				return true;
+			} else {
+				return this.headersPredicate.test(request.headers());
+			}
 		}
 
 		@Override

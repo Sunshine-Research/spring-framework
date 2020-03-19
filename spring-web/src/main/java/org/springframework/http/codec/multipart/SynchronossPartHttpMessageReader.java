@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,36 +15,6 @@
  */
 
 package org.springframework.http.codec.multipart;
-
-import java.io.IOException;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.OpenOption;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
-
-import org.synchronoss.cloud.nio.multipart.DefaultPartBodyStreamStorageFactory;
-import org.synchronoss.cloud.nio.multipart.Multipart;
-import org.synchronoss.cloud.nio.multipart.MultipartContext;
-import org.synchronoss.cloud.nio.multipart.MultipartUtils;
-import org.synchronoss.cloud.nio.multipart.NioMultipartParser;
-import org.synchronoss.cloud.nio.multipart.NioMultipartParserListener;
-import org.synchronoss.cloud.nio.multipart.PartBodyStreamStorageFactory;
-import org.synchronoss.cloud.nio.stream.storage.StreamStorage;
-import reactor.core.publisher.BaseSubscriber;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
-import reactor.core.publisher.Mono;
-import reactor.core.publisher.SignalType;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.DecodingException;
@@ -62,6 +32,34 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.LoggingCodecSupport;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.synchronoss.cloud.nio.multipart.DefaultPartBodyStreamStorageFactory;
+import org.synchronoss.cloud.nio.multipart.Multipart;
+import org.synchronoss.cloud.nio.multipart.MultipartContext;
+import org.synchronoss.cloud.nio.multipart.MultipartUtils;
+import org.synchronoss.cloud.nio.multipart.NioMultipartParser;
+import org.synchronoss.cloud.nio.multipart.NioMultipartParserListener;
+import org.synchronoss.cloud.nio.multipart.PartBodyStreamStorageFactory;
+import org.synchronoss.cloud.nio.stream.storage.StreamStorage;
+import reactor.core.publisher.BaseSubscriber;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.SignalType;
+
+import java.io.IOException;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 /**
  * {@code HttpMessageReader} for parsing {@code "multipart/form-data"} requests
@@ -153,13 +151,22 @@ public class SynchronossPartHttpMessageReader extends LoggingCodecSupport implem
 
 	@Override
 	public List<MediaType> getReadableMediaTypes() {
-		return Collections.singletonList(MediaType.MULTIPART_FORM_DATA);
+		return MultipartHttpMessageReader.MIME_TYPES;
 	}
 
 	@Override
 	public boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType) {
-		return Part.class.equals(elementType.toClass()) &&
-				(mediaType == null || MediaType.MULTIPART_FORM_DATA.isCompatibleWith(mediaType));
+		if (Part.class.equals(elementType.toClass())) {
+			if (mediaType == null) {
+				return true;
+			}
+			for (MediaType supportedMediaType : getReadableMediaTypes()) {
+				if (supportedMediaType.isCompatibleWith(mediaType)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	@Override

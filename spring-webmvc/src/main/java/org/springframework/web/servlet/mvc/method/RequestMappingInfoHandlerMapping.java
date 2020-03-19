@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,6 @@
  */
 
 package org.springframework.web.servlet.mvc.method;
-
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -45,12 +32,24 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.AbstractHandlerMethodMapping;
 import org.springframework.web.servlet.mvc.condition.NameValueExpression;
+import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
 import org.springframework.web.util.WebUtils;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Abstract base class for classes for which {@link RequestMappingInfo} defines
  * the mapping between a request and a handler method.
- *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -102,6 +101,16 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		return (info1, info2) -> info1.compareTo(info2, request);
 	}
 
+	@Override
+	protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
+		request.removeAttribute(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
+		try {
+			return super.getHandlerInternal(request);
+		} finally {
+			ProducesRequestCondition.clearMediaTypesAttribute(request);
+		}
+	}
+
 	/**
 	 * Expose URI template variables, matrix variables, and producible media types in the request.
 	 * @see HandlerMapping#URI_TEMPLATE_VARIABLES_ATTRIBUTE
@@ -119,8 +128,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		if (patterns.isEmpty()) {
 			bestPattern = lookupPath;
 			uriVariables = Collections.emptyMap();
-		}
-		else {
+		} else {
 			bestPattern = patterns.iterator().next();
 			uriVariables = getPathMatcher().extractUriTemplateVariables(bestPattern, lookupPath);
 		}

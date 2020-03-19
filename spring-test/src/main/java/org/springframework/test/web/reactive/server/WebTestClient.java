@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,8 @@
 
 package org.springframework.test.web.reactive.server;
 
-import java.net.URI;
-import java.nio.charset.Charset;
-import java.time.Duration;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 import org.hamcrest.Matcher;
 import org.reactivestreams.Publisher;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -60,6 +50,15 @@ import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.session.WebSessionManager;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
+
+import java.net.URI;
+import java.nio.charset.Charset;
+import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Client for testing web servers that uses {@link WebClient} internally to
@@ -658,8 +657,8 @@ public interface WebTestClient {
 
 		/**
 		 * Set the body to the given {@code Object} value. This method invokes the
-		 * {@link WebClient.RequestBodySpec#bodyValue(Object) bodyValue} method
-		 * on the underlying {@code WebClient}.
+		 * {@link org.springframework.web.reactive.function.client.WebClient.RequestBodySpec#bodyValue(Object)
+		 * bodyValue} method on the underlying {@code WebClient}.
 		 * @param body the value to write to the request body
 		 * @return spec for further declaration of the request
 		 * @since 5.2
@@ -693,8 +692,8 @@ public interface WebTestClient {
 
 		/**
 		 * Set the body from the given producer. This method invokes the
-		 * {@link WebClient.RequestBodySpec#body(Object, Class)} method on the
-		 * underlying {@code WebClient}.
+		 * {@link org.springframework.web.reactive.function.client.WebClient.RequestBodySpec#body(Object, Class)
+		 * body(Object, Class)} method on the underlying {@code WebClient}.
 		 * @param producer the producer to write to the request. This must be a
 		 * {@link Publisher} or another producer adaptable to a
 		 * {@code Publisher} via {@link ReactiveAdapterRegistry}
@@ -706,8 +705,8 @@ public interface WebTestClient {
 
 		/**
 		 * Set the body from the given producer. This method invokes the
-		 * {@link WebClient.RequestBodySpec#body(Object, ParameterizedTypeReference)}
-		 * method on the underlying {@code WebClient}.
+		 * {@link org.springframework.web.reactive.function.client.WebClient.RequestBodySpec#body(Object, ParameterizedTypeReference)
+		 * body(Object, ParameterizedTypeReference)} method on the underlying {@code WebClient}.
 		 * @param producer the producer to write to the request. This must be a
 		 * {@link Publisher} or another producer adaptable to a
 		 * {@code Publisher} via {@link ReactiveAdapterRegistry}
@@ -720,8 +719,8 @@ public interface WebTestClient {
 		/**
 		 * Set the body of the request to the given {@code BodyInserter}.
 		 * This method invokes the
-		 * {@link WebClient.RequestBodySpec#body(BodyInserter)} method on the
-		 * underlying {@code WebClient}.
+		 * {@link org.springframework.web.reactive.function.client.WebClient.RequestBodySpec#body(BodyInserter)
+		 * body(BodyInserter)} method on the underlying {@code WebClient}.
 		 * @param inserter the body inserter to use
 		 * @return spec for further declaration of the request
 		 * @see org.springframework.web.reactive.function.BodyInserters

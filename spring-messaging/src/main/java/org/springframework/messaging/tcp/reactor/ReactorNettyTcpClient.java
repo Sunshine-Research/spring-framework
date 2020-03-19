@@ -16,14 +16,6 @@
 
 package org.springframework.messaging.tcp.reactor;
 
-import java.time.Duration;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.group.ChannelGroup;
@@ -33,6 +25,16 @@ import io.netty.util.concurrent.ImmediateEventExecutor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
+import org.springframework.lang.Nullable;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.tcp.ReconnectStrategy;
+import org.springframework.messaging.tcp.TcpConnection;
+import org.springframework.messaging.tcp.TcpConnectionHandler;
+import org.springframework.messaging.tcp.TcpOperations;
+import org.springframework.util.Assert;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.MonoToListenableFutureAdapter;
+import org.springframework.util.concurrent.SettableListenableFuture;
 import reactor.core.publisher.DirectProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -47,16 +49,13 @@ import reactor.netty.resources.ConnectionProvider;
 import reactor.netty.resources.LoopResources;
 import reactor.netty.tcp.TcpClient;
 
-import org.springframework.lang.Nullable;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.tcp.ReconnectStrategy;
-import org.springframework.messaging.tcp.TcpConnection;
-import org.springframework.messaging.tcp.TcpConnectionHandler;
-import org.springframework.messaging.tcp.TcpOperations;
-import org.springframework.util.Assert;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.MonoToListenableFutureAdapter;
-import org.springframework.util.concurrent.SettableListenableFuture;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Reactor Netty based implementation of {@link TcpOperations}.
@@ -199,6 +198,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public ListenableFuture<Void> connect(TcpConnectionHandler<P> handler, ReconnectStrategy strategy) {
 		Assert.notNull(handler, "TcpConnectionHandler is required");
 		Assert.notNull(strategy, "ReconnectStrategy is required");

@@ -16,19 +16,8 @@
 
 package org.springframework.messaging.handler.invocation;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.SimpleMessageConverter;
@@ -39,6 +28,16 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -205,8 +204,7 @@ public class MethodMessageHandlerTests {
 
 		@Override
 		protected List<? extends HandlerMethodReturnValueHandler> initReturnValueHandlers() {
-			List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>();
-			handlers.addAll(getCustomReturnValueHandlers());
+			List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>(getCustomReturnValueHandlers());
 			return handlers;
 		}
 

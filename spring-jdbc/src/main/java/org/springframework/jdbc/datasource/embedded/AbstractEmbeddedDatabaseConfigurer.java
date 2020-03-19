@@ -16,16 +16,13 @@
 
 package org.springframework.jdbc.datasource.embedded;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-
-import javax.sql.DataSource;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.jdbc.support.JdbcUtils;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * Base class for {@link EmbeddedDatabaseConfigurer} implementations
@@ -55,7 +52,15 @@ abstract class AbstractEmbeddedDatabaseConfigurer implements EmbeddedDatabaseCon
 			logger.info("Could not shut down embedded database", ex);
 		}
 		finally {
-			JdbcUtils.closeConnection(con);
+			if (con != null) {
+				try {
+					con.close();
+				} catch (SQLException ex) {
+					logger.debug("Could not close JDBC Connection on shutdown", ex);
+				} catch (Throwable ex) {
+					logger.debug("Unexpected exception on closing JDBC Connection", ex);
+				}
+			}
 		}
 	}
 

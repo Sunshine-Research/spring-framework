@@ -16,16 +16,7 @@
 
 package org.springframework.aop.aspectj;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.reflect.Method;
-
 import org.junit.jupiter.api.Test;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.ThrowsAdvice;
@@ -33,6 +24,14 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.core.OverridingClassLoader;
 import org.springframework.lang.Nullable;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Method;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -87,7 +86,7 @@ public class TrickyAspectJPointcutExpressionTests {
 		testAdvice(new DefaultPointcutAdvisor(pointcut, logAdvice), logAdvice, new TestServiceImpl(), "TestServiceImpl");
 
 		// Then try again with a different class loader on the target...
-		SimpleThrowawayClassLoader loader = new SimpleThrowawayClassLoader(new TestServiceImpl().getClass().getClassLoader());
+		SimpleThrowawayClassLoader loader = new SimpleThrowawayClassLoader(TestServiceImpl.class.getClassLoader());
 		// Make sure the interface is loaded from the  parent class loader
 		loader.excludeClass(TestService.class.getName());
 		loader.excludeClass(TestException.class.getName());

@@ -16,6 +16,12 @@
 
 package org.springframework.core.annotation;
 
+import org.junit.jupiter.api.Test;
+import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
+import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
+
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
@@ -28,13 +34,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Test;
-
-import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
-import org.springframework.lang.Nullable;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -45,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AnnotationsScannerTests {
 
 	@Test
-	void directStrategyOnClassWhenNotAnnoatedScansNone() {
+	void directStrategyOnClassWhenNotAnnotatedScansNone() {
 		Class<?> source = WithNoAnnotations.class;
 		assertThat(scan(source, SearchStrategy.DIRECT)).isEmpty();
 	}
@@ -423,7 +422,7 @@ class AnnotationsScannerTests {
 	@Test
 	void typeHierarchyStrategyOnMethodWithIgnorablesScansAnnotations()
 			throws Exception {
-		Method source = methodFrom(Ignoreable.class);
+		Method source = methodFrom(Ignorable.class);
 		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY)).containsExactly(
 				"0:TestAnnotation1");
 	}
@@ -752,7 +751,7 @@ class AnnotationsScannerTests {
 	}
 
 	@SuppressWarnings("serial")
-	static class Ignoreable implements IgnoreableOverrideInterface1, IgnoreableOverrideInterface2, Serializable {
+	static class Ignorable implements IgnorableOverrideInterface1, IgnorableOverrideInterface2, Serializable {
 
 		@Override
 		@TestAnnotation1
@@ -760,13 +759,13 @@ class AnnotationsScannerTests {
 		}
 	}
 
-	interface IgnoreableOverrideInterface1 {
+	interface IgnorableOverrideInterface1 {
 
 		@Nullable
 		void method();
 	}
 
-	interface IgnoreableOverrideInterface2 {
+	interface IgnorableOverrideInterface2 {
 
 		@Nullable
 		void method();

@@ -16,6 +16,14 @@
 
 package org.springframework.web.servlet.mvc.condition;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
+import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.util.UrlPathHelper;
+
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -25,16 +33,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.AntPathMatcher;
-import org.springframework.util.PathMatcher;
-import org.springframework.util.StringUtils;
-import org.springframework.web.servlet.HandlerMapping;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import org.springframework.web.util.UrlPathHelper;
 
 /**
  * A logical disjunction (' || ') request condition that matches a request
@@ -91,8 +89,8 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * @param useSuffixPatternMatch whether to enable matching by suffix (".*")
 	 * @param useTrailingSlashMatch whether to match irrespective of a trailing slash
 	 * @deprecated as of 5.2.4. See class-level note in
-	 * {@link RequestMappingHandlerMapping} on the deprecation of path extension
-	 * config options.
+	 * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping}
+	 * on the deprecation of path extension config options.
 	 */
 	@Deprecated
 	public PatternsRequestCondition(String[] patterns, @Nullable UrlPathHelper urlPathHelper,
@@ -110,8 +108,8 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * @param useTrailingSlashMatch whether to match irrespective of a trailing slash
 	 * @param fileExtensions a list of file extensions to consider for path matching
 	 * @deprecated as of 5.2.4. See class-level note in
-	 * {@link RequestMappingHandlerMapping} on the deprecation of path extension
-	 * config options.
+	 * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping}
+	 * on the deprecation of path extension config options.
 	 */
 	@Deprecated
 	public PatternsRequestCondition(String[] patterns, @Nullable UrlPathHelper urlPathHelper,

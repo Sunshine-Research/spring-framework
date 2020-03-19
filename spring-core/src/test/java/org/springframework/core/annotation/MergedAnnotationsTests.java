@@ -16,6 +16,19 @@
 
 package org.springframework.core.annotation;
 
+import org.junit.jupiter.api.Test;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.MergedAnnotation.Adapt;
+import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
+import org.springframework.core.annotation.subpackage.NonPublicAnnotatedClass;
+import org.springframework.core.testfixture.stereotype.Component;
+import org.springframework.core.testfixture.stereotype.Indexed;
+import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.ReflectionUtils;
+
+import javax.annotation.Resource;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -34,21 +47,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javax.annotation.Resource;
-
-import org.junit.jupiter.api.Test;
-
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.MergedAnnotation.Adapt;
-import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
-import org.springframework.core.annotation.subpackage.NonPublicAnnotatedClass;
-import org.springframework.core.testfixture.stereotype.Component;
-import org.springframework.core.testfixture.stereotype.Indexed;
-import org.springframework.lang.Nullable;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -338,8 +336,8 @@ class MergedAnnotationsTests {
 
 	@Test
 	void getWithInheritedAnnotationsFromHalfConventionBasedAndHalfAliasedComposedAnnotation1() {
-		// SPR-13554: convention mapping mixed with AlaisFor annotations
-		// xmlConfigFiles can be used because it has an AlaisFor annotation
+		// SPR-13554: convention mapping mixed with AliasFor annotations
+		// xmlConfigFiles can be used because it has an AliasFor annotation
 		MergedAnnotation<?> annotation = MergedAnnotations.from(
 				HalfConventionBasedAndHalfAliasedComposedContextConfigurationClass1.class,
 				SearchStrategy.INHERITED_ANNOTATIONS).get(ContextConfiguration.class);
@@ -351,8 +349,8 @@ class MergedAnnotationsTests {
 
 	@Test
 	void withInheritedAnnotationsFromHalfConventionBasedAndHalfAliasedComposedAnnotation2() {
-		// SPR-13554: convention mapping mixed with AlaisFor annotations
-		// locations doesn't apply because it has no AlaisFor annotation
+		// SPR-13554: convention mapping mixed with AliasFor annotations
+		// locations doesn't apply because it has no AliasFor annotation
 		MergedAnnotation<?> annotation = MergedAnnotations.from(
 				HalfConventionBasedAndHalfAliasedComposedContextConfigurationClass2.class,
 				SearchStrategy.INHERITED_ANNOTATIONS).get(ContextConfiguration.class);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,6 @@
  */
 
 package org.springframework.orm.jpa;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.PersistenceException;
-import javax.persistence.RollbackException;
-import javax.sql.DataSource;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -54,6 +43,16 @@ import org.springframework.transaction.support.ResourceTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.PersistenceException;
+import javax.persistence.RollbackException;
+import javax.sql.DataSource;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * {@link org.springframework.transaction.PlatformTransactionManager} implementation
@@ -603,10 +602,9 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 				try {
 					getJpaDialect().releaseJdbcConnection(conHandle,
 							txObject.getEntityManagerHolder().getEntityManager());
-				}
-				catch (Exception ex) {
+				} catch (Throwable ex) {
 					// Just log it, to keep a transaction-related exception.
-					logger.error("Could not close JDBC connection after transaction", ex);
+					logger.error("Failed to release JDBC connection after transaction", ex);
 				}
 			}
 		}

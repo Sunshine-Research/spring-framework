@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,36 +15,6 @@
  */
 
 package org.springframework.beans.factory.support;
-
-import java.io.IOException;
-import java.io.NotSerializableException;
-import java.io.ObjectInputStream;
-import java.io.ObjectStreamException;
-import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
-import java.lang.reflect.Method;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
-
-import javax.inject.Provider;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
@@ -85,6 +55,35 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.CompositeIterator;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+
+import javax.inject.Provider;
+import java.io.IOException;
+import java.io.NotSerializableException;
+import java.io.ObjectInputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /**
  * Spring's default implementation of the {@link ConfigurableListableBeanFactory}
@@ -398,6 +397,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			@Override
 			public Stream<T> orderedStream() {
 				String[] beanNames = getBeanNamesForTypedStream(requiredType);
+				if (beanNames.length == 0) {
+					return Stream.empty();
+				}
 				Map<String, T> matchingBeans = new LinkedHashMap<>(beanNames.length);
 				for (String beanName : beanNames) {
 					Object beanInstance = getBean(beanName);
@@ -1366,9 +1368,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
 			Object result = converter.convertIfNecessary(matchingBeans.values(), type);
 			if (result instanceof List) {
-				Comparator<Object> comparator = adaptDependencyComparator(matchingBeans);
-				if (comparator != null) {
-					((List<?>) result).sort(comparator);
+				if (((List<?>) result).size() > 1) {
+					Comparator<Object> comparator = adaptDependencyComparator(matchingBeans);
+					if (comparator != null) {
+						((List<?>) result).sort(comparator);
+					}
 				}
 			}
 			return result;

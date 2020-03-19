@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,10 @@
 
 package org.springframework.aop.framework;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.Interceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
@@ -49,6 +39,15 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} implementation that builds an
@@ -600,8 +599,8 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 			// We expected this to be an Advisor or Advice,
 			// but it wasn't. This is a configuration error.
 			throw new AopConfigException("Unknown advisor type " + next.getClass() +
-					"; Can only include Advisor or Advice type beans in interceptorNames chain except for last entry, " +
-					"which may also be target or TargetSource", ex);
+					"; can only include Advisor or Advice type beans in interceptorNames chain " +
+					"except for last entry which may also be target instance or TargetSource", ex);
 		}
 	}
 

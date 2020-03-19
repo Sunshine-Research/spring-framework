@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,6 @@
 
 package org.springframework.web.servlet.mvc.condition;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
@@ -34,6 +25,14 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition.HeaderExpression;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * A logical disjunction (' || ') request condition to match a request's
@@ -77,7 +76,9 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	 */
 	public ConsumesRequestCondition(String[] consumes, @Nullable String[] headers) {
 		this.expressions = new ArrayList<>(parseExpressions(consumes, headers));
-		Collections.sort(this.expressions);
+		if (this.expressions.size() > 1) {
+			Collections.sort(this.expressions);
+		}
 	}
 
 	/**

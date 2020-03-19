@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,6 @@
 
 package org.springframework.web.reactive.function.server;
 
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.nio.charset.Charset;
-import java.security.Principal;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalLong;
-import java.util.function.Consumer;
-
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpCookie;
@@ -43,12 +29,27 @@ import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.util.UriBuilder;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.nio.charset.Charset;
+import java.security.Principal;
+import java.time.Instant;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalLong;
+import java.util.function.Consumer;
 
 /**
  * Represents a server-side HTTP request, as handled by a {@code HandlerFunction}.
@@ -287,13 +288,115 @@ public interface ServerRequest {
 	 */
 	ServerWebExchange exchange();
 
+	/**
+	 * Check whether the requested resource has been modified given the
+	 * supplied last-modified timestamp (as determined by the application).
+	 * If not modified, this method returns a response with corresponding
+	 * status code and headers, otherwise an empty result.
+	 * <p>Typical usage:
+	 * <pre class="code">
+	 * public Mono&lt;ServerResponse&gt; myHandleMethod(ServerRequest request) {
+	 *   Instant lastModified = // application-specific calculation
+	 * 	 return request.checkNotModified(lastModified)
+	 * 	   .switchIfEmpty(Mono.defer(() -> {
+	 * 	     // further request processing, actually building content
+	 * 		 return ServerResponse.ok().body(...);
+	 *       }));
+	 * }</pre>
+	 * <p>This method works with conditional GET/HEAD requests, but
+	 * also with conditional POST/PUT/DELETE requests.
+	 * <p><strong>Note:</strong> you can use either
+	 * this {@code #checkNotModified(Instant)} method; or
+	 * {@link #checkNotModified(String)}. If you want enforce both
+	 * a strong entity tag and a Last-Modified value,
+	 * as recommended by the HTTP specification,
+	 * then you should use {@link #checkNotModified(Instant, String)}.
+	 * @param lastModified the last-modified timestamp that the
+	 *                     application determined for the underlying resource
+	 * @return a corresponding response if the request qualifies as not
+	 * modified, or an empty result otherwise.
+	 * @since 5.2.5
+	 */
+	default Mono<ServerResponse> checkNotModified(Instant lastModified) {
+		Assert.notNull(lastModified, "LastModified must not be null");
+		return DefaultServerRequest.checkNotModified(exchange(), lastModified, null);
+	}
+
+	/**
+	 * Check whether the requested resource has been modified given the
+	 * supplied {@code ETag} (entity tag), as determined by the application.
+	 * If not modified, this method returns a response with corresponding
+	 * status code and headers, otherwise an empty result.
+	 * <p>Typical usage:
+	 * <pre class="code">
+	 * public Mono&lt;ServerResponse&gt; myHandleMethod(ServerRequest request) {
+	 *   String eTag = // application-specific calculation
+	 * 	 return request.checkNotModified(eTag)
+	 * 	   .switchIfEmpty(Mono.defer(() -> {
+	 * 	     // further request processing, actually building content
+	 * 		 return ServerResponse.ok().body(...);
+	 *       }));
+	 * }</pre>
+	 * <p>This method works with conditional GET/HEAD requests, but
+	 * also with conditional POST/PUT/DELETE requests.
+	 * <p><strong>Note:</strong> you can use either
+	 * this {@link #checkNotModified(Instant)} method; or
+	 * {@code #checkNotModified(String)}. If you want enforce both
+	 * a strong entity tag and a Last-Modified value,
+	 * as recommended by the HTTP specification,
+	 * then you should use {@link #checkNotModified(Instant, String)}.
+	 * @param etag the entity tag that the application determined
+	 *             for the underlying resource. This parameter will be padded
+	 *             with quotes (") if necessary.
+	 * @return a corresponding response if the request qualifies as not
+	 * modified, or an empty result otherwise.
+	 * @since 5.2.5
+	 */
+	default Mono<ServerResponse> checkNotModified(String etag) {
+		Assert.notNull(etag, "Etag must not be null");
+		return DefaultServerRequest.checkNotModified(exchange(), null, etag);
+	}
+
+	/**
+	 * Check whether the requested resource has been modified given the
+	 * supplied {@code ETag} (entity tag) and last-modified timestamp,
+	 * as determined by the application.
+	 * If not modified, this method returns a response with corresponding
+	 * status code and headers, otherwise an empty result.
+	 * <p>Typical usage:
+	 * <pre class="code">
+	 * public Mono&lt;ServerResponse&gt; myHandleMethod(ServerRequest request) {
+	 *   Instant lastModified = // application-specific calculation
+	 *   String eTag = // application-specific calculation
+	 * 	 return request.checkNotModified(lastModified, eTag)
+	 * 	   .switchIfEmpty(Mono.defer(() -> {
+	 * 	     // further request processing, actually building content
+	 * 		 return ServerResponse.ok().body(...);
+	 *       }));
+	 * }</pre>
+	 * <p>This method works with conditional GET/HEAD requests, but
+	 * also with conditional POST/PUT/DELETE requests.
+	 * @param lastModified the last-modified timestamp that the
+	 *                     application determined for the underlying resource
+	 * @param etag         the entity tag that the application determined
+	 *                     for the underlying resource. This parameter will be padded
+	 *                     with quotes (") if necessary.
+	 * @return a corresponding response if the request qualifies as not
+	 * modified, or an empty result otherwise.
+	 * @since 5.2.5
+	 */
+	default Mono<ServerResponse> checkNotModified(Instant lastModified, String etag) {
+		Assert.notNull(lastModified, "LastModified must not be null");
+		Assert.notNull(etag, "Etag must not be null");
+		return DefaultServerRequest.checkNotModified(exchange(), lastModified, etag);
+	}
 
 	// Static builder methods
 
 	/**
 	 * Create a new {@code ServerRequest} based on the given {@code ServerWebExchange} and
 	 * message readers.
-	 * @param exchange the exchange
+	 * @param exchange       the exchange
 	 * @param messageReaders the message readers
 	 * @return the created {@code ServerRequest}
 	 */
@@ -370,6 +473,18 @@ public interface ServerRequest {
 		 * @param headerName the header name
 		 */
 		List<String> header(String headerName);
+
+		/**
+		 * Get the first header value, if any, for the header for the given name.
+		 * <p>Returns {@code null} if no header values are found.
+		 * @param headerName the header name
+		 * @since 5.2.5
+		 */
+		@Nullable
+		default String firstHeader(String headerName) {
+			List<String> list = header(headerName);
+			return list.isEmpty() ? null : list.get(0);
+		}
 
 		/**
 		 * Get the headers as an instance of {@link HttpHeaders}.

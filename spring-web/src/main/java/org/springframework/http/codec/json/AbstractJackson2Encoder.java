@@ -16,15 +16,6 @@
 
 package org.springframework.http.codec.json;
 
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -35,9 +26,6 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SequenceWriter;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
@@ -53,6 +41,17 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Base class providing support methods for Jackson 2.9 encoding. For non-streaming use
@@ -70,7 +69,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	private static final Map<MediaType, byte[]> STREAM_SEPARATORS;
 
 	static {
-		STREAM_SEPARATORS = new HashMap<>();
+		STREAM_SEPARATORS = new HashMap<>(4);
 		STREAM_SEPARATORS.put(MediaType.APPLICATION_STREAM_JSON, NEWLINE_SEPARATOR);
 		STREAM_SEPARATORS.put(MediaType.parseMediaType("application/stream+x-jackson-smile"), new byte[0]);
 	}
@@ -171,8 +170,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 			throw new EncodingException("JSON encoding error: " + ex.getOriginalMessage(), ex);
 		}
 		catch (IOException ex) {
-			throw new IllegalStateException("Unexpected I/O error while writing to byte array builder",
-					ex);
+			throw new IllegalStateException("Unexpected I/O error while writing to byte array builder", ex);
 		}
 
 		byte[] bytes = byteBuilder.toByteArray();
@@ -198,8 +196,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 			throw new EncodingException("JSON encoding error: " + ex.getOriginalMessage(), ex);
 		}
 		catch (IOException ex) {
-			throw new IllegalStateException("Unexpected I/O error while writing to byte array builder",
-					ex);
+			throw new IllegalStateException("Unexpected I/O error while writing to byte array builder", ex);
 		}
 
 		byte[] bytes = byteArrayBuilder.toByteArray();
@@ -234,6 +231,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 
 	private ObjectWriter createObjectWriter(ResolvableType valueType, @Nullable MimeType mimeType,
 			@Nullable Map<String, Object> hints) {
+
 		JavaType javaType = getJavaType(valueType.getType(), null);
 		Class<?> jsonView = (hints != null ? (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT) : null);
 		ObjectWriter writer = (jsonView != null ?
@@ -281,7 +279,7 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 	}
 
 
-	// HttpMessageEncoder...
+	// HttpMessageEncoder
 
 	@Override
 	public List<MimeType> getEncodableMimeTypes() {
@@ -295,12 +293,13 @@ public abstract class AbstractJackson2Encoder extends Jackson2CodecSupport imple
 
 	@Override
 	public Map<String, Object> getEncodeHints(@Nullable ResolvableType actualType, ResolvableType elementType,
-			@Nullable MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
+											  @Nullable MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
 
 		return (actualType != null ? getHints(actualType) : Hints.none());
 	}
 
-	// Jackson2CodecSupport ...
+
+	// Jackson2CodecSupport
 
 	@Override
 	protected <A extends Annotation> A getAnnotation(MethodParameter parameter, Class<A> annotType) {

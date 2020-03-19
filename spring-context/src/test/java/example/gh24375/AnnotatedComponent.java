@@ -16,20 +16,9 @@
 
 package example.gh24375;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.springframework.stereotype.Component;
 
-import org.springframework.core.annotation.AliasFor;
-
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface A {
-
-	@AliasFor("value")
-	B other() default @B;
-
-	@AliasFor("other")
-	B value() default @B;
+@Component
+@EnclosingAnnotation(nested2 = @NestedAnnotation)
+public class AnnotatedComponent {
 }

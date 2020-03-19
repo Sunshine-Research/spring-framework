@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,12 @@
 
 package org.springframework.core.annotation;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.InvocationHandler;
@@ -23,12 +29,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link InvocationHandler} for an {@link Annotation} that Spring has
@@ -184,10 +184,12 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 	}
 
 	private static boolean isVisible(ClassLoader classLoader, Class<?> interfaceClass) {
+		if (classLoader == interfaceClass.getClassLoader()) {
+			return true;
+		}
 		try {
 			return Class.forName(interfaceClass.getName(), false, classLoader) == interfaceClass;
-		}
-		catch (ClassNotFoundException ex) {
+		} catch (ClassNotFoundException ex) {
 			return false;
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,34 +16,17 @@
 
 package org.springframework.web.servlet.function;
 
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.net.URI;
-import java.time.Instant;
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CompletionStage;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-
-import javax.servlet.AsyncContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
-
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRange;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
@@ -58,17 +41,39 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.AsyncContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.net.URI;
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CompletionStage;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
 /**
  * Default {@link EntityResponse.Builder} implementation.
- *
+ * @param <T> the entity type
  * @author Arjen Poutsma
  * @since 5.2
- * @param <T> the entity type
  */
 final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T> {
 
 	private static final boolean reactiveStreamsPresent = ClassUtils.isPresent(
 			"org.reactivestreams.Publisher", DefaultEntityResponseBuilder.class.getClassLoader());
+
+	private static final Type RESOURCE_REGION_LIST_TYPE =
+			new ParameterizedTypeReference<List<ResourceRegion>>() {
+			}.getType();
 
 
 	private final T entity;
@@ -238,11 +243,16 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 		private final Type entityType;
 
 		public DefaultEntityResponse(int statusCode, HttpHeaders headers,
-				MultiValueMap<String, Cookie> cookies, T entity, Type entityType) {
+									 MultiValueMap<String, Cookie> cookies, T entity, Type entityType) {
 
 			super(statusCode, headers, cookies);
 			this.entity = entity;
 			this.entityType = entityType;
+		}
+
+		private static <T> boolean isResource(T entity) {
+			return !(entity instanceof InputStreamResource) &&
+					(entity instanceof Resource);
 		}
 
 		@Override
@@ -252,7 +262,7 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 
 		@Override
 		protected ModelAndView writeToInternal(HttpServletRequest servletRequest,
-				HttpServletResponse servletResponse, Context context)
+											   HttpServletResponse servletResponse, Context context)
 				throws ServletException, IOException {
 
 			writeEntityWithMessageConverters(this.entity, servletRequest,servletResponse, context);
@@ -267,13 +277,32 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 			ServletServerHttpResponse serverResponse = new ServletServerHttpResponse(response);
 			MediaType contentType = getContentType(response);
 			Class<?> entityClass = entity.getClass();
+			Type entityType = this.entityType;
+
+			if (entityClass != InputStreamResource.class && Resource.class.isAssignableFrom(entityClass)) {
+				serverResponse.getHeaders().set(HttpHeaders.ACCEPT_RANGES, "bytes");
+				String rangeHeader = request.getHeader(HttpHeaders.RANGE);
+				if (rangeHeader != null) {
+					Resource resource = (Resource) entity;
+					try {
+						List<HttpRange> httpRanges = HttpRange.parseRanges(rangeHeader);
+						serverResponse.getServletResponse().setStatus(HttpStatus.PARTIAL_CONTENT.value());
+						entity = HttpRange.toResourceRegions(httpRanges, resource);
+						entityClass = entity.getClass();
+						entityType = RESOURCE_REGION_LIST_TYPE;
+					} catch (IllegalArgumentException ex) {
+						serverResponse.getHeaders().set(HttpHeaders.CONTENT_RANGE, "bytes */" + resource.contentLength());
+						serverResponse.getServletResponse().setStatus(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE.value());
+					}
+				}
+			}
 
 			for (HttpMessageConverter<?> messageConverter : context.messageConverters()) {
 				if (messageConverter instanceof GenericHttpMessageConverter<?>) {
 					GenericHttpMessageConverter<Object> genericMessageConverter =
 							(GenericHttpMessageConverter<Object>) messageConverter;
-					if (genericMessageConverter.canWrite(this.entityType, entityClass, contentType)) {
-						genericMessageConverter.write(entity, this.entityType, contentType, serverResponse);
+					if (genericMessageConverter.canWrite(entityType, entityClass, contentType)) {
+						genericMessageConverter.write(entity, entityType, contentType, serverResponse);
 						return;
 					}
 				}

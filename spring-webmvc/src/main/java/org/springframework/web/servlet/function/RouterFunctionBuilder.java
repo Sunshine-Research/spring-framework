@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.springframework.web.servlet.function;
 
+import org.springframework.core.io.Resource;
+import org.springframework.util.Assert;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -24,9 +27,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-
-import org.springframework.core.io.Resource;
-import org.springframework.util.Assert;
 
 /**
  * Default implementation of {@link RouterFunctions.Builder}.
@@ -237,14 +237,14 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 
 	@Override
 	public RouterFunction<ServerResponse> build() {
-		RouterFunction<ServerResponse> result = this.routerFunctions.stream()
-				.reduce(RouterFunction::and)
-				.orElseThrow(IllegalStateException::new);
+		if (this.routerFunctions.isEmpty()) {
+			throw new IllegalStateException("No routes registered. Register a route with GET(), POST(), etc.");
+		}
+		RouterFunction<ServerResponse> result = new BuiltRouterFunction(this.routerFunctions);
 
 		if (this.filterFunctions.isEmpty()) {
 			return result;
-		}
-		else {
+		} else {
 			HandlerFilterFunction<ServerResponse, ServerResponse> filter =
 					this.filterFunctions.stream()
 							.reduce(HandlerFilterFunction::andThen)
@@ -253,5 +253,36 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 			return result.filter(filter);
 		}
 	}
+
+
+	/**
+	 * Router function returned by {@link #build()} that simply iterates over the registered routes.
+	 */
+	private static class BuiltRouterFunction extends RouterFunctions.AbstractRouterFunction<ServerResponse> {
+
+		private List<RouterFunction<ServerResponse>> routerFunctions;
+
+		public BuiltRouterFunction(List<RouterFunction<ServerResponse>> routerFunctions) {
+			Assert.notEmpty(routerFunctions, "RouterFunctions must not be empty");
+			this.routerFunctions = routerFunctions;
+		}
+
+		@Override
+		public Optional<HandlerFunction<ServerResponse>> route(ServerRequest request) {
+			for (RouterFunction<ServerResponse> routerFunction : this.routerFunctions) {
+				Optional<HandlerFunction<ServerResponse>> result = routerFunction.route(request);
+				if (result.isPresent()) {
+					return result;
+				}
+			}
+			return Optional.empty();
+		}
+
+		@Override
+		public void accept(RouterFunctions.Visitor visitor) {
+			this.routerFunctions.forEach(routerFunction -> routerFunction.accept(visitor));
+		}
+	}
+
 
 }

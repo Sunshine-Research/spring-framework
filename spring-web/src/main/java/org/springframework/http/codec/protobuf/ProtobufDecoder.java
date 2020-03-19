@@ -16,22 +16,10 @@
 
 package org.springframework.http.codec.protobuf;
 
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
-import java.util.function.Function;
-
 import com.google.protobuf.CodedInputStream;
 import com.google.protobuf.ExtensionRegistry;
 import com.google.protobuf.Message;
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.DecodingException;
@@ -42,6 +30,17 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.MimeType;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
 
 /**
  * A {@code Decoder} that reads {@link com.google.protobuf.Message}s using
@@ -227,8 +226,7 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 						this.output = input.factory().allocateBuffer(this.messageBytesToRead);
 					}
 
-					chunkBytesToRead = this.messageBytesToRead >= input.readableByteCount() ?
-							input.readableByteCount() : this.messageBytesToRead;
+					chunkBytesToRead = Math.min(this.messageBytesToRead, input.readableByteCount());
 					remainingBytesToRead = input.readableByteCount() - chunkBytesToRead;
 
 					byte[] bytesToWrite = new byte[chunkBytesToRead];

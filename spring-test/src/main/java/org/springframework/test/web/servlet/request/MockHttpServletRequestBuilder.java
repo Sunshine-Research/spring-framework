@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,24 +15,6 @@
  */
 
 package org.springframework.test.web.servlet.request;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
-import javax.servlet.ServletContext;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.Mergeable;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -61,6 +43,23 @@ import org.springframework.web.servlet.support.SessionFlashMapManager;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.UrlPathHelper;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpSession;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * Default builder for {@link MockHttpServletRequest} required as input to
@@ -145,14 +144,21 @@ public class MockHttpServletRequestBuilder
 	 * @param vars zero or more URI variables
 	 */
 	MockHttpServletRequestBuilder(HttpMethod httpMethod, String url, Object... vars) {
-		this(httpMethod.name(), UriComponentsBuilder.fromUriString(url).buildAndExpand(vars).encode().toUri());
+		this(httpMethod.name(), initUri(url, vars));
+	}
+
+	private static URI initUri(String url, Object[] vars) {
+		Assert.notNull(url, "'url' must not be null");
+		Assert.isTrue(url.startsWith("/") || url.startsWith("http://") || url.startsWith("https://"), "" +
+				"'url' should start with a path or be a complete HTTP URL: " + url);
+		return UriComponentsBuilder.fromUriString(url).buildAndExpand(vars).encode().toUri();
 	}
 
 	/**
 	 * Alternative to {@link #MockHttpServletRequestBuilder(HttpMethod, String, Object...)}
 	 * with a pre-built URI.
 	 * @param httpMethod the HTTP method (GET, POST, etc)
-	 * @param url the URL
+	 * @param url        the URL
 	 * @since 4.0.3
 	 */
 	MockHttpServletRequestBuilder(HttpMethod httpMethod, URI url) {

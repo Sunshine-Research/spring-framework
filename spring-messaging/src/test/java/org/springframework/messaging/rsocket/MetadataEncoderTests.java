@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,6 @@
  */
 package org.springframework.messaging.rsocket;
 
-import java.time.Duration;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Map;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.Unpooled;
@@ -27,8 +22,6 @@ import io.rsocket.metadata.CompositeMetadata;
 import io.rsocket.metadata.RoutingMetadata;
 import io.rsocket.metadata.WellKnownMimeType;
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBuffer;
@@ -36,6 +29,12 @@ import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.core.testfixture.io.buffer.DataBufferTestUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
+import reactor.core.publisher.Mono;
+
+import java.time.Duration;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -131,11 +130,11 @@ public class MetadataEncoderTests {
 	public void routeWithVars() {
 		DataBuffer buffer =
 				new MetadataEncoder(MimeTypeUtils.TEXT_PLAIN, this.strategies)
-						.route("a.{b}.{c}", "BBB", "C.C.C")
+						.route("a.{b}.{c}.d", "BBB", "C.C.C")
 						.encode()
 						.block();
 
-		assertThat(dumpString(buffer)).isEqualTo("a.BBB.C%2EC%2EC");
+		assertThat(dumpString(buffer)).isEqualTo("a.BBB.C%2EC%2EC.d");
 	}
 
 	@Test

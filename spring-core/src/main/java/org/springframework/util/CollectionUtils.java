@@ -16,6 +16,8 @@
 
 package org.springframework.util;
 
+import org.springframework.lang.Nullable;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,8 +32,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
-
-import org.springframework.lang.Nullable;
 
 /**
  * Miscellaneous collection utility methods.
@@ -181,15 +181,7 @@ public abstract class CollectionUtils {
 	 * @return whether any of the candidates has been found
 	 */
 	public static boolean containsAny(Collection<?> source, Collection<?> candidates) {
-		if (isEmpty(source) || isEmpty(candidates)) {
-			return false;
-		}
-		for (Object candidate : candidates) {
-			if (source.contains(candidate)) {
-				return true;
-			}
-		}
-		return false;
+		return findFirstMatch(source, candidates) != null;
 	}
 
 	/**

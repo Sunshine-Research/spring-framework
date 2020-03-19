@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,7 @@
 
 package org.springframework.expression.spel;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.junit.jupiter.api.Test;
-
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
@@ -34,6 +26,12 @@ import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+
+import java.awt.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -95,10 +93,9 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		// Use the standard evaluation context
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
-		ctx.setVariable("favouriteColour","blue");
-		List<Integer> primes = new ArrayList<>();
-		primes.addAll(Arrays.asList(2,3,5,7,11,13,17));
-		ctx.setVariable("primes",primes);
+		ctx.setVariable("favouriteColour", "blue");
+		List<Integer> primes = Arrays.asList(2, 3, 5, 7, 11, 13, 17);
+		ctx.setVariable("primes", primes);
 
 		Expression expr = parser.parseRaw("#favouriteColour");
 		Object value = expr.getValue(ctx);
@@ -313,4 +310,5 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 		}
 
 	}
+
 }

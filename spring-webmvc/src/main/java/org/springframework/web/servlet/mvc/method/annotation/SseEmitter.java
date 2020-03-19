@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpResponse;
@@ -29,20 +23,22 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 /**
  * A specialization of {@link ResponseBodyEmitter} for sending
  * <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events</a>.
- *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @since 4.2
  */
 public class SseEmitter extends ResponseBodyEmitter {
 
-	static final MediaType TEXT_PLAIN = new MediaType("text", "plain", StandardCharsets.UTF_8);
-
-	static final MediaType TEXT_EVENTSTREAM = new MediaType("text", "event-stream", StandardCharsets.UTF_8);
-
+	private static final MediaType TEXT_PLAIN = new MediaType("text", "plain", StandardCharsets.UTF_8);
 
 	/**
 	 * Create a new SseEmitter instance.
@@ -70,7 +66,7 @@ public class SseEmitter extends ResponseBodyEmitter {
 
 		HttpHeaders headers = outputMessage.getHeaders();
 		if (headers.getContentType() == null) {
-			headers.setContentType(TEXT_EVENTSTREAM);
+			headers.setContentType(MediaType.TEXT_EVENT_STREAM);
 		}
 	}
 

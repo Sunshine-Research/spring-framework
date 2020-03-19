@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,8 @@
 
 package org.springframework.orm.jpa;
 
-import java.util.Map;
-
-import javax.persistence.EntityExistsException;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.LockTimeoutException;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.OptimisticLockException;
-import javax.persistence.PersistenceException;
-import javax.persistence.PessimisticLockException;
-import javax.persistence.Query;
-import javax.persistence.QueryTimeoutException;
-import javax.persistence.SynchronizationType;
-import javax.persistence.TransactionRequiredException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -55,6 +37,22 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+
+import javax.persistence.EntityExistsException;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.LockTimeoutException;
+import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
+import javax.persistence.OptimisticLockException;
+import javax.persistence.PersistenceException;
+import javax.persistence.PessimisticLockException;
+import javax.persistence.Query;
+import javax.persistence.QueryTimeoutException;
+import javax.persistence.SynchronizationType;
+import javax.persistence.TransactionRequiredException;
+import java.util.Map;
 
 /**
  * Helper class featuring methods for JPA EntityManager handling,
@@ -427,11 +425,8 @@ public abstract class EntityManagerFactoryUtils {
 					em.close();
 				}
 			}
-			catch (PersistenceException ex) {
-				logger.debug("Could not close JPA EntityManager", ex);
-			}
 			catch (Throwable ex) {
-				logger.debug("Unexpected exception on closing JPA EntityManager", ex);
+				logger.error("Failed to release JPA EntityManager", ex);
 			}
 		}
 	}

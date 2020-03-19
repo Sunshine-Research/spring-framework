@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,6 @@
 
 package org.springframework.web.reactive.function.client;
 
-import java.time.Duration;
-import java.util.Collections;
-import java.util.Map;
-import java.util.function.Function;
-
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelOption;
 import okhttp3.mockwebserver.MockResponse;
@@ -28,9 +23,6 @@ import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
@@ -41,6 +33,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorResourceFactory;
 import org.springframework.web.reactive.function.UnsupportedMediaTypeException;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+
+import java.time.Duration;
+import java.util.Collections;
+import java.util.Map;
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
@@ -63,6 +62,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 
 	@BeforeAll
 	void setUpReactorResourceFactory() {
+		this.factory.setShutdownQuietPeriod(Duration.ofMillis(100));
 		this.factory.afterPropertiesSet();
 	}
 

@@ -16,16 +16,7 @@
 
 package org.springframework.expression.spel;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.junit.jupiter.api.Test;
-
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -34,6 +25,14 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.Inventor;
 import org.springframework.expression.spel.testresources.PlaceOfBirth;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
@@ -420,13 +419,12 @@ public class SpelDocumentationTests extends AbstractExpressionTests {
 	@Test
 	public void testSpecialVariables() throws Exception {
 		// create an array of integers
-		List<Integer> primes = new ArrayList<>();
-		primes.addAll(Arrays.asList(2,3,5,7,11,13,17));
+		List<Integer> primes = Arrays.asList(2, 3, 5, 7, 11, 13, 17);
 
 		// create parser and set variable 'primes' as the array of integers
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		context.setVariable("primes",primes);
+		context.setVariable("primes", primes);
 
 		// all prime numbers > 10 from the list (using selection ?{...})
 		List<Integer> primesGreaterThanTen = (List<Integer>) parser.parseExpression("#primes.?[#this>10]").getValue(context);
@@ -518,4 +516,3 @@ public class SpelDocumentationTests extends AbstractExpressionTests {
 	}
 
 }
-

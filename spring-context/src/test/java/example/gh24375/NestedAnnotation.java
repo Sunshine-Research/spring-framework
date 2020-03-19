@@ -16,9 +16,15 @@
 
 package example.gh24375;
 
-import org.springframework.stereotype.Component;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@Component
-@A(other = @B)
-public class MyComponent {
+@Target(ElementType.ANNOTATION_TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface NestedAnnotation {
+
+	String name() default "";
+
 }

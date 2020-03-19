@@ -16,16 +16,8 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.EmitterProcessor;
-import reactor.core.publisher.Flux;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +33,13 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.testfixture.servlet.MockAsyncContext;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
+import reactor.core.publisher.EmitterProcessor;
+import reactor.core.publisher.Flux;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -211,14 +210,14 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		emitter.send(SseEmitter.event().
 				comment("a test").name("update").id("1").reconnectTime(5000L).data(bean1).data(bean2));
 
-		assertThat(this.response.getContentType()).isEqualTo("text/event-stream;charset=UTF-8");
+		assertThat(this.response.getContentType()).isEqualTo("text/event-stream");
 		assertThat(this.response.getContentAsString()).isEqualTo((":a test\n" +
-						"event:update\n" +
-						"id:1\n" +
-						"retry:5000\n" +
-						"data:{\"id\":1,\"name\":\"Joe\"}\n" +
-						"data:{\"id\":2,\"name\":\"John\"}\n" +
-						"\n"));
+				"event:update\n" +
+				"id:1\n" +
+				"retry:5000\n" +
+				"data:{\"id\":1,\"name\":\"Joe\"}\n" +
+				"data:{\"id\":2,\"name\":\"John\"}\n" +
+				"\n"));
 	}
 
 	@Test
@@ -238,7 +237,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		processor.onNext("baz");
 		processor.onComplete();
 
-		assertThat(this.response.getContentType()).isEqualTo("text/event-stream;charset=UTF-8");
+		assertThat(this.response.getContentType()).isEqualTo("text/event-stream");
 		assertThat(this.response.getContentAsString()).isEqualTo("data:foo\n\ndata:bar\n\ndata:baz\n\n");
 	}
 
@@ -272,7 +271,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 
 		assertThat(this.request.isAsyncStarted()).isTrue();
 		assertThat(this.response.getStatus()).isEqualTo(200);
-		assertThat(this.response.getContentType()).isEqualTo("text/event-stream;charset=UTF-8");
+		assertThat(this.response.getContentType()).isEqualTo("text/event-stream");
 		assertThat(this.response.getHeader("foo")).isEqualTo("bar");
 	}
 

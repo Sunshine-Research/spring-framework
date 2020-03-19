@@ -16,12 +16,8 @@
 
 package org.springframework.expression.spel;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.ConstructorExecutor;
@@ -31,6 +27,9 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.PlaceOfBirth;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -162,8 +161,7 @@ public class ConstructorInvocationTests extends AbstractExpressionTests {
 		ctx.addConstructorResolver(dummy);
 		assertThat(ctx.getConstructorResolvers().size()).isEqualTo(2);
 
-		List<ConstructorResolver> copy = new ArrayList<>();
-		copy.addAll(ctx.getConstructorResolvers());
+		List<ConstructorResolver> copy = new ArrayList<>(ctx.getConstructorResolvers());
 		assertThat(ctx.removeConstructorResolver(dummy)).isTrue();
 		assertThat(ctx.removeConstructorResolver(dummy)).isFalse();
 		assertThat(ctx.getConstructorResolvers().size()).isEqualTo(1);

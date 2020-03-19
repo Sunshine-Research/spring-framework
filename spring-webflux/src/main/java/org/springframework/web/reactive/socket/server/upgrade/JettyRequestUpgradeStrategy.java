@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,8 @@
 
 package org.springframework.web.reactive.socket.server.upgrade;
 
-import java.io.IOException;
-import java.util.function.Supplier;
-
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 import org.eclipse.jetty.websocket.server.WebSocketServerFactory;
-import reactor.core.publisher.Mono;
-
 import org.springframework.context.Lifecycle;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -44,6 +35,12 @@ import org.springframework.web.reactive.socket.adapter.JettyWebSocketHandlerAdap
 import org.springframework.web.reactive.socket.adapter.JettyWebSocketSession;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.function.Supplier;
 
 /**
  * A {@link RequestUpgradeStrategy} for use with Jetty.
@@ -162,18 +159,17 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 		boolean isUpgrade = this.factory.isUpgradeRequest(servletRequest, servletResponse);
 		Assert.isTrue(isUpgrade, "Not a WebSocket handshake");
 
-		try {
-			adapterHolder.set(new WebSocketHandlerContainer(adapter, subProtocol));
-			this.factory.acceptWebSocket(servletRequest, servletResponse);
-		}
-		catch (IOException ex) {
-			return Mono.error(ex);
-		}
-		finally {
-			adapterHolder.remove();
-		}
-
-		return Mono.empty();
+		// Trigger WebFlux preCommit actions and upgrade
+		return exchange.getResponse().setComplete()
+				.then(Mono.fromCallable(() -> {
+					try {
+						adapterHolder.set(new WebSocketHandlerContainer(adapter, subProtocol));
+						this.factory.acceptWebSocket(servletRequest, servletResponse);
+					} finally {
+						adapterHolder.remove();
+					}
+					return null;
+				}));
 	}
 
 	private static HttpServletRequest getNativeRequest(ServerHttpRequest request) {

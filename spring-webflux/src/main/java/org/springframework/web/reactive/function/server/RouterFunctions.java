@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,8 @@
 
 package org.springframework.web.reactive.function.server;
 
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.io.Resource;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.HttpHandler;
@@ -36,6 +26,16 @@ import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * <strong>Central entry point to Spring's functional web framework.</strong>
@@ -748,7 +748,7 @@ public abstract class RouterFunctions {
 	}
 
 
-	private abstract static class AbstractRouterFunction<T extends ServerResponse> implements RouterFunction<T> {
+	abstract static class AbstractRouterFunction<T extends ServerResponse> implements RouterFunction<T> {
 
 		@Override
 		public String toString() {
@@ -778,8 +778,8 @@ public abstract class RouterFunctions {
 
 		@Override
 		public Mono<HandlerFunction<T>> route(ServerRequest request) {
-			return this.first.route(request)
-					.switchIfEmpty(Mono.defer(() -> this.second.route(request)));
+			return Flux.concat(this.first.route(request), Mono.defer(() -> this.second.route(request)))
+					.next();
 		}
 
 		@Override
@@ -808,9 +808,9 @@ public abstract class RouterFunctions {
 
 		@Override
 		public Mono<HandlerFunction<ServerResponse>> route(ServerRequest request) {
-			return this.first.route(request)
-					.map(this::cast)
-					.switchIfEmpty(Mono.defer(() -> this.second.route(request).map(this::cast)));
+			return Flux.concat(this.first.route(request), Mono.defer(() -> this.second.route(request)))
+					.next()
+					.map(this::cast);
 		}
 
 		@SuppressWarnings("unchecked")

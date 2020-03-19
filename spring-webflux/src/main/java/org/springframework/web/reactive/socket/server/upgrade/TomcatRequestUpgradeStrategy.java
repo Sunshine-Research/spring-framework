@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,7 @@
 
 package org.springframework.web.reactive.socket.server.upgrade;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.function.Supplier;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.websocket.Endpoint;
-import javax.websocket.server.ServerContainer;
-
 import org.apache.tomcat.websocket.server.WsServerContainer;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.server.reactive.AbstractServerHttpRequest;
 import org.springframework.http.server.reactive.AbstractServerHttpResponse;
@@ -44,6 +32,14 @@ import org.springframework.web.reactive.socket.adapter.StandardWebSocketHandlerA
 import org.springframework.web.reactive.socket.adapter.TomcatWebSocketSession;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.websocket.Endpoint;
+import javax.websocket.server.ServerContainer;
+import java.util.Collections;
+import java.util.function.Supplier;
 
 /**
  * A {@link RequestUpgradeStrategy} for use with Tomcat.
@@ -147,15 +143,13 @@ public class TomcatRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		config.setSubprotocols(subProtocol != null ?
 				Collections.singletonList(subProtocol) : Collections.emptyList());
 
-		try {
-			WsServerContainer container = getContainer(servletRequest);
-			container.doUpgrade(servletRequest, servletResponse, config, Collections.emptyMap());
-		}
-		catch (ServletException | IOException ex) {
-			return Mono.error(ex);
-		}
-
-		return Mono.empty();
+		// Trigger WebFlux preCommit actions and upgrade
+		return exchange.getResponse().setComplete()
+				.then(Mono.fromCallable(() -> {
+					WsServerContainer container = getContainer(servletRequest);
+					container.doUpgrade(servletRequest, servletResponse, config, Collections.emptyMap());
+					return null;
+				}));
 	}
 
 	private static HttpServletRequest getNativeRequest(ServerHttpRequest request) {

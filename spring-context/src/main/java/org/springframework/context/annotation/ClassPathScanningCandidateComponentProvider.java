@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,10 @@
 
 package org.springframework.context.annotation;
 
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
-import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -60,6 +50,14 @@ import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * A component provider that provides candidate components from a base package. Can
@@ -386,15 +384,13 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 			for (String type : types) {
 				MetadataReader metadataReader = getMetadataReaderFactory().getMetadataReader(type);
 				if (isCandidateComponent(metadataReader)) {
-					AnnotatedGenericBeanDefinition sbd = new AnnotatedGenericBeanDefinition(
-							metadataReader.getAnnotationMetadata());
+					ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
 					if (isCandidateComponent(sbd)) {
 						if (debugEnabled) {
 							logger.debug("Using candidate component class from index: " + type);
 						}
 						candidates.add(sbd);
-					}
-					else {
+					} else {
 						if (debugEnabled) {
 							logger.debug("Ignored because not a concrete top-level class: " + type);
 						}

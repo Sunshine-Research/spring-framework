@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,8 @@
 
 package org.springframework.http.client.reactive;
 
-import java.net.HttpCookie;
-import java.util.List;
-
 import org.eclipse.jetty.reactive.client.ReactiveResponse;
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -30,6 +25,10 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import reactor.core.publisher.Flux;
+
+import java.net.HttpCookie;
+import java.util.List;
 
 /**
  * {@link ClientHttpResponse} implementation for the Jetty ReactiveStreams HTTP client.
@@ -66,16 +65,14 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 		MultiValueMap<String, ResponseCookie> result = new LinkedMultiValueMap<>();
 		List<String> cookieHeader = getHeaders().get(HttpHeaders.SET_COOKIE);
 		if (cookieHeader != null) {
-			cookieHeader.forEach(header ->
-				HttpCookie.parse(header)
-						.forEach(cookie -> result.add(cookie.getName(),
-								ResponseCookie.from(cookie.getName(), cookie.getValue())
-						.domain(cookie.getDomain())
-						.path(cookie.getPath())
-						.maxAge(cookie.getMaxAge())
-						.secure(cookie.getSecure())
-						.httpOnly(cookie.isHttpOnly())
-						.build()))
+			cookieHeader.forEach(header -> HttpCookie.parse(header)
+					.forEach(c -> result.add(c.getName(), ResponseCookie.fromClientResponse(c.getName(), c.getValue())
+							.domain(c.getDomain())
+							.path(c.getPath())
+							.maxAge(c.getMaxAge())
+							.secure(c.getSecure())
+							.httpOnly(c.isHttpOnly())
+							.build()))
 			);
 		}
 		return CollectionUtils.unmodifiableMultiValueMap(result);
