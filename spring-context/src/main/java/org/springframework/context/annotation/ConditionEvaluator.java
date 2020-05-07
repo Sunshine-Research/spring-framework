@@ -16,10 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -38,9 +34,12 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Internal class used to evaluate {@link Conditional} annotations.
- *
  * @author Phillip Webb
  * @author Juergen Hoeller
  * @since 4.0
@@ -72,25 +71,31 @@ class ConditionEvaluator {
 	}
 
 	/**
-	 * Determine if an item should be skipped based on {@code @Conditional} annotations.
-	 * @param metadata the meta data
-	 * @param phase the phase of the call
-	 * @return if the item should be skipped
+	 * 确认元素是否需要因为基于{@code @Conditional}注解而跳过
+	 * @param metadata BeanDefinition所在注解的元数据
+	 * @param phase 调用的语义
+	 * @return 是否需要跳过
 	 */
 	public boolean shouldSkip(@Nullable AnnotatedTypeMetadata metadata, @Nullable ConfigurationPhase phase) {
+		// 如果没有使用注解，或者注解中没有使用@Conditional注解
 		if (metadata == null || !metadata.isAnnotated(Conditional.class.getName())) {
 			return false;
 		}
-
+		// 如果语义为null
 		if (phase == null) {
+			// 元数据是注解类型的元数据，并且使用了@Configuration注解
+			// 比如bootstrap启动器的加载
 			if (metadata instanceof AnnotationMetadata &&
 					ConfigurationClassUtils.isConfigurationCandidate((AnnotationMetadata) metadata)) {
+				// 根据元数据的类型来判断是否需要跳过
 				return shouldSkip(metadata, ConfigurationPhase.PARSE_CONFIGURATION);
 			}
+			// 普通Bean的判断
 			return shouldSkip(metadata, ConfigurationPhase.REGISTER_BEAN);
 		}
-
+		// 此时已经指定判断语义
 		List<Condition> conditions = new ArrayList<>();
+		// 获取元数据的所有Condition
 		for (String[] conditionClasses : getConditionClasses(metadata)) {
 			for (String conditionClass : conditionClasses) {
 				Condition condition = getCondition(conditionClass, this.context.getClassLoader());
@@ -105,11 +110,12 @@ class ConditionEvaluator {
 			if (condition instanceof ConfigurationCondition) {
 				requiredPhase = ((ConfigurationCondition) condition).getConfigurationPhase();
 			}
+			// 条件不匹配，需要跳过
 			if ((requiredPhase == null || requiredPhase == phase) && !condition.matches(this.context, metadata)) {
 				return true;
 			}
 		}
-
+		// 其他情况下不需要跳过
 		return false;
 	}
 

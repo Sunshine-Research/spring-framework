@@ -16,16 +16,16 @@
 
 package org.springframework.context.annotation;
 
+import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.core.annotation.AliasFor;
+import org.springframework.core.type.filter.TypeFilter;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import org.springframework.beans.factory.support.BeanNameGenerator;
-import org.springframework.core.annotation.AliasFor;
-import org.springframework.core.type.filter.TypeFilter;
 
 /**
  * Configures component scanning directives for use with @{@link Configuration} classes.
@@ -105,11 +105,11 @@ public @interface ComponentScan {
 	Class<? extends ScopeMetadataResolver> scopeResolver() default AnnotationScopeMetadataResolver.class;
 
 	/**
-	 * Indicates whether proxies should be generated for detected components, which may be
-	 * necessary when using scopes in a proxy-style fashion.
-	 * <p>The default is defer to the default behavior of the component scanner used to
-	 * execute the actual scan.
-	 * <p>Note that setting this attribute overrides any value set for {@link #scopeResolver}.
+	 * 是否需要为检测到的Component创建代理对象，可能在使用以代理风格使用scope时有用
+	 * <p>
+	 * 默认值取决于执行实际扫描的组件扫描程序的默认行为
+	 * <p>
+	 * 注意，此值的设置将会覆盖{@link #scopeResolver}任何值的设定
 	 * @see ClassPathBeanDefinitionScanner#setScopedProxyMode(ScopedProxyMode)
 	 */
 	ScopedProxyMode scopedProxy() default ScopedProxyMode.DEFAULT;

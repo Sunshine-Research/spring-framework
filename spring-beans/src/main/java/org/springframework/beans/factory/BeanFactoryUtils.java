@@ -71,22 +71,25 @@ public abstract class BeanFactoryUtils {
 	}
 
 	/**
-	 * Return the actual bean name, stripping out the factory dereference
-	 * prefix (if any, also stripping repeated factory prefixes if found).
-	 * @param name the name of the bean
-	 * @return the transformed name
+	 * 返回真实的beanName，去掉beanFactory的引用（可能需要去掉多个beanFactory的引用）
+	 * @param name beanName
+	 * @return 转换后的名称
 	 * @see BeanFactory#FACTORY_BEAN_PREFIX
 	 */
 	public static String transformedBeanName(String name) {
 		Assert.notNull(name, "'name' must not be null");
+		// 非"&"开头的beanName
 		if (!name.startsWith(BeanFactory.FACTORY_BEAN_PREFIX)) {
 			return name;
 		}
+
 		return transformedBeanNameCache.computeIfAbsent(name, beanName -> {
 			do {
+				// 可能FactoryBean是嵌套的，需要把所有加上的"&"都去掉
 				beanName = beanName.substring(BeanFactory.FACTORY_BEAN_PREFIX.length());
 			}
 			while (beanName.startsWith(BeanFactory.FACTORY_BEAN_PREFIX));
+			// 返回处理后的beanName，并放入缓存中
 			return beanName;
 		});
 	}

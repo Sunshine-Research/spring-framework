@@ -41,9 +41,10 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Descriptor for a specific dependency that is about to be injected.
- * Wraps a constructor parameter, a method parameter or a field,
- * allowing unified access to their metadata.
+ * 指定注入依赖的描述符
+ * 包装了构造函数参数，方法参数或字段
+ * 允许统一访问其元数据
+ * 用于封装依赖注入的所有情况，可以用于构造函数注入，属性注入，方法注入
  * @author Juergen Hoeller
  * @since 2.5
  */

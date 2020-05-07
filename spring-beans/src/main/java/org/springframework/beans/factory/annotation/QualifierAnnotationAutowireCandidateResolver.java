@@ -16,13 +16,6 @@
 
 package org.springframework.beans.factory.annotation;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Method;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -41,6 +34,13 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * {@link AutowireCandidateResolver} implementation that matches bean definition qualifiers
@@ -131,21 +131,21 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 
 
 	/**
-	 * Determine whether the provided bean definition is an autowire candidate.
-	 * <p>To be considered a candidate the bean's <em>autowire-candidate</em>
-	 * attribute must not have been set to 'false'. Also, if an annotation on
-	 * the field or parameter to be autowired is recognized by this bean factory
-	 * as a <em>qualifier</em>, the bean must 'match' against the annotation as
-	 * well as any attributes it may contain. The bean definition must contain
-	 * the same qualifier or match by meta attributes. A "value" attribute will
-	 * fallback to match against the bean name or an alias if a qualifier or
-	 * attribute does not match.
+	 * 确认提供的beanDefinition是否是一个自动注入候选
+	 * <p>
+	 * 想要成为一个自动注入候选，那么Bean的autowire-candidate属性需要设置为true
+	 * 同时，如果一个在自断或者参数上的注解被beanFactory识别为qualifier，也就是使用了@Qualifier注解
+	 * bean必须匹配注解和注解所拥有的属性
+	 * BeanDefinition同时也必须包含相同的qualifier或者匹配元数据属性值
+	 * 如果遇到了"value"属性，那么将会回滚到匹配beanName或别名的条件，如果qualifier或者属性不匹配
 	 * @see Qualifier
 	 */
 	@Override
 	public boolean isAutowireCandidate(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
+		// 检查BeanDefinition的属性是否支持自动注入候选
 		boolean match = super.isAutowireCandidate(bdHolder, descriptor);
 		if (match) {
+			// 检查qualifier
 			match = checkQualifiers(bdHolder, descriptor.getAnnotations());
 			if (match) {
 				MethodParameter methodParam = descriptor.getMethodParameter();

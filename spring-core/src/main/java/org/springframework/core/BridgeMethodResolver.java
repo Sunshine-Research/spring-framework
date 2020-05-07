@@ -16,18 +16,18 @@
 
 package org.springframework.core;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.util.ReflectionUtils.MethodFilter;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ConcurrentReferenceHashMap;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.util.ReflectionUtils.MethodFilter;
 
 /**
  * Helper for resolving synthetic {@link Method#isBridge bridge Methods} to the
@@ -42,7 +42,6 @@ import org.springframework.util.ReflectionUtils.MethodFilter;
  *
  * <p>See <a href="https://java.sun.com/docs/books/jls/third_edition/html/expressions.html#15.12.4.5">
  * The Java Language Specification</a> for more details on the use of bridge methods.
- *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Phillip Webb
@@ -57,35 +56,41 @@ public final class BridgeMethodResolver {
 
 
 	/**
-	 * Find the original method for the supplied {@link Method bridge Method}.
-	 * <p>It is safe to call this method passing in a non-bridge {@link Method} instance.
-	 * In such a case, the supplied {@link Method} instance is returned directly to the caller.
-	 * Callers are <strong>not</strong> required to check for bridging before calling this method.
-	 * @param bridgeMethod the method to introspect
-	 * @return the original method (either the bridged method or the passed-in method
-	 * if no more specific one could be found)
+	 * 查找原生的方法，也就是获取桥接方法
+	 * <p>
+	 * 通过非桥接方法调用此方法是线程安全的
+	 * 在此种情况下，提供方法实例，将会直接返回给调用者
+	 * 调用者不必在调用此方法之前检查桥接
+	 * @param bridgeMethod 需要进行内省的方法
+	 * @return 原生的方法，即不带泛型的方法，即桥接方法，或者传入的方法
 	 */
 	public static Method findBridgedMethod(Method bridgeMethod) {
+		// 如果给定的方法不是桥接方法，直接返回
 		if (!bridgeMethod.isBridge()) {
 			return bridgeMethod;
 		}
+		// 此时给定方法是桥接方法
+		// 从缓存中获取桥接方法
 		Method bridgedMethod = cache.get(bridgeMethod);
 		if (bridgedMethod == null) {
-			// Gather all methods with matching name and parameter size.
+			// 收集所有匹配的方法名称和参数大小
 			List<Method> candidateMethods = new ArrayList<>();
 			MethodFilter filter = candidateMethod ->
 					isBridgedCandidateFor(candidateMethod, bridgeMethod);
+			// 查找所有符合条件的桥接方法
 			ReflectionUtils.doWithMethods(bridgeMethod.getDeclaringClass(), candidateMethods::add, filter);
 			if (!candidateMethods.isEmpty()) {
+				// 如果仅有一个匹配，则返回此桥接方法
+				// 如果有多个匹配，则进行搜索
 				bridgedMethod = candidateMethods.size() == 1 ?
 						candidateMethods.get(0) :
 						searchCandidates(candidateMethods, bridgeMethod);
 			}
+			// 如果没有桥接方法，则返回给定的方法
 			if (bridgedMethod == null) {
-				// A bridge method was passed in but we couldn't find the bridged method.
-				// Let's proceed with the passed-in method and hope for the best...
 				bridgedMethod = bridgeMethod;
 			}
+			// 找到桥接方法的情况下，将桥接方法放入到缓存中
 			cache.put(bridgeMethod, bridgedMethod);
 		}
 		return bridgedMethod;
@@ -104,10 +109,10 @@ public final class BridgeMethodResolver {
 	}
 
 	/**
-	 * Searches for the bridged method in the given candidates.
-	 * @param candidateMethods the List of candidate Methods
-	 * @param bridgeMethod the bridge method
-	 * @return the bridged method, or {@code null} if none found
+	 * 在多个候选桥接方法中，寻找合适的桥接方法
+	 * @param candidateMethods 候选桥接方法列表
+	 * @param bridgeMethod     给定的桥接方法
+	 * @return 匹配的候选桥接方法，或者{@code null}
 	 */
 	@Nullable
 	private static Method searchCandidates(List<Method> candidateMethods, Method bridgeMethod) {
@@ -116,11 +121,12 @@ public final class BridgeMethodResolver {
 		}
 		Method previousMethod = null;
 		boolean sameSig = true;
+		// 迭代候选桥接方法
 		for (Method candidateMethod : candidateMethods) {
+			// 筛选桥接方法，通过比较方法的参数类型
 			if (isBridgeMethodFor(bridgeMethod, candidateMethod, bridgeMethod.getDeclaringClass())) {
 				return candidateMethod;
-			}
-			else if (previousMethod != null) {
+			} else if (previousMethod != null) {
 				sameSig = sameSig &&
 						Arrays.equals(candidateMethod.getGenericParameterTypes(), previousMethod.getGenericParameterTypes());
 			}
@@ -130,10 +136,14 @@ public final class BridgeMethodResolver {
 	}
 
 	/**
-	 * Determines whether or not the bridge {@link Method} is the bridge for the
-	 * supplied candidate {@link Method}.
+	 * 确认方法是否是给定方法的桥接方法
+	 * 通过比较参数类型
+	 * @param bridgeMethod    给定方法
+	 * @param candidateMethod 候选桥接方法
+	 * @param declaringClass  桥接方法所属类
 	 */
 	static boolean isBridgeMethodFor(Method bridgeMethod, Method candidateMethod, Class<?> declaringClass) {
+		// 比较两个方法的参数类型是否匹配
 		if (isResolvedTypeMatch(candidateMethod, bridgeMethod, declaringClass)) {
 			return true;
 		}
@@ -142,31 +152,36 @@ public final class BridgeMethodResolver {
 	}
 
 	/**
-	 * Returns {@code true} if the {@link Type} signature of both the supplied
-	 * {@link Method#getGenericParameterTypes() generic Method} and concrete {@link Method}
-	 * are equal after resolving all types against the declaringType, otherwise
-	 * returns {@code false}.
+	 * 两个方法的{@link Type}标志和具体实现是相同的，在解析所有的声明类型之后，返回{@code true}
+	 * 否则返回{@code false}.
+	 * @param genericMethod   给定的方法
+	 * @param candidateMethod 候选方法
+	 * @param declaringClass  候选方法所属的类
+	 * @return
 	 */
 	private static boolean isResolvedTypeMatch(Method genericMethod, Method candidateMethod, Class<?> declaringClass) {
+		// 获取给定方法的参数类型，对参数类型个数进行比较
 		Type[] genericParameters = genericMethod.getGenericParameterTypes();
 		if (genericParameters.length != candidateMethod.getParameterCount()) {
 			return false;
 		}
+		// 获取候选方法的参数类
 		Class<?>[] candidateParameters = candidateMethod.getParameterTypes();
 		for (int i = 0; i < candidateParameters.length; i++) {
 			ResolvableType genericParameter = ResolvableType.forMethodParameter(genericMethod, i, declaringClass);
 			Class<?> candidateParameter = candidateParameters[i];
 			if (candidateParameter.isArray()) {
-				// An array type: compare the component type.
+				// 数组类型，那么继续比较其中的元素类型
 				if (!candidateParameter.getComponentType().equals(genericParameter.getComponentType().toClass())) {
 					return false;
 				}
 			}
-			// A non-array type: compare the type itself.
+			// 非数组类型，那么直接比较两个的参数类型
 			if (!candidateParameter.equals(genericParameter.toClass())) {
 				return false;
 			}
 		}
+		// 匹配成功
 		return true;
 	}
 
@@ -197,8 +212,7 @@ public final class BridgeMethodResolver {
 			Method method = searchForMatch(ifc, bridgeMethod);
 			if (method != null && !method.isBridge()) {
 				return method;
-			}
-			else {
+			} else {
 				method = searchInterfaces(ifc.getInterfaces(), bridgeMethod);
 				if (method != null) {
 					return method;
@@ -217,8 +231,7 @@ public final class BridgeMethodResolver {
 	private static Method searchForMatch(Class<?> type, Method bridgeMethod) {
 		try {
 			return type.getDeclaredMethod(bridgeMethod.getName(), bridgeMethod.getParameterTypes());
-		}
-		catch (NoSuchMethodException ex) {
+		} catch (NoSuchMethodException ex) {
 			return null;
 		}
 	}

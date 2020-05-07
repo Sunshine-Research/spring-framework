@@ -189,6 +189,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	private boolean enforceDestroyMethod = true;
 
+	/**
+	 * BeanDefinition是否是合成的，也就是不是由context自己生成的
+	 */
 	private boolean synthetic = false;
 
 	private int role = BeanDefinition.ROLE_APPLICATION;
@@ -989,8 +992,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	}
 
 	/**
-	 * Return whether this bean definition is 'synthetic', that is,
-	 * not defined by the application itself.
+	 * BeanDefinition是否是合成的，也就是不是由context自己生成的
 	 */
 	public boolean isSynthetic() {
 		return this.synthetic;
@@ -1099,12 +1101,12 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	}
 
 	/**
-	 * Validate and prepare the method overrides defined for this bean.
-	 * Checks for existence of a method with the specified name.
-	 * @throws BeanDefinitionValidationException in case of validation failure
+	 * 为当前bean校验和准备方法重写声明
+	 * 检查是否存在具有指定名称的方法
+	 * @throws BeanDefinitionValidationException 检查异常
 	 */
 	public void prepareMethodOverrides() throws BeanDefinitionValidationException {
-		// Check that lookup methods exist and determine their overloaded status.
+		// 检查所有查找到的已存在的方法，并确认它们重载的状态
 		if (hasMethodOverrides()) {
 			getMethodOverrides().getOverrides().forEach(this::prepareMethodOverride);
 		}

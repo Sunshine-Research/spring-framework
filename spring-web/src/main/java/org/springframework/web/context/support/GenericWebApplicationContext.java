@@ -16,9 +16,6 @@
 
 package org.springframework.web.context.support;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.support.GenericApplicationContext;
@@ -35,6 +32,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.ConfigurableWebEnvironment;
 import org.springframework.web.context.ServletContextAware;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 
 /**
  * Subclass of {@link GenericApplicationContext}, suitable for web environments.
@@ -143,15 +143,21 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	}
 
 	/**
-	 * Register ServletContextAwareProcessor.
+	 * 在context内部beanFactory重载并配置完成之后，子类实现可以对其进行修改
+	 * 所有的BeanDefinition应该已经被加载，但是还没有开始初始化
+	 * 允许在特殊实现的ApplicationContext中注册特殊的BeanPostProcessors等
+	 * GenericWebApplicationContext会注册一个ServletContextAwareProcessor
+	 * @param beanFactory 需要进行修改的beanFactory
 	 * @see ServletContextAwareProcessor
 	 */
 	@Override
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		if (this.servletContext != null) {
+			// 如果当前context已经初始化，则添加ServletContextAwareProcessor，并忽略ServletContextAware类型bean的注入
 			beanFactory.addBeanPostProcessor(new ServletContextAwareProcessor(this.servletContext));
 			beanFactory.ignoreDependencyInterface(ServletContextAware.class);
 		}
+
 		WebApplicationContextUtils.registerWebApplicationScopes(beanFactory, this.servletContext);
 		WebApplicationContextUtils.registerEnvironmentBeans(beanFactory, this.servletContext);
 	}
@@ -184,8 +190,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>Replace {@code Servlet}-related property sources.
+	 * 替代{@code Servlet}相关的属性资源
 	 */
 	@Override
 	protected void initPropertySources() {

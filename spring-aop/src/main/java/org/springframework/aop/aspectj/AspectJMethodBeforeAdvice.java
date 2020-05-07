@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 
 /**
+ * 使用AspectJ包装的增强
  * Spring AOP增强，包装了前置方法的静态代理
  * @author Rod Johnson
  * @author Adrian Colyer

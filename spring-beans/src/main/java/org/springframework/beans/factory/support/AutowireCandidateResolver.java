@@ -23,7 +23,6 @@ import org.springframework.lang.Nullable;
 /**
  * Strategy interface for determining whether a specific bean definition
  * qualifies as an autowire candidate for a specific dependency.
- *
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @since 2.5
@@ -31,13 +30,13 @@ import org.springframework.lang.Nullable;
 public interface AutowireCandidateResolver {
 
 	/**
-	 * Determine whether the given bean definition qualifies as an
-	 * autowire candidate for the given dependency.
-	 * <p>The default implementation checks
+	 * 确认指定的beanDefinition有资格成为自动注入候选人
+	 * <p>
+	 * 默认的实现检查
 	 * {@link org.springframework.beans.factory.config.BeanDefinition#isAutowireCandidate()}.
-	 * @param bdHolder the bean definition including bean name and aliases
-	 * @param descriptor the descriptor for the target method parameter or field
-	 * @return whether the bean definition qualifies as autowire candidate
+	 * @param bdHolder   候选beanDefinition的持有器，包括了beanDefinition和beanDefinition的别名
+	 * @param descriptor 目标方法参数或字段的描述符
+	 * @return bean定义是否符合自动注入候选条件
 	 * @see org.springframework.beans.factory.config.BeanDefinition#isAutowireCandidate()
 	 */
 	default boolean isAutowireCandidate(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
@@ -50,8 +49,8 @@ public interface AutowireCandidateResolver {
 	 * @param descriptor the descriptor for the target method parameter or field
 	 * @return whether the descriptor is marked as required or possibly indicating
 	 * non-required status some other way (e.g. through a parameter annotation)
-	 * @since 5.0
 	 * @see DependencyDescriptor#isRequired()
+	 * @since 5.0
 	 */
 	default boolean isRequired(DependencyDescriptor descriptor) {
 		return descriptor.isRequired();
@@ -64,8 +63,8 @@ public interface AutowireCandidateResolver {
 	 * @param descriptor the descriptor for the target method parameter or field
 	 * @return whether the descriptor declares a qualifier, narrowing the candidate
 	 * status beyond the type match
-	 * @since 5.1
 	 * @see org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver#hasQualifier
+	 * @since 5.1
 	 */
 	default boolean hasQualifier(DependencyDescriptor descriptor) {
 		return false;
@@ -89,7 +88,7 @@ public interface AutowireCandidateResolver {
 	 * if demanded by the injection point.
 	 * <p>The default implementation simply returns {@code null}.
 	 * @param descriptor the descriptor for the target method parameter or field
-	 * @param beanName the name of the bean that contains the injection point
+	 * @param beanName   the name of the bean that contains the injection point
 	 * @return the lazy resolution proxy for the actual dependency target,
 	 * or {@code null} if straight resolution is to be performed
 	 * @since 4.0

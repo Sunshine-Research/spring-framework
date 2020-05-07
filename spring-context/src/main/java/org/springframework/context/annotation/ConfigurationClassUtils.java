@@ -16,14 +16,8 @@
 
 package org.springframework.context.annotation;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -41,9 +35,13 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * Utilities for identifying {@link Configuration} classes.
- *
  * @author Chris Beams
  * @author Juergen Hoeller
  * @since 3.1
@@ -74,12 +72,11 @@ abstract class ConfigurationClassUtils {
 
 
 	/**
-	 * Check whether the given bean definition is a candidate for a configuration class
-	 * (or a nested component class declared within a configuration/component class,
-	 * to be auto-registered as well), and mark it accordingly.
-	 * @param beanDef the bean definition to check
-	 * @param metadataReaderFactory the current factory in use by the caller
-	 * @return whether the candidate qualifies as (any kind of) configuration class
+	 * 检查给定的BeanDefinition是否是Configuration类型的类，SpringBoot的启动类就是一个Configuration类
+	 * （或者是在Configuration和Component类中声明的嵌套的component类，用于自动注入），并相应地进行标记
+	 * @param beanDef 进行检查的BeanDefinition
+	 * @param metadataReaderFactory 调用者使用的BeanFactory
+	 * @return 候选BeanDefinition是否是Configuration类型
 	 */
 	public static boolean checkConfigurationClassCandidate(
 			BeanDefinition beanDef, MetadataReaderFactory metadataReaderFactory) {
@@ -92,12 +89,10 @@ abstract class ConfigurationClassUtils {
 		AnnotationMetadata metadata;
 		if (beanDef instanceof AnnotatedBeanDefinition &&
 				className.equals(((AnnotatedBeanDefinition) beanDef).getMetadata().getClassName())) {
-			// Can reuse the pre-parsed metadata from the given BeanDefinition...
+			// 可以重用来自给定BeanDefinition的预先解析的元数据
 			metadata = ((AnnotatedBeanDefinition) beanDef).getMetadata();
-		}
-		else if (beanDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) beanDef).hasBeanClass()) {
-			// Check already loaded Class if present...
-			// since we possibly can't even load the class file for this Class.
+		} else if (beanDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) beanDef).hasBeanClass()) {
+			// 检查已经加载的类
 			Class<?> beanClass = ((AbstractBeanDefinition) beanDef).getBeanClass();
 			if (BeanFactoryPostProcessor.class.isAssignableFrom(beanClass) ||
 					BeanPostProcessor.class.isAssignableFrom(beanClass) ||
@@ -106,13 +101,11 @@ abstract class ConfigurationClassUtils {
 				return false;
 			}
 			metadata = AnnotationMetadata.introspect(beanClass);
-		}
-		else {
+		} else {
 			try {
 				MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(className);
 				metadata = metadataReader.getAnnotationMetadata();
-			}
-			catch (IOException ex) {
+			} catch (IOException ex) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Could not find class file for introspecting configuration annotations: " +
 							className, ex);
@@ -121,18 +114,18 @@ abstract class ConfigurationClassUtils {
 			}
 		}
 
+		// 获取@Configuration注解的属性值，如果是Configuration类型的BeanDefinition，设置一些属性值
+		// 主要设置为轻量还是全量的Configuration类型的BeanDefinition
 		Map<String, Object> config = metadata.getAnnotationAttributes(Configuration.class.getName());
 		if (config != null && !Boolean.FALSE.equals(config.get("proxyBeanMethods"))) {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
-		}
-		else if (config != null || isConfigurationCandidate(metadata)) {
+		} else if (config != null || isConfigurationCandidate(metadata)) {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
-		}
-		else {
+		} else {
 			return false;
 		}
 
-		// It's a full or lite configuration candidate... Let's determine the order value, if any.
+		// 此时，是一个全量或轻量的Configuration类型的候选，此时确认下是否存在优先级策略
 		Integer order = getOrder(metadata);
 		if (order != null) {
 			beanDef.setAttribute(ORDER_ATTRIBUTE, order);

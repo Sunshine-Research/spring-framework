@@ -47,7 +47,7 @@ import org.springframework.lang.Nullable;
 public interface BeanPostProcessor {
 
 	/**
-	 * 在任何bean实例化回调以前（比如InitializingBean#afterPropertiesSet，或者自定义的初始化方法），将此{@code BeanPostProcessor}应用于给定的新的bean实例
+	 * 在任何bean初始化回调以前（比如InitializingBean#afterPropertiesSet，或者自定义的初始化方法），将此{@code BeanPostProcessor}应用于给定的新的bean实例
 	 * bean已经填充了属性，返回的bean实例可能是原始bean的包装类
 	 * <p>
 	 * 默认的实现是返回给定的bean原样
@@ -64,7 +64,7 @@ public interface BeanPostProcessor {
 	}
 
 	/**
-	 * 在任何bean实例化回调以后（比如InitializingBean#afterPropertiesSet，或者自定义的初始化方法），将此{@code BeanPostProcessor}应用于给定的新的bean实例
+	 * 在任何bean初始化回调以后（比如InitializingBean#afterPropertiesSet，或者自定义的初始化方法），将此{@code BeanPostProcessor}应用于给定的新的bean实例
 	 * bean已经填充了属性，返回的bean实例可能是原始bean的包装类
 	 * 假如是FactoryBean，此回调任务既会被FactoryBean调用，也会被FactoryBean创建的对象的调用（Spring 2.0）
 	 * post-processor可以通过{@code bean instanceof FactoryBean}方法，决定是应用到FactoryBean还是FactoryBean创建的对象，或者是两者都应用

@@ -17,41 +17,33 @@
 package org.springframework.beans.factory;
 
 /**
- * Callback interface triggered at the end of the singleton pre-instantiation phase
- * during {@link BeanFactory} bootstrap. This interface can be implemented by
- * singleton beans in order to perform some initialization after the regular
- * singleton instantiation algorithm, avoiding side effects with accidental early
- * initialization (e.g. from {@link ListableBeanFactory#getBeansOfType} calls).
- * In that sense, it is an alternative to {@link InitializingBean} which gets
- * triggered right at the end of a bean's local construction phase.
- *
- * <p>This callback variant is somewhat similar to
- * {@link org.springframework.context.event.ContextRefreshedEvent} but doesn't
- * require an implementation of {@link org.springframework.context.ApplicationListener},
- * with no need to filter context references across a context hierarchy etc.
- * It also implies a more minimal dependency on just the {@code beans} package
- * and is being honored by standalone {@link ListableBeanFactory} implementations,
- * not just in an {@link org.springframework.context.ApplicationContext} environment.
- *
- * <p><b>NOTE:</b> If you intend to start/manage asynchronous tasks, preferably
- * implement {@link org.springframework.context.Lifecycle} instead which offers
- * a richer model for runtime management and allows for phased startup/shutdown.
- *
+ * 在{@link BeanFactory}启动时，单例Bean实例化结束阶段触发的回调接口
+ * 单例bean可以实现此接口来执行一些在常规单例bean实例化之后的实现
+ * 避免一些因为过早实例化而带来的副作用（比如{@link ListableBeanFactory#getBeansOfType}的调用）
+ * 从这个意义上来讲，它是替代{@link InitializingBean}的
+ * {@link InitializingBean}用于触发在bean本地构建语义之后的动作
+ * <p>
+ * 这个回调任务可以认为是{@link org.springframework.context.event.ContextRefreshedEvent}
+ * 但是不需要一个{@link org.springframework.context.ApplicationListener}listener
+ * 无需筛选整个context层次结构中的上下文引用，这也意味着对于{@code beans}包的依赖性最小
+ * 并且受到独立{@link ListableBeanFactory}实现的尊重，并不仅仅在{@link org.springframework.context.ApplicationContext}环境下
+ * <p>
+ * 注意：如果打算启动或管理异步任务，更好地实现{@link org.springframework.context.Lifecycle}接口
+ * 来代替用于运行时管理的更丰富的而模型，并允许分阶段启动和关闭
  * @author Juergen Hoeller
- * @since 4.1
  * @see org.springframework.beans.factory.config.ConfigurableListableBeanFactory#preInstantiateSingletons()
+ * @since 4.1
  */
 public interface SmartInitializingSingleton {
 
 	/**
-	 * Invoked right at the end of the singleton pre-instantiation phase,
-	 * with a guarantee that all regular singleton beans have been created
-	 * already. {@link ListableBeanFactory#getBeansOfType} calls within
-	 * this method won't trigger accidental side effects during bootstrap.
-	 * <p><b>NOTE:</b> This callback won't be triggered for singleton beans
-	 * lazily initialized on demand after {@link BeanFactory} bootstrap,
-	 * and not for any other bean scope either. Carefully use it for beans
-	 * with the intended bootstrap semantics only.
+	 * 在单例预实例化结束阶段进行调用
+	 * 用于保证所有常规的单例bean已经被创建
+	 * {@link ListableBeanFactory#getBeansOfType}使用此方法的调用将不会触发beanFactory启动时的副作用
+	 * <p>
+	 * 注意：此回调任务不会在{@link BeanFactory}启动之后，懒加载单例bean实例化后触发
+	 * 也不支持其他scope类型
+	 * 需要在仅有的预期语义之下谨慎使用
 	 */
 	void afterSingletonsInstantiated();
 

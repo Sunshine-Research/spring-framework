@@ -16,18 +16,18 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringValueResolver;
+
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Visitor class for traversing {@link BeanDefinition} objects, in particular
@@ -70,9 +70,9 @@ public class BeanDefinitionVisitor {
 
 
 	/**
-	 * Traverse the given BeanDefinition object and the MutablePropertyValues
-	 * and ConstructorArgumentValues contained in them.
-	 * @param beanDefinition the BeanDefinition object to traverse
+	 * 遍历给定的BeanDefinition以及属性值以及构造函数参数
+	 * 依次遍历BeanDefinition关联的所有对象，核心方法是调用resolveStringValue()
+	 * @param beanDefinition 需要遍历的BeanDefinition
 	 * @see #resolveStringValue(String)
 	 */
 	public void visitBeanDefinition(BeanDefinition beanDefinition) {
@@ -283,9 +283,9 @@ public class BeanDefinitionVisitor {
 	}
 
 	/**
-	 * Resolve the given String value, for example parsing placeholders.
-	 * @param strVal the original String value
-	 * @return the resolved String value
+	 * 取代占位符
+	 * @param strVal 原始的String值
+	 * @return 替换后的String值
 	 */
 	@Nullable
 	protected String resolveStringValue(String strVal) {
@@ -293,8 +293,9 @@ public class BeanDefinitionVisitor {
 			throw new IllegalStateException("No StringValueResolver specified - pass a resolver " +
 					"object into the constructor or override the 'resolveStringValue' method");
 		}
+		// 计算替换后的值
 		String resolvedValue = this.valueResolver.resolveStringValue(strVal);
-		// Return original String if not modified.
+		// 如果没有修改，则返回旧值
 		return (strVal.equals(resolvedValue) ? strVal : resolvedValue);
 	}
 

@@ -16,8 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import java.lang.reflect.Constructor;
-
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.Aware;
@@ -33,10 +31,11 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
+import java.lang.reflect.Constructor;
+
 /**
  * Common delegate code for the handling of parser strategies, e.g.
  * {@code TypeFilter}, {@code ImportSelector}, {@code ImportBeanDefinitionRegistrar}
- *
  * @author Juergen Hoeller
  * @author Phillip Webb
  * @since 4.3.3
@@ -44,11 +43,8 @@ import org.springframework.util.Assert;
 abstract class ParserStrategyUtils {
 
 	/**
-	 * Instantiate a class using an appropriate constructor and return the new
-	 * instance as the specified assignable type. The returned instance will
-	 * have {@link BeanClassLoaderAware}, {@link BeanFactoryAware},
-	 * {@link EnvironmentAware}, and {@link ResourceLoaderAware} contracts
-	 * invoked if they are implemented by the given object.
+	 * 使用适当的构造函数参数实例化类，并返回给定类型的新的实例
+	 * 返回的实例将会有{@link BeanClassLoaderAware}，{@link BeanFactoryAware}，{@link EnvironmentAware}，{@link ResourceLoaderAware}关联调用
 	 * @since 5.2
 	 */
 	@SuppressWarnings("unchecked")
@@ -63,6 +59,7 @@ abstract class ParserStrategyUtils {
 		ClassLoader classLoader = (registry instanceof ConfigurableBeanFactory ?
 				((ConfigurableBeanFactory) registry).getBeanClassLoader() : resourceLoader.getClassLoader());
 		T instance = (T) createInstance(clazz, environment, resourceLoader, registry, classLoader);
+		// 调用Aware方法
 		ParserStrategyUtils.invokeAwareMethods(instance, environment, resourceLoader, registry, classLoader);
 		return instance;
 	}

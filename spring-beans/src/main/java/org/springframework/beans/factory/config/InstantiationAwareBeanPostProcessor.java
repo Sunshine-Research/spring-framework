@@ -62,7 +62,7 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 
 	/**
 	 * 通过构造方法或者工厂方法，在bean实例化之后执行的操作，但是需要发生在Spring属性注入之前（显示属性或者自动注入）
-	 * 这是在Spring的自动装配之前，在给定bean实例上执行自定义字段注入的理想回调
+	 * 这是在Spring的自动装配之前，在给定bean实例上执行自定义字段注入的理想回调方法
 	 * 默认的实现是返回{@code true}
 	 * @param bean     创建的bean实例，此时还没有设置bean属性
 	 * @param beanName bean名称

@@ -17,27 +17,20 @@
 package org.springframework.beans.factory;
 
 /**
- * Extension of the {@link FactoryBean} interface. Implementations may
- * indicate whether they always return independent instances, for the
- * case where their {@link #isSingleton()} implementation returning
- * {@code false} does not clearly indicate independent instances.
- *
- * <p>Plain {@link FactoryBean} implementations which do not implement
- * this extended interface are simply assumed to always return independent
- * instances if their {@link #isSingleton()} implementation returns
- * {@code false}; the exposed object is only accessed on demand.
- *
- * <p><b>NOTE:</b> This interface is a special purpose interface, mainly for
- * internal use within the framework and within collaborating frameworks.
- * In general, application-provided FactoryBeans should simply implement
- * the plain {@link FactoryBean} interface. New methods might be added
- * to this extended interface even in point releases.
- *
- * @author Juergen Hoeller
- * @since 2.0.3
+ * <p>
+ * {@link FactoryBean}接口的扩展
+ * 实现可能需要证明是否需要返回独立的实例，也就是在{@link #isSingleton()}实现返回{@code false}，并不代表独立的实例
+ * 如果没有实现此接口的清晰明了的{@link FactoryBean}实现，{@link #isSingleton()}实现是返回{@code false}
+ * 则简单的假设总是返回独立的实例
+ * <p>
+ * 注意：此接口是一个特殊目的的接口，主要用于内部框架和合作框架的的内部使用
+ * 通常，应用提供的FactoryBean应该仅仅实现{@link FactoryBean}接口
+ * 新的方法可能添加到此扩展接口中
  * @param <T> the bean type
+ * @author Juergen Hoeller
  * @see #isPrototype()
  * @see #isSingleton()
+ * @since 2.0.3
  */
 public interface SmartFactoryBean<T> extends FactoryBean<T> {
 

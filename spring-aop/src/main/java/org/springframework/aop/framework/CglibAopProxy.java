@@ -218,6 +218,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 			enhancer.setCallbackTypes(types);
 
 			// 生成代理类，并创建代理实例
+			// ObjenesisCglibAopProxy
 			return createProxyClassAndInstance(enhancer, callbacks);
 		} catch (CodeGenerationException | IllegalArgumentException ex) {
 			throw new AopConfigException("Could not generate CGLIB subclass of " + this.advised.getTargetClass() +

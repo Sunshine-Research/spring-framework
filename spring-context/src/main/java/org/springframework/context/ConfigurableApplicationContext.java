@@ -16,8 +16,6 @@
 
 package org.springframework.context;
 
-import java.io.Closeable;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -26,16 +24,14 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ProtocolResolver;
 import org.springframework.lang.Nullable;
 
+import java.io.Closeable;
+
 /**
- * SPI interface to be implemented by most if not all application contexts.
- * Provides facilities to configure an application context in addition
- * to the application context client methods in the
- * {@link org.springframework.context.ApplicationContext} interface.
- *
- * <p>Configuration and lifecycle methods are encapsulated here to avoid
- * making them obvious to ApplicationContext client code. The present
- * methods should only be used by startup and shutdown code.
- *
+ * 大多数context需要实现的SPI接口
+ * 提供了一些额外的功能来配置context，除了context客户端方法
+ * <p>
+ * 配置和bean生命周期的方法封装在这里来避免暴露给context客户端代码
+ * 目前方法应该仅用于启动和关闭代码使用
  * @author Juergen Hoeller
  * @author Chris Beams
  * @author Sam Brannen
@@ -53,10 +49,11 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	String CONFIG_LOCATION_DELIMITERS = ",; \t\n";
 
 	/**
-	 * Name of the ConversionService bean in the factory.
-	 * If none is supplied, default conversion rules apply.
-	 * @since 3.0
+	 * ConversionService bean
+	 * 用于类型转换
+	 * 如果没有指定，则使用默认的ConversionBean
 	 * @see org.springframework.core.convert.ConversionService
+	 * @since 3.0
 	 */
 	String CONVERSION_SERVICE_BEAN_NAME = "conversionService";
 
@@ -77,19 +74,19 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 
 	/**
 	 * Name of the System properties bean in the factory.
+	 * SystemProperties bean在工厂中的名称
 	 * @see java.lang.System#getProperties()
 	 */
 	String SYSTEM_PROPERTIES_BEAN_NAME = "systemProperties";
 
 	/**
-	 * Name of the System environment bean in the factory.
+	 * SystemEnvironment bean在工厂中的名称
 	 * @see java.lang.System#getenv()
 	 */
 	String SYSTEM_ENVIRONMENT_BEAN_NAME = "systemEnvironment";
 
 	/**
-	 * {@link Thread#getName() Name} of the {@linkplain #registerShutdownHook()
-	 * shutdown hook} thread: {@value}.
+	 * {@linkplain #registerShutdownHook() shutdown hook}的线程名称
 	 * @since 5.2
 	 * @see #registerShutdownHook()
 	 */
@@ -97,23 +94,23 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 
 
 	/**
-	 * Set the unique id of this application context.
+	 * 设置当前context的唯一ID
 	 * @since 3.0
 	 */
 	void setId(String id);
 
 	/**
 	 * Set the parent of this application context.
-	 * <p>Note that the parent shouldn't be changed: It should only be set outside
-	 * a constructor if it isn't available when an object of this class is created,
-	 * for example in case of WebApplicationContext setup.
+	 * <p>
+	 * 设置当前context的父context
+	 * <p>注意：父context不允许改变，仅当创建此context时不可用（例如在WebApplicationContext设置时）时，才应在构造方法外部设置
 	 * @param parent the parent context
 	 * @see org.springframework.web.context.ConfigurableWebApplicationContext
 	 */
 	void setParent(@Nullable ApplicationContext parent);
 
 	/**
-	 * Set the {@code Environment} for this application context.
+	 * 设置当前context的{@code Environment}
 	 * @param environment the new environment
 	 * @since 3.1
 	 */
@@ -157,14 +154,11 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	void addProtocolResolver(ProtocolResolver resolver);
 
 	/**
-	 * Load or refresh the persistent representation of the configuration,
-	 * which might an XML file, properties file, or relational database schema.
-	 * <p>As this is a startup method, it should destroy already created singletons
-	 * if it fails, to avoid dangling resources. In other words, after invocation
-	 * of that method, either all or no singletons at all should be instantiated.
-	 * @throws BeansException if the bean factory could not be initialized
-	 * @throws IllegalStateException if already initialized and multiple refresh
-	 * attempts are not supported
+	 * 加载或刷新配置的持久代理，可能是XML文件，属性文件，或者关系数据schema
+	 * 作为一个启动时的方法，它需要毁灭掉所有已经创建的单例bean
+	 * 如果无法毁掉所有的单例bean，则需要避免资源悬空，换句话说，在调用此方法之后，要不重新实例化所有的单例bean，要不然就不实例化单例bean
+	 * @throws BeansException 无法实例化beanFactory
+	 * @throws IllegalStateException 已经开始初始化，不支持多个线程进行初始化
 	 */
 	void refresh() throws BeansException, IllegalStateException;
 

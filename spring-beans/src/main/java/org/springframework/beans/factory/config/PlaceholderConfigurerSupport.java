@@ -32,7 +32,7 @@ import org.springframework.util.StringValueResolver;
  * <p>The default placeholder syntax follows the Ant / Log4J / JSP EL style:
  *
  * <pre class="code">${...}</pre>
- *
+ * <p>
  * Example XML bean definition:
  *
  * <pre class="code">
@@ -41,24 +41,24 @@ import org.springframework.util.StringValueResolver;
  *   &lt;property name="url" value="jdbc:${dbname}"/&gt;
  * &lt;/bean&gt;
  * </pre>
- *
+ * <p>
  * Example properties file:
  *
  * <pre class="code">driver=com.mysql.jdbc.Driver
  * dbname=mysql:mydb</pre>
- *
+ * <p>
  * Annotated bean definitions may take advantage of property replacement using
  * the {@link org.springframework.beans.factory.annotation.Value @Value} annotation:
  *
  * <pre class="code">@Value("${person.age}")</pre>
- *
+ * <p>
  * Implementations check simple property values, lists, maps, props, and bean names
  * in bean references. Furthermore, placeholder values can also cross-reference
  * other placeholders, like:
  *
  * <pre class="code">rootPath=myrootdir
  * subPath=${rootPath}/subdir</pre>
- *
+ * <p>
  * In contrast to {@link PropertyOverrideConfigurer}, subclasses of this type allow
  * filling in of explicit placeholders in bean definitions.
  *
@@ -79,33 +79,44 @@ import org.springframework.util.StringValueResolver;
  * <pre class="code">
  *   <property name="url" value="jdbc:${dbname:defaultdb}"/>
  * </pre>
- *
  * @author Chris Beams
  * @author Juergen Hoeller
- * @since 3.1
  * @see PropertyPlaceholderConfigurer
  * @see org.springframework.context.support.PropertySourcesPlaceholderConfigurer
+ * @since 3.1
  */
 public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfigurer
 		implements BeanNameAware, BeanFactoryAware {
 
-	/** Default placeholder prefix: {@value}. */
+	/**
+	 * Default placeholder prefix: {@value}.
+	 */
 	public static final String DEFAULT_PLACEHOLDER_PREFIX = "${";
 
-	/** Default placeholder suffix: {@value}. */
+	/**
+	 * Default placeholder suffix: {@value}.
+	 */
 	public static final String DEFAULT_PLACEHOLDER_SUFFIX = "}";
 
-	/** Default value separator: {@value}. */
+	/**
+	 * Default value separator: {@value}.
+	 */
 	public static final String DEFAULT_VALUE_SEPARATOR = ":";
 
 
-	/** Defaults to {@value #DEFAULT_PLACEHOLDER_PREFIX}. */
+	/**
+	 * Defaults to {@value #DEFAULT_PLACEHOLDER_PREFIX}.
+	 */
 	protected String placeholderPrefix = DEFAULT_PLACEHOLDER_PREFIX;
 
-	/** Defaults to {@value #DEFAULT_PLACEHOLDER_SUFFIX}. */
+	/**
+	 * Defaults to {@value #DEFAULT_PLACEHOLDER_SUFFIX}.
+	 */
 	protected String placeholderSuffix = DEFAULT_PLACEHOLDER_SUFFIX;
 
-	/** Defaults to {@value #DEFAULT_VALUE_SEPARATOR}. */
+	/**
+	 * Defaults to {@value #DEFAULT_VALUE_SEPARATOR}.
+	 */
 	@Nullable
 	protected String valueSeparator = DEFAULT_VALUE_SEPARATOR;
 
@@ -209,31 +220,36 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 		this.beanFactory = beanFactory;
 	}
 
-
+	/**
+	 * 使用字符串值处理器处理当前BeanFactory中的所有占位符
+	 * @param beanFactoryToProcess 当前需要处理的BeanFactory
+	 * @param valueResolver        字符串值处理器
+	 */
 	protected void doProcessProperties(ConfigurableListableBeanFactory beanFactoryToProcess,
-			StringValueResolver valueResolver) {
-
+									   StringValueResolver valueResolver) {
+		// 构建BeanDefinition访问器
 		BeanDefinitionVisitor visitor = new BeanDefinitionVisitor(valueResolver);
-
+		// 获取当前BeanFactory所有已注册的BeanDefinition
 		String[] beanNames = beanFactoryToProcess.getBeanDefinitionNames();
+		// 迭代所有的BeanDefinition
 		for (String curName : beanNames) {
-			// Check that we're not parsing our own bean definition,
-			// to avoid failing on unresolvable placeholders in properties file locations.
+			// 判断当前处理BeanDefinition是否属于当前BeanFactory
+			// 避免在属性文件位置中无法解析的占位符失败
 			if (!(curName.equals(this.beanName) && beanFactoryToProcess.equals(this.beanFactory))) {
 				BeanDefinition bd = beanFactoryToProcess.getBeanDefinition(curName);
 				try {
+					// 使用访问器注入属性值
 					visitor.visitBeanDefinition(bd);
-				}
-				catch (Exception ex) {
+				} catch (Exception ex) {
 					throw new BeanDefinitionStoreException(bd.getResourceDescription(), curName, ex.getMessage(), ex);
 				}
 			}
 		}
 
-		// New in Spring 2.5: resolve placeholders in alias target names and aliases as well.
+		// Spring 2.5新特性，解决别名中的占位符
 		beanFactoryToProcess.resolveAliases(valueResolver);
 
-		// New in Spring 3.0: resolve placeholders in embedded values such as annotation attributes.
+		// Spring 3.0新特性，解决诸如注解属性中的占位符
 		beanFactoryToProcess.addEmbeddedValueResolver(valueResolver);
 	}
 

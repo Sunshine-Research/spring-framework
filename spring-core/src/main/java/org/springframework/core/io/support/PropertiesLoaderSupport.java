@@ -16,25 +16,23 @@
 
 package org.springframework.core.io.support;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.UnknownHostException;
-import java.util.Properties;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DefaultPropertiesPersister;
 import org.springframework.util.PropertiesPersister;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.Properties;
+
 /**
  * Base class for JavaBean-style components that need to load properties
  * from one or more resources. Supports local properties as well, with
  * configurable overriding.
- *
  * @author Juergen Hoeller
  * @since 1.2.2
  */
@@ -140,25 +138,26 @@ public abstract class PropertiesLoaderSupport {
 
 
 	/**
-	 * Return a merged Properties instance containing both the
-	 * loaded properties and properties set on this FactoryBean.
+	 * 返回一个合并的属性集实例
+	 * 包括加载的属性和FactoryBean上设置的属性
 	 */
 	protected Properties mergeProperties() throws IOException {
 		Properties result = new Properties();
 
 		if (this.localOverride) {
-			// Load properties from file upfront, to let local properties override.
+			// 看是否可以先从文件进行加载，看是否允许重写
 			loadProperties(result);
 		}
 
 		if (this.localProperties != null) {
+			// 正常加载本地属性
 			for (Properties localProp : this.localProperties) {
 				CollectionUtils.mergePropertiesIntoMap(localProp, result);
 			}
 		}
 
 		if (!this.localOverride) {
-			// Load properties from file afterwards, to let those properties override.
+			// 后从文件中进行加载
 			loadProperties(result);
 		}
 
@@ -173,15 +172,16 @@ public abstract class PropertiesLoaderSupport {
 	 */
 	protected void loadProperties(Properties props) throws IOException {
 		if (this.locations != null) {
+			// 获取所有引入的文件位置，在扫描ImportSource注解时写入
 			for (Resource location : this.locations) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Loading properties file from " + location);
 				}
 				try {
+					// 填充所有属性
 					PropertiesLoaderUtils.fillProperties(
 							props, new EncodedResource(location, this.fileEncoding), this.propertiesPersister);
-				}
-				catch (FileNotFoundException | UnknownHostException ex) {
+				} catch (FileNotFoundException | UnknownHostException ex) {
 					if (this.ignoreResourceNotFound) {
 						if (logger.isDebugEnabled()) {
 							logger.debug("Properties resource not found: " + ex.getMessage());

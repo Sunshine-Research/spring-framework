@@ -16,20 +16,6 @@
 
 package org.springframework.web.context.support;
 
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpSession;
-
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.env.MutablePropertySources;
@@ -47,6 +33,19 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.SessionScope;
 import org.springframework.web.context.request.WebRequest;
 
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Convenience methods for retrieving the root {@link WebApplicationContext} for
  * a given {@link ServletContext}. This is useful for programmatically accessing
@@ -55,7 +54,6 @@ import org.springframework.web.context.request.WebRequest;
  * <p>Note that there are more convenient ways of accessing the root context for
  * many web frameworks, either part of Spring or available as an external library.
  * This helper class is just the most generic way to access the root context.
- *
  * @author Juergen Hoeller
  * @see org.springframework.web.context.ContextLoader
  * @see org.springframework.web.servlet.FrameworkServlet
@@ -103,7 +101,7 @@ public abstract class WebApplicationContextUtils {
 
 	/**
 	 * Find a custom {@code WebApplicationContext} for this web app.
-	 * @param sc the ServletContext to find the web application context for
+	 * @param sc       the ServletContext to find the web application context for
 	 * @param attrName the name of the ServletContext attribute to look for
 	 * @return the desired WebApplicationContext for this web app, or {@code null} if none
 	 */
@@ -140,9 +138,9 @@ public abstract class WebApplicationContextUtils {
 	 * despite multiple {@code DispatcherServlet} registrations in the web app.
 	 * @param sc the ServletContext to find the web application context for
 	 * @return the desired WebApplicationContext for this web app, or {@code null} if none
-	 * @since 4.2
 	 * @see #getWebApplicationContext(ServletContext)
 	 * @see ServletContext#getAttributeNames()
+	 * @since 4.2
 	 */
 	@Nullable
 	public static WebApplicationContext findWebApplicationContext(ServletContext sc) {
@@ -175,26 +173,29 @@ public abstract class WebApplicationContextUtils {
 	}
 
 	/**
-	 * Register web-specific scopes ("request", "session", "globalSession", "application")
-	 * with the given BeanFactory, as used by the WebApplicationContext.
-	 * @param beanFactory the BeanFactory to configure
-	 * @param sc the ServletContext that we're running within
+	 * 向beanFactory中注册web领域特定的scope("request", "session", "globalSession", "application")
+	 * 用于WebApplicationContext
+	 * @param beanFactory 需要后置处理的beanFactory
+	 * @param sc          目前处于的context
 	 */
 	public static void registerWebApplicationScopes(ConfigurableListableBeanFactory beanFactory,
-			@Nullable ServletContext sc) {
-
+													@Nullable ServletContext sc) {
+		// 注册web领域的特定的scope类型
 		beanFactory.registerScope(WebApplicationContext.SCOPE_REQUEST, new RequestScope());
 		beanFactory.registerScope(WebApplicationContext.SCOPE_SESSION, new SessionScope());
 		if (sc != null) {
 			ServletContextScope appScope = new ServletContextScope(sc);
 			beanFactory.registerScope(WebApplicationContext.SCOPE_APPLICATION, appScope);
-			// Register as ServletContext attribute, for ContextCleanupListener to detect it.
+			// 注入ServletContextScope类型，ContextCleanupListener用于检测
 			sc.setAttribute(ServletContextScope.class.getName(), appScope);
 		}
-
+		// 注入ServletRequest的ObjectFactory
 		beanFactory.registerResolvableDependency(ServletRequest.class, new RequestObjectFactory());
+		// 注入ServletResponse的ObjectFactory
 		beanFactory.registerResolvableDependency(ServletResponse.class, new ResponseObjectFactory());
+		// 注入HttpSession的ObjectFactory
 		beanFactory.registerResolvableDependency(HttpSession.class, new SessionObjectFactory());
+		// 注入WebRequest的ObjectFactory
 		beanFactory.registerResolvableDependency(WebRequest.class, new WebRequestObjectFactory());
 		if (jsfPresent) {
 			FacesDependencyRegistrar.registerFacesDependencies(beanFactory);
@@ -202,36 +203,37 @@ public abstract class WebApplicationContextUtils {
 	}
 
 	/**
-	 * Register web-specific environment beans ("contextParameters", "contextAttributes")
-	 * with the given BeanFactory, as used by the WebApplicationContext.
-	 * @param bf the BeanFactory to configure
-	 * @param sc the ServletContext that we're running within
+	 * 向beanFactory中注册web领域特定的environment bean，比如("contextParameters", "contextAttributes")
+	 * 用于WebApplicationContext
+	 * @param bf 需要后置处理的beanFactory
+	 * @param sc 目前处于的context
 	 */
 	public static void registerEnvironmentBeans(ConfigurableListableBeanFactory bf, @Nullable ServletContext sc) {
 		registerEnvironmentBeans(bf, sc, null);
 	}
 
 	/**
-	 * Register web-specific environment beans ("contextParameters", "contextAttributes")
-	 * with the given BeanFactory, as used by the WebApplicationContext.
-	 * @param bf the BeanFactory to configure
-	 * @param servletContext the ServletContext that we're running within
-	 * @param servletConfig the ServletConfig
+	 * 向beanFactory中注册web领域特定的environment bean，比如("contextParameters", "contextAttributes")
+	 * 用于WebApplicationContext
+	 * @param bf             需要后置处理的beanFactory
+	 * @param servletContext 目前处于的context
+	 * @param servletConfig  Servlet配置
 	 */
 	public static void registerEnvironmentBeans(ConfigurableListableBeanFactory bf,
-			@Nullable ServletContext servletContext, @Nullable ServletConfig servletConfig) {
-
+												@Nullable ServletContext servletContext, @Nullable ServletConfig servletConfig) {
+		// 向beanFactory中注册，context中还没有的servletContext bean
 		if (servletContext != null && !bf.containsBean(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME)) {
 			bf.registerSingleton(WebApplicationContext.SERVLET_CONTEXT_BEAN_NAME, servletContext);
 		}
-
+		// 尝试向beanFactory中注册新的servletConfig bean
 		if (servletConfig != null && !bf.containsBean(ConfigurableWebApplicationContext.SERVLET_CONFIG_BEAN_NAME)) {
 			bf.registerSingleton(ConfigurableWebApplicationContext.SERVLET_CONFIG_BEAN_NAME, servletConfig);
 		}
-
+		// 向beanFactory中注册，目前还未注册的contextParameters bean
 		if (!bf.containsBean(WebApplicationContext.CONTEXT_PARAMETERS_BEAN_NAME)) {
 			Map<String, String> parameterMap = new HashMap<>();
 			if (servletContext != null) {
+				// 获取context中已经实例化的参数名称
 				Enumeration<?> paramNameEnum = servletContext.getInitParameterNames();
 				while (paramNameEnum.hasMoreElements()) {
 					String paramName = (String) paramNameEnum.nextElement();
@@ -239,25 +241,29 @@ public abstract class WebApplicationContextUtils {
 				}
 			}
 			if (servletConfig != null) {
+				// 获取给定配置中声明的实例化的参数名称
 				Enumeration<?> paramNameEnum = servletConfig.getInitParameterNames();
 				while (paramNameEnum.hasMoreElements()) {
 					String paramName = (String) paramNameEnum.nextElement();
 					parameterMap.put(paramName, servletConfig.getInitParameter(paramName));
 				}
 			}
+			// 以这些参数名称作为contextParameters bean的对象
 			bf.registerSingleton(WebApplicationContext.CONTEXT_PARAMETERS_BEAN_NAME,
 					Collections.unmodifiableMap(parameterMap));
 		}
-
+		// 向beanFactory中注册，目前还未注册的contextAttributes bean
 		if (!bf.containsBean(WebApplicationContext.CONTEXT_ATTRIBUTES_BEAN_NAME)) {
 			Map<String, Object> attributeMap = new HashMap<>();
 			if (servletContext != null) {
+				// 获取context中已经实例化的属性名称
 				Enumeration<?> attrNameEnum = servletContext.getAttributeNames();
 				while (attrNameEnum.hasMoreElements()) {
 					String attrName = (String) attrNameEnum.nextElement();
 					attributeMap.put(attrName, servletContext.getAttribute(attrName));
 				}
 			}
+			// 以这写属性名称作为contextAttributes bean的对象
 			bf.registerSingleton(WebApplicationContext.CONTEXT_ATTRIBUTES_BEAN_NAME,
 					Collections.unmodifiableMap(attributeMap));
 		}
@@ -280,19 +286,19 @@ public abstract class WebApplicationContextUtils {
 	 * <p>This method is idempotent with respect to the fact it may be called any number
 	 * of times but will perform replacement of stub property sources with their
 	 * corresponding actual property sources once and only once.
-	 * @param sources the {@link MutablePropertySources} to initialize (must not
-	 * be {@code null})
+	 * @param sources        the {@link MutablePropertySources} to initialize (must not
+	 *                       be {@code null})
 	 * @param servletContext the current {@link ServletContext} (ignored if {@code null}
-	 * or if the {@link StandardServletEnvironment#SERVLET_CONTEXT_PROPERTY_SOURCE_NAME
-	 * servlet context property source} has already been initialized)
-	 * @param servletConfig the current {@link ServletConfig} (ignored if {@code null}
-	 * or if the {@link StandardServletEnvironment#SERVLET_CONFIG_PROPERTY_SOURCE_NAME
-	 * servlet config property source} has already been initialized)
+	 *                       or if the {@link StandardServletEnvironment#SERVLET_CONTEXT_PROPERTY_SOURCE_NAME
+	 *                       servlet context property source} has already been initialized)
+	 * @param servletConfig  the current {@link ServletConfig} (ignored if {@code null}
+	 *                       or if the {@link StandardServletEnvironment#SERVLET_CONFIG_PROPERTY_SOURCE_NAME
+	 *                       servlet config property source} has already been initialized)
 	 * @see org.springframework.core.env.PropertySource.StubPropertySource
 	 * @see org.springframework.core.env.ConfigurableEnvironment#getPropertySources()
 	 */
 	public static void initServletPropertySources(MutablePropertySources sources,
-			@Nullable ServletContext servletContext, @Nullable ServletConfig servletConfig) {
+												  @Nullable ServletContext servletContext, @Nullable ServletConfig servletConfig) {
 
 		Assert.notNull(sources, "'propertySources' must not be null");
 		String name = StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME;
@@ -398,7 +404,7 @@ public abstract class WebApplicationContextUtils {
 
 	/**
 	 * Inner class to avoid hard-coded JSF dependency.
- 	 */
+	 */
 	private static class FacesDependencyRegistrar {
 
 		public static void registerFacesDependencies(ConfigurableListableBeanFactory beanFactory) {
@@ -407,6 +413,7 @@ public abstract class WebApplicationContextUtils {
 				public FacesContext getObject() {
 					return FacesContext.getCurrentInstance();
 				}
+
 				@Override
 				public String toString() {
 					return "Current JSF FacesContext";
@@ -417,6 +424,7 @@ public abstract class WebApplicationContextUtils {
 				public ExternalContext getObject() {
 					return FacesContext.getCurrentInstance().getExternalContext();
 				}
+
 				@Override
 				public String toString() {
 					return "Current JSF ExternalContext";

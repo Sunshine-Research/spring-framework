@@ -16,6 +16,14 @@
 
 package org.springframework.beans.factory.annotation;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyValues;
+import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.lang.Nullable;
+import org.springframework.util.ReflectionUtils;
+
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -25,15 +33,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.PropertyValues;
-import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.lang.Nullable;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Internal class for managing injection metadata.
@@ -118,15 +117,25 @@ public class InjectionMetadata {
 		this.checkedElements = checkedElements;
 	}
 
+	/**
+	 * bean的自动装配
+	 * @param target   bean实例
+	 * @param beanName beanName
+	 * @param pvs      默认属性值
+	 * @throws Throwable
+	 */
 	public void inject(Object target, @Nullable String beanName, @Nullable PropertyValues pvs) throws Throwable {
+		// 此时为kafkaProduceService kafkaSynchronousProduceService
 		Collection<InjectedElement> checkedElements = this.checkedElements;
 		Collection<InjectedElement> elementsToIterate =
 				(checkedElements != null ? checkedElements : this.injectedElements);
+
 		if (!elementsToIterate.isEmpty()) {
 			for (InjectedElement element : elementsToIterate) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Processing injected element of bean '" + beanName + "': " + element);
 				}
+				// 执行自动装配，根据元素的类型不同，分为field和method两种不同的注入类型，调用的是AutowiredAnnotationBeanPostProcessor中的类
 				element.inject(target, beanName, pvs);
 			}
 		}
@@ -149,11 +158,10 @@ public class InjectionMetadata {
 
 
 	/**
-	 * Return an {@code InjectionMetadata} instance, possibly for empty elements.
-	 * @param elements the elements to inject (possibly empty)
-	 * @param clazz the target class
-	 * @return a new {@link #InjectionMetadata(Class, Collection)} instance,
-	 * or {@link #EMPTY} in case of no elements
+	 * 返回一个{@code InjectionMetadata}实例，可能是空元素的实例
+	 * @param elements 需要注入的元素
+	 * @param clazz    注入的bean class
+	 * @return 一个{@code InjectionMetadata}实例
 	 * @since 5.2
 	 */
 	public static InjectionMetadata forElements(Collection<InjectedElement> elements, Class<?> clazz) {
@@ -228,17 +236,16 @@ public class InjectionMetadata {
 		}
 
 		/**
-		 * Either this or {@link #getResourceToInject} needs to be overridden.
+		 * 可以重写此方法或{@link #getResourceToInject}
 		 */
 		protected void inject(Object target, @Nullable String requestingBeanName, @Nullable PropertyValues pvs)
 				throws Throwable {
-
+			// 要么是字段，要是方法
 			if (this.isField) {
 				Field field = (Field) this.member;
 				ReflectionUtils.makeAccessible(field);
 				field.set(target, getResourceToInject(target, requestingBeanName));
-			}
-			else {
+			} else {
 				if (checkPropertySkipping(pvs)) {
 					return;
 				}

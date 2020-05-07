@@ -355,7 +355,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 			return bean;
 		}
 
-		// 获取当前Bean的interceptors
+		// 获取当前Bean的interceptors，即bean的Advisors
 		Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
 		// 如果针对该Bean存在对应的interceptors
 		if (specificInterceptors != DO_NOT_PROXY) {

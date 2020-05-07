@@ -16,6 +16,15 @@
 
 package org.springframework.core.annotation;
 
+import org.springframework.core.BridgeMethodResolver;
+import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets.MirrorSet;
+import org.springframework.core.annotation.MergedAnnotation.Adapt;
+import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
+import org.springframework.lang.Nullable;
+import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Array;
@@ -29,15 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-
-import org.springframework.core.BridgeMethodResolver;
-import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets.MirrorSet;
-import org.springframework.core.annotation.MergedAnnotation.Adapt;
-import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
-import org.springframework.lang.Nullable;
-import org.springframework.util.ConcurrentReferenceHashMap;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * General utility methods for working with annotations, handling meta-annotations,
@@ -138,38 +138,37 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * Determine whether the given class is a candidate for carrying the specified annotation
-	 * (at type, method or field level).
-	 * @param clazz the class to introspect
-	 * @param annotationType the searchable annotation type
-	 * @return {@code false} if the class is known to have no such annotations at any level;
-	 * {@code true} otherwise. Callers will usually perform full method/field introspection
-	 * if {@code true} is being returned here.
-	 * @since 5.2
+	 * 确认给定的类型是否是特定的注解的候选（从类型，方法和字段三个方面确认）
+	 * @param clazz          需要进行内省的类型
+	 * @param annotationType 需要进行搜索的注解类型
+	 * @return 给定的类没有使用此种注解，返回{@code false}，否则返回{@code true}
+	 * 调用者通常会执行所有的方法/字段内省
 	 * @see #isCandidateClass(Class, String)
+	 * @since 5.2
 	 */
 	public static boolean isCandidateClass(Class<?> clazz, Class<? extends Annotation> annotationType) {
 		return isCandidateClass(clazz, annotationType.getName());
 	}
 
 	/**
-	 * Determine whether the given class is a candidate for carrying the specified annotation
-	 * (at type, method or field level).
-	 * @param clazz the class to introspect
-	 * @param annotationName the fully-qualified name of the searchable annotation type
-	 * @return {@code false} if the class is known to have no such annotations at any level;
-	 * {@code true} otherwise. Callers will usually perform full method/field introspection
-	 * if {@code true} is being returned here.
+	 * 确认给定的类型是否是特定的注解的候选（从类型，方法和字段三个方面确认）
+	 * @param clazz 需要进行内省的类型
+	 * @param annotationName 需要搜寻的注解类型的全限定名
+	 * @return 给定的类没有使用此种注解，返回{@code false}，否则返回{@code true}
+	 * 		   调用者通常会执行所有的方法/字段内省
 	 * @since 5.2
 	 * @see #isCandidateClass(Class, Class)
 	 */
 	public static boolean isCandidateClass(Class<?> clazz, String annotationName) {
+		// 注解使用java开头，判定为true
 		if (annotationName.startsWith("java.")) {
 			return true;
 		}
+		// 如果是以java开头，或者Order类型的类型，则不是
 		if (AnnotationsScanner.hasPlainJavaAnnotationsOnly(clazz)) {
 			return false;
 		}
+		// 其他情况下返回true
 		return true;
 	}
 

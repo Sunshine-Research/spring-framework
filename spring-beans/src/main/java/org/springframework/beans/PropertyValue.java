@@ -16,11 +16,11 @@
 
 package org.springframework.beans;
 
-import java.io.Serializable;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+
+import java.io.Serializable;
 
 /**
  * Object to hold information and value for an individual bean property.
@@ -48,17 +48,23 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 	private final Object value;
 
 	private boolean optional = false;
-
+	/**
+	 * 属性值是否已经转换或者仍需转换
+	 */
 	private boolean converted = false;
 
 	@Nullable
 	private Object convertedValue;
 
-	/** Package-visible field that indicates whether conversion is necessary. */
+	/**
+	 * Package-visible field that indicates whether conversion is necessary.
+	 */
 	@Nullable
 	volatile Boolean conversionNecessary;
 
-	/** Package-visible field for caching the resolved property path tokens. */
+	/**
+	 * Package-visible field for caching the resolved property path tokens.
+	 */
 	@Nullable
 	transient volatile Object resolvedTokens;
 
@@ -161,8 +167,8 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 	}
 
 	/**
-	 * Return whether this holder contains a converted value already ({@code true}),
-	 * or whether the value still needs to be converted ({@code false}).
+	 * 属性持有器是否包含了一个已转换的值
+	 * 或者值仍然需要进行转换
 	 */
 	public synchronized boolean isConverted() {
 		return this.converted;

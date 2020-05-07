@@ -210,8 +210,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	void addEmbeddedValueResolver(StringValueResolver valueResolver);
 
 	/**
-	 * Determine whether an embedded value resolver has been registered with this
-	 * bean factory, to be applied through {@link #resolveEmbeddedValue(String)}.
+	 * 确认当前beanFactory是否已经注册了嵌入的value解析器，可以用于{@link #resolveEmbeddedValue(String)}
 	 * @since 4.3
 	 */
 	boolean hasEmbeddedValueResolver();
@@ -226,14 +225,12 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	String resolveEmbeddedValue(String value);
 
 	/**
-	 * Add a new BeanPostProcessor that will get applied to beans created
-	 * by this factory. To be invoked during factory configuration.
-	 * <p>Note: Post-processors submitted here will be applied in the order of
-	 * registration; any ordering semantics expressed through implementing the
-	 * {@link org.springframework.core.Ordered} interface will be ignored. Note
-	 * that autodetected post-processors (e.g. as beans in an ApplicationContext)
-	 * will always be applied after programmatically registered ones.
-	 * @param beanPostProcessor the post-processor to register
+	 * 添加在bean创建时，需要应用到bean上的BeanPostProcessor，用于在beanFactory配置时调用
+	 * <p>
+	 * 注意：此处添加的post-processor将会按照注册的顺序执行
+	 * 通过{@link org.springframework.core.Ordered}接口实现的顺序语法将会被忽略
+	 * 自动识别的post-processor（比如context中的bean）将会以编程的方式，在注册后使用
+	 * @param beanPostProcessor 需要注册的post-processor
 	 */
 	void addBeanPostProcessor(BeanPostProcessor beanPostProcessor);
 

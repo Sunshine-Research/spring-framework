@@ -16,13 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.security.PrivilegedExceptionAction;
-
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
@@ -30,6 +23,13 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
 
 /**
  * Simple object instantiation strategy for use in a BeanFactory.
@@ -59,14 +59,18 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 
 	@Override
 	public Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner) {
-		// Don't override the class with CGLIB if no overrides.
+		// 不要使用CGLIB重写方法，如果没有任何重写的情况下
 		if (!bd.hasMethodOverrides()) {
 			Constructor<?> constructorToUse;
+			// 对当前BeanDefinition的构造函数参数进行锁定，一般情况下，实例化都是通过构造函数进行
 			synchronized (bd.constructorArgumentLock) {
+				// 这是一个公共方法，首先确定是否指定了某个构造函数进行实例化
 				constructorToUse = (Constructor<?>) bd.resolvedConstructorOrFactoryMethod;
 				if (constructorToUse == null) {
+					// 没有指定的构造函数，即视为使用默认的构造函数
 					final Class<?> clazz = bd.getBeanClass();
 					if (clazz.isInterface()) {
+						// 接口不进行解析，直接抛出异常
 						throw new BeanInstantiationException(clazz, "Specified class is an interface");
 					}
 					try {
@@ -75,15 +79,16 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 									(PrivilegedExceptionAction<Constructor<?>>) clazz::getDeclaredConstructor);
 						}
 						else {
+							// 获取所有声明的构造函数
 							constructorToUse = clazz.getDeclaredConstructor();
 						}
 						bd.resolvedConstructorOrFactoryMethod = constructorToUse;
-					}
-					catch (Throwable ex) {
+					} catch (Throwable ex) {
 						throw new BeanInstantiationException(clazz, "No default constructor found", ex);
 					}
 				}
 			}
+			// 挑选好构造函数后，对bean进行实例化
 			return BeanUtils.instantiateClass(constructorToUse);
 		}
 		else {

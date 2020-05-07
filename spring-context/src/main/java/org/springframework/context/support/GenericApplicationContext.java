@@ -16,11 +16,6 @@
 
 package org.springframework.context.support;
 
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -38,6 +33,11 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 /**
  * Generic ApplicationContext implementation that holds a single internal
@@ -256,16 +256,17 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	//---------------------------------------------------------------------
 
 	/**
-	 * Do nothing: We hold a single internal BeanFactory and rely on callers
-	 * to register beans through our public methods (or the BeanFactory's).
+	 * 不做任何事情：已经持有了一个简单内部的beanFactory，并依靠调用者通过我们的公共方法注册bean
 	 * @see #registerBeanDefinition
 	 */
 	@Override
 	protected final void refreshBeanFactory() throws IllegalStateException {
 		if (!this.refreshed.compareAndSet(false, true)) {
+			// GenericApplicationContext不支多次尝试refresh
 			throw new IllegalStateException(
 					"GenericApplicationContext does not support multiple refresh attempts: just call 'refresh' once");
 		}
+		// 设置当前beanFactory的ID
 		this.beanFactory.setSerializationId(getId());
 	}
 
@@ -313,7 +314,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 
 
 	//---------------------------------------------------------------------
-	// Implementation of BeanDefinitionRegistry
+	// BeanDefinitionRegistry的实现
 	//---------------------------------------------------------------------
 
 	@Override

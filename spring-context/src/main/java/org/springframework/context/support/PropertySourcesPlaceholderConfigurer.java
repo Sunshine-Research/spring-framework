@@ -16,9 +16,6 @@
 
 package org.springframework.context.support;
 
-import java.io.IOException;
-import java.util.Properties;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -35,32 +32,25 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringValueResolver;
 
+import java.io.IOException;
+import java.util.Properties;
+
 /**
- * Specialization of {@link PlaceholderConfigurerSupport} that resolves ${...} placeholders
- * within bean definition property values and {@code @Value} annotations against the current
- * Spring {@link Environment} and its set of {@link PropertySources}.
- *
- * <p>This class is designed as a general replacement for {@code PropertyPlaceholderConfigurer}.
- * It is used by default to support the {@code property-placeholder} element in working against
- * the spring-context-3.1 or higher XSD; whereas, spring-context versions &lt;= 3.0 default to
- * {@code PropertyPlaceholderConfigurer} to ensure backward compatibility. See the spring-context
- * XSD documentation for complete details.
- *
- * <p>Any local properties (e.g. those added via {@link #setProperties}, {@link #setLocations}
- * et al.) are added as a {@code PropertySource}. Search precedence of local properties is
- * based on the value of the {@link #setLocalOverride localOverride} property, which is by
- * default {@code false} meaning that local properties are to be searched last, after all
- * environment property sources.
- *
- * <p>See {@link org.springframework.core.env.ConfigurableEnvironment} and related javadocs
- * for details on manipulating environment property sources.
- *
+ * {@link PlaceholderConfigurerSupport}特别用于解决${...}类型赋值的处理器，使用了{@link Environment}和{@link PropertySources}
+ * <p>
+ * 此类用于设计来代替{@code PropertyPlaceholderConfigurer}
+ * 默认支持{@code property-placeholder}元素，在spring-context 3.1或更高的版本之上
+ * 但是，spring-context＜3.0默认使用{@code PropertyPlaceholderConfigurer}来确保向后兼容
+ * <p>
+ * 任何本地的属性，比如：{@link #setProperties}，{@link #setLocations}将会被添加为{@code PropertySource}
+ * 本地属性的优先级基于{@link #setLocalOverride localOverride}属性值
+ * 默认是{@code false}意味着本地属性值最后才会被搜索，在所有Environment属性值之后
  * @author Chris Beams
  * @author Juergen Hoeller
- * @since 3.1
  * @see org.springframework.core.env.ConfigurableEnvironment
  * @see org.springframework.beans.factory.config.PlaceholderConfigurerSupport
  * @see org.springframework.beans.factory.config.PropertyPlaceholderConfigurer
+ * @since 3.1
  */
 public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerSupport implements EnvironmentAware {
 
@@ -112,73 +102,83 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 	/**
 	 * Processing occurs by replacing ${...} placeholders in bean definitions by resolving each
 	 * against this configurer's set of {@link PropertySources}, which includes:
+	 * 处理所有BeanDefinition中的${...}占位符，通过针对此配置程序的{@link PropertySources}集解析
 	 * <ul>
-	 * <li>all {@linkplain org.springframework.core.env.ConfigurableEnvironment#getPropertySources
-	 * environment property sources}, if an {@code Environment} {@linkplain #setEnvironment is present}
-	 * <li>{@linkplain #mergeProperties merged local properties}, if {@linkplain #setLocation any}
-	 * {@linkplain #setLocations have} {@linkplain #setProperties been}
-	 * {@linkplain #setPropertiesArray specified}
-	 * <li>any property sources set by calling {@link #setPropertySources}
+	 * <li>
+	 * 所有{@linkplain org.springframework.core.env.ConfigurableEnvironment#getPropertySources environment property sources}
+	 * 如果存在{@code Environment}
+	 * <li>
+	 * {@linkplain #mergeProperties merged local properties}合并本地属性
+	 * 如果{@linkplain #setLocation}和{@linkplain #setLocations}和{@linkplain #setPropertiesArray}和{@linkplain #setProperties}存在
+	 * <li>调用{@link #setPropertySources}设置的属性
 	 * </ul>
-	 * <p>If {@link #setPropertySources} is called, <strong>environment and local properties will be
-	 * ignored</strong>. This method is designed to give the user fine-grained control over property
-	 * sources, and once set, the configurer makes no assumptions about adding additional sources.
+	 * <p>
+	 * 此方法用于给开发者更细粒度的属性控制，一旦设置，处理器不会假设添加起额外的属性源
 	 */
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		if (this.propertySources == null) {
+			// 创建可变的属性集
 			this.propertySources = new MutablePropertySources();
 			if (this.environment != null) {
+				// 首先添加Environment
 				this.propertySources.addLast(
-					new PropertySource<Environment>(ENVIRONMENT_PROPERTIES_PROPERTY_SOURCE_NAME, this.environment) {
-						@Override
-						@Nullable
-						public String getProperty(String key) {
-							return this.source.getProperty(key);
+						new PropertySource<Environment>(ENVIRONMENT_PROPERTIES_PROPERTY_SOURCE_NAME, this.environment) {
+							@Override
+							@Nullable
+							public String getProperty(String key) {
+								return this.source.getProperty(key);
+							}
 						}
-					}
 				);
 			}
 			try {
+				// 其次添加合并的属性，这里会处理@ImportSource属性值
 				PropertySource<?> localPropertySource =
 						new PropertiesPropertySource(LOCAL_PROPERTIES_PROPERTY_SOURCE_NAME, mergeProperties());
+				// 如果允许本地覆写，则添加到属性的最前面，即为优先级最高
 				if (this.localOverride) {
 					this.propertySources.addFirst(localPropertySource);
 				}
+				// 不允许覆写，则放在最后面，优先级最低
 				else {
 					this.propertySources.addLast(localPropertySource);
 				}
-			}
-			catch (IOException ex) {
+			} catch (IOException ex) {
 				throw new BeanInitializationException("Could not load properties", ex);
 			}
 		}
-
+		// 创建一个新的属性占位符处理器，一般的属性值注入包括environment和localProperties
+		// 接下来就是使用装配好的所有属性注入值，替换占位符
 		processProperties(beanFactory, new PropertySourcesPropertyResolver(this.propertySources));
 		this.appliedPropertySources = this.propertySources;
 	}
 
 	/**
-	 * Visit each bean definition in the given bean factory and attempt to replace ${...} property
-	 * placeholders with values from the given properties.
+	 * 访问所有已注册的BeanDefinition，解决其中的每一个${...}占位符
+	 * @param beanFactoryToProcess 遍历BeanDefinition所属的BeanFactory
+	 * @param propertyResolver 占位符解决器
 	 */
 	protected void processProperties(ConfigurableListableBeanFactory beanFactoryToProcess,
 			final ConfigurablePropertyResolver propertyResolver) throws BeansException {
-
+		// 设置前缀${
 		propertyResolver.setPlaceholderPrefix(this.placeholderPrefix);
+		// 设置后缀}
 		propertyResolver.setPlaceholderSuffix(this.placeholderSuffix);
+		// 设置分割符:，:代表后半部分为默认值
 		propertyResolver.setValueSeparator(this.valueSeparator);
-
+		// 构建字符串值处理器
 		StringValueResolver valueResolver = strVal -> {
 			String resolved = (this.ignoreUnresolvablePlaceholders ?
 					propertyResolver.resolvePlaceholders(strVal) :
 					propertyResolver.resolveRequiredPlaceholders(strVal));
+			// 是否需要去掉字符串中的空格
 			if (this.trimValues) {
 				resolved = resolved.trim();
 			}
 			return (resolved.equals(this.nullValue) ? null : resolved);
 		};
-
+		// 使用字符串值处理器处理当前BeanFactory中的所有占位符
 		doProcessProperties(beanFactoryToProcess, valueResolver);
 	}
 
