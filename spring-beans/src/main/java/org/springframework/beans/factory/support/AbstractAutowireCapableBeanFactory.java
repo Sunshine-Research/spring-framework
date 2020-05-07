@@ -604,7 +604,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				logger.trace("Eagerly caching bean '" + beanName +
 						"' to allow for resolving potential circular references");
 			}
-			// 移除二级缓存的单例，放入到一级缓存和已注册缓存中
+			// 移除二级缓存的单例，放入到一级缓存、三级缓存和已注册缓存中
 			addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, mbd, bean));
 		}
 

@@ -235,7 +235,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					// 从三级缓存中获取正在实例化的单例bean的ObjectFactory
 					ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
 					if (singletonFactory != null) {
-						// 获取ObjectFactory生产对象，放入到二级缓存中，并从一级缓存中删除
+						// 获取ObjectFactory生产对象，放入到二级缓存中，并从三级缓存中删除
 						singletonObject = singletonFactory.getObject();
 						this.earlySingletonObjects.put(beanName, singletonObject);
 						this.singletonFactories.remove(beanName);
